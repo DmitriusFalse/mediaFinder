@@ -9,10 +9,7 @@
 #include <QString>
 
 Q_DECLARE_METATYPE(libraryFolder)
-// struct libraryFolder {
-//     QString path;
-//     QString type;
-// };
+
 QDataStream &operator<<(QDataStream &out, const libraryFolder &pathType)
 {
     out << pathType.path << pathType.type;
