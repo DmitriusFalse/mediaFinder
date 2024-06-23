@@ -33,7 +33,18 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
-             <widget class="QTreeWidget" name="listMovieLibrary"/>
+             <widget class="QTreeWidget" name="listMovieLibrary">
+              <column>
+               <property name="text">
+                <string>Постер</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Название</string>
+               </property>
+              </column>
+             </widget>
             </item>
            </layout>
           </item>

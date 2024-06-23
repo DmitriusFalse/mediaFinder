@@ -1,5 +1,6 @@
 #include "settingsapp.h"
 #include "ui_settingsapp.h"
+#include "settingsdata.h"
 #include <QComboBox>
 #include <QFileDialog>
 #include <QVariant>
@@ -33,7 +34,6 @@ SettingsApp::SettingsApp(QWidget *parent)
     setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
     qRegisterMetaType<libraryFolder>("libraryFolder");
 
-    // w.setWindowTitle("MediaFinder");
     SettingsApp::addPathToListLibrary();
 }
 
@@ -72,10 +72,10 @@ void SettingsApp::on_addPath_clicked()
                                                           QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
     if (!directory.isEmpty()) {
-        QList<libraryFolder> libFolders = SettingsApp::readStructFromSettings();
-        libFolders << libraryFolder{directory, "Movie"};
-        libFolders = SettingsApp::checkDuplicate(libFolders);
-        SettingsApp::writeStructToSettings(libFolders);
+        QList<libraryItem> libFolders = SettingsData::readStructFromSettings();
+        libFolders << libraryItem{directory, "Movie"};
+        libFolders = SettingsData::checkDuplicate(libFolders);
+        SettingsData::writeStructToSettings(libFolders);
 
         SettingsApp::addPathToListLibrary();
     }
@@ -83,7 +83,7 @@ void SettingsApp::on_addPath_clicked()
 
 void SettingsApp::addPathToListLibrary(){
 
-    QList<libraryFolder> libraryFolders = SettingsApp::readStructFromSettings();
+    QList<libraryItem> libraryFolders = SettingsData::readStructFromSettings();
     int size = libraryFolders.size();
 
     SettingsApp::ui->tableDirsType->setRowCount(size);
@@ -116,16 +116,19 @@ void SettingsApp::addPathToListLibrary(){
 void SettingsApp::writeStructToSettings(const QList<libraryFolder> &data)
 {
         QSettings settings("MediaFinder", "settings");
+        if(data.size()>0){
+            settings.beginWriteArray("library", data.size());
+            for (int i = 0; i < data.size(); ++i) {
+                if (data.at(i).path != "" and data.at(i).type != ""){
+                    settings.setArrayIndex(i);
+                    settings.setValue("libraryItem"+ QString::number(i), QVariant::fromValue(data.at(i)));
+                }
 
-        settings.beginWriteArray("library", data.size());
-        for (int i = 0; i < data.size(); ++i) {
-            if (data.at(i).path != "" and data.at(i).type != ""){
-                settings.setArrayIndex(i);
-                settings.setValue("libraryFolder"+ QString::number(i), QVariant::fromValue(data.at(i)));
             }
-
+            settings.endArray();
+        }else{
+            settings.remove("library");
         }
-        settings.endArray();
 }
 ///
 /// \brief readStructFromSettings
@@ -139,7 +142,7 @@ QList<libraryFolder> SettingsApp::readStructFromSettings()
         QList<libraryFolder> data;
         for (int i = 0; i < size; ++i) {
             settings.setArrayIndex(i);
-            QVariant variant = settings.value("libraryFolder"+ QString::number(i));
+            QVariant variant = settings.value("libraryItem"+ QString::number(i));
             if (variant.canConvert<libraryFolder>()) {
                 libraryFolder libFolder = variant.value<libraryFolder>();
                 data.append(libFolder);
@@ -150,25 +153,25 @@ QList<libraryFolder> SettingsApp::readStructFromSettings()
         return data;
 }
 
-QList<libraryFolder> SettingsApp::checkDuplicate(QList<libraryFolder> libFolder) {
-        // QList<libraryFolder> newLibFolders;
-        // for (const auto &itemFolder : libFolder) {
-        //     bool insert = true;
-        //     for (const auto &newItemFolder : newLibFolders) {
-        //         if(itemFolder.path==newItemFolder.path){
-        //             insert = false;
-        //             break;
-        //         }
-        //     }
-        //     if (insert == true){
-        //         newLibFolders << itemFolder;
-        //     }
-        // }
-        // return newLibFolders;
-    return libFolder;
-}
+// QList<libraryFolder> SettingsApp::checkDuplicate(QList<libraryFolder> libFolder) {
+//         QList<libraryFolder> newLibFolders;
+//         for (const auto &itemFolder : libFolder) {
+//             bool insert = true;
+//             for (const auto &newItemFolder : newLibFolders) {
+//                 if(itemFolder.path==newItemFolder.path){
+//                     insert = false;
+//                     break;
+//                 }
+//             }
+//             if (insert == true){
+//                 newLibFolders << itemFolder;
+//             }
+//         }
+//         return newLibFolders;
+//     // return libFolder;
+// }
 
-void SettingsApp::on_pushButton_clicked()
+void SettingsApp::on_removeLibraryRow_clicked()
 {
     int row = ui->tableDirsType->currentRow();
 
@@ -178,6 +181,4 @@ void SettingsApp::on_pushButton_clicked()
         ui->tableDirsType->removeRow(row);
     }
 }
-
-
 

@@ -66,7 +66,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton">
+         <widget class="QPushButton" name="removeLibraryRow">
           <property name="text">
            <string>- Remove</string>
           </property>

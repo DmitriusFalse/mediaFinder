@@ -1,5 +1,6 @@
 #ifndef SETTINGSAPP_H
 #define SETTINGSAPP_H
+#include "settingsdata.h"
 
 #include <QMainWindow>
 #include <QMetaType>
@@ -25,10 +26,8 @@ public:
 private slots:
     void on_saveButton_clicked();
     void on_addPath_clicked();
-
-    void on_pushButton_clicked();
-
     void on_applySaveSettings_clicked();
+    void on_removeLibraryRow_clicked();
 
 private:
     Ui::SettingsApp *ui;
@@ -37,6 +36,7 @@ private:
     QList<libraryFolder> readStructFromSettings();
     QList<libraryFolder> checkDuplicate(QList<libraryFolder> libFolder);
     void saveLibraryFolder();
+    SettingsData settData;
 };
 
 #endif // SETTINGSAPP_H
