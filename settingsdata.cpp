@@ -4,26 +4,17 @@
 #include <QSettings>
 #include <QMetaType>
 #include <QString>
+Q_DECLARE_METATYPE(libraryItem);
 
-Q_DECLARE_METATYPE(libraryItem)
 
-QDataStream &operator<<(QDataStream &out, const libraryItem &libItem)
-{
-    out << libItem.path << libItem.type;
-    return out;
-}
-
-QDataStream &operator>>(QDataStream &in, libraryItem &libItem)
-{
-    in >> libItem.path >> libItem.type;
-    return in;
-}
-
+const QString SettingsData::INSTALL_PATH = "/opt/MediaFinder";
 SettingsData::SettingsData() {
     qRegisterMetaType<libraryItem>("libraryItem");
+// static const QString INSTALL_PATH = "/opt/MediaFinder"
+    // videoExtensions
 }
 
-void SettingsData::writeStructToSettings(const QList<libraryItem> &data)
+void SettingsData::writeLibraryToSettings(const QList<libraryItem> &data)
 {
     QSettings settings("MediaFinder", "settings");
     if(data.size()>0){
@@ -33,7 +24,6 @@ void SettingsData::writeStructToSettings(const QList<libraryItem> &data)
                 settings.setArrayIndex(i);
                 settings.setValue("libraryItem"+ QString::number(i), QVariant::fromValue(data.at(i)));
             }
-
         }
         settings.endArray();
     }else{
@@ -41,7 +31,7 @@ void SettingsData::writeStructToSettings(const QList<libraryItem> &data)
     }
 }
 
-QList<libraryItem> SettingsData::readStructFromSettings()
+QList<libraryItem> SettingsData::readLibraryFromSettings()
 {
     QSettings settings("MediaFinder", "settings");
 
@@ -60,7 +50,28 @@ QList<libraryItem> SettingsData::readStructFromSettings()
     return data;
 }
 
-QList<libraryItem> SettingsData::checkDuplicate(QList<libraryItem> libFolder)
+QList<libraryItem> SettingsData::readLibraryFromSettings(QString type)
+{
+    QSettings settings("MediaFinder", "settings");
+
+    int size = settings.beginReadArray("library");
+    QList<libraryItem> data;
+    for (int i = 0; i < size; ++i) {
+        settings.setArrayIndex(i);
+        QVariant variant = settings.value("libraryItem"+ QString::number(i));
+        if (variant.canConvert<libraryItem>()) {
+            libraryItem libFolder = variant.value<libraryItem>();
+            if(libFolder.type==type){
+                data.append(libFolder);
+            }
+        }
+    }
+    settings.endArray();
+
+    return data;
+}
+
+QList<libraryItem> SettingsData::checkLibraryDuplicate(QList<libraryItem> libFolder)
 {
     QList<libraryItem> newLibFolders;
     for (const auto &itemFolder : libFolder) {
@@ -76,4 +87,14 @@ QList<libraryItem> SettingsData::checkDuplicate(QList<libraryItem> libFolder)
         }
     }
     return newLibFolders;
+}
+
+QStringList SettingsData::getVideoExtensions() const
+{
+    return {"mp4", "avi", "mkv", "mov", "wmv", "flv", "mpeg", "mpg"};
+}
+
+QString SettingsData::getInstallPath()
+{
+    return INSTALL_PATH;
 }

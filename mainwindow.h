@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "settingsapp.h"
+#include "medialibrary.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -21,11 +22,13 @@ public:
 private slots:
     void on_pushButton_clicked();
     void onDialogClosed();
-
     void on_refreshLibrary_clicked();
 
 private:
     Ui::MainWindow *ui;
     SettingsApp *dialog;
+    SettingsData *settingsData;
+    MediaLibrary *mediaLibrary;
+    void onTreeWidgetItemSelected();
 };
 #endif // MAINWINDOW_H

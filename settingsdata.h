@@ -1,20 +1,39 @@
 #ifndef SETTINGSDATA_H
 #define SETTINGSDATA_H
-#include <QString>
 #include <QMetaType>
-
+#include <QString>
+#include <QJsonObject>
 
 struct libraryItem {
     QString path;
     QString type;
-};
-class SettingsData
-{
-public:
-    SettingsData();
-    static void writeStructToSettings(const QList<libraryItem> &data);
-    static QList<libraryItem> readStructFromSettings();
-    static QList<libraryItem> checkDuplicate(QList<libraryItem> libFolder);
+
+    friend QDataStream &operator<<(QDataStream &out, const libraryItem &libItem)
+    {
+        out << libItem.path << libItem.type;
+        return out;
+    }
+
+    friend QDataStream &operator>>(QDataStream &in, libraryItem &libItem)
+    {
+        in >> libItem.path >> libItem.type;
+        return in;
+    }
 };
 
+class SettingsData
+{
+    // Q_OBJECT
+public:
+    SettingsData();
+    void writeLibraryToSettings(const QList<libraryItem> &data);
+    QList<libraryItem> readLibraryFromSettings();
+    QList<libraryItem> readLibraryFromSettings(QString type);
+    QList<libraryItem> checkLibraryDuplicate(QList<libraryItem> libFolder);
+    // QStringList videoExtensions = ;
+    static const QString INSTALL_PATH;
+    QString getInstallPath();
+
+    QStringList getVideoExtensions() const;
+};
 #endif // SETTINGSDATA_H

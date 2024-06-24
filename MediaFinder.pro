@@ -1,4 +1,4 @@
-QT       += core gui network
+QT       += core gui network sql
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17
@@ -8,13 +8,17 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    dbmanager.cpp \
     main.cpp \
     mainwindow.cpp \
+    medialibrary.cpp \
     settingsapp.cpp \
     settingsdata.cpp
 
 HEADERS += \
+    dbmanager.h \
     mainwindow.h \
+    medialibrary.h \
     settingsapp.h \
     settingsdata.h
 
@@ -26,6 +30,8 @@ TRANSLATIONS += \
     MediaFinder_ru_RU.ts
 CONFIG += lrelease
 CONFIG += embed_translations
+
+
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

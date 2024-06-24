@@ -36,7 +36,7 @@
              <widget class="QTreeWidget" name="listMovieLibrary">
               <column>
                <property name="text">
-                <string>Постер</string>
+                <string>Афиша</string>
                </property>
               </column>
               <column>

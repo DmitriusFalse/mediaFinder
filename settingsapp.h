@@ -10,11 +10,6 @@
 namespace Ui {
 class SettingsApp;
 }
-struct libraryFolder {
-    QString path;
-    QString type;
-};
-// Q_DECLARE_METATYPE(libraryFolder)
 class SettingsApp : public QMainWindow
 {
     Q_OBJECT
@@ -32,11 +27,8 @@ private slots:
 private:
     Ui::SettingsApp *ui;
     void addPathToListLibrary();
-    void writeStructToSettings(const QList<libraryFolder> &data);
-    QList<libraryFolder> readStructFromSettings();
-    QList<libraryFolder> checkDuplicate(QList<libraryFolder> libFolder);
     void saveLibraryFolder();
-    SettingsData settData;
+    SettingsData *settings;
 };
 
 #endif // SETTINGSAPP_H

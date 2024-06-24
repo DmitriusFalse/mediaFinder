@@ -9,19 +9,7 @@
 #include <QMetaType>
 #include <QString>
 
-Q_DECLARE_METATYPE(libraryFolder)
 
-QDataStream &operator<<(QDataStream &out, const libraryFolder &pathType)
-{
-    out << pathType.path << pathType.type;
-    return out;
-}
-
-QDataStream &operator>>(QDataStream &in, libraryFolder &pathType)
-{
-    in >> pathType.path >> pathType.type;
-    return in;
-}
 //////////////////////////////////////////////////////////////////////////
 /// \brief SettingsApp::SettingsApp
 /// \param parent
@@ -32,8 +20,6 @@ SettingsApp::SettingsApp(QWidget *parent)
 {
     ui->setupUi(this);
     setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
-    qRegisterMetaType<libraryFolder>("libraryFolder");
-
     SettingsApp::addPathToListLibrary();
 }
 
@@ -43,14 +29,14 @@ SettingsApp::~SettingsApp()
 }
 
 void SettingsApp::saveLibraryFolder(){
-    QList<libraryFolder> libFolders;
+    QList<libraryItem> libFolders;
     for (int row = 0; row < ui->tableDirsType->rowCount(); ++row) {
         // Получение значения из первой ячейки строки (например)
         QTableWidgetItem *itemPath = ui->tableDirsType->item(row, 0);
         QComboBox *comboBox = qobject_cast<QComboBox*>(ui->tableDirsType->cellWidget(row, 1));
-        libFolders << libraryFolder {itemPath->text(), comboBox->currentText()};
+        libFolders << libraryItem {itemPath->text(), comboBox->currentText()};
     }
-    SettingsApp::writeStructToSettings(libFolders);
+    settings->writeLibraryToSettings(libFolders);
 }
 
 void SettingsApp::on_saveButton_clicked()
@@ -66,24 +52,25 @@ void SettingsApp::on_applySaveSettings_clicked()
 
 void SettingsApp::on_addPath_clicked()
 {
+    qRegisterMetaType<libraryItem>("libraryItem");
     QString directory = QFileDialog::getExistingDirectory(this,
                                                           "Выберите папку",
                                                           QDir::homePath(),
                                                           QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
     if (!directory.isEmpty()) {
-        QList<libraryItem> libFolders = SettingsData::readStructFromSettings();
+        QList<libraryItem> libFolders = settings->readLibraryFromSettings();
         libFolders << libraryItem{directory, "Movie"};
-        libFolders = SettingsData::checkDuplicate(libFolders);
-        SettingsData::writeStructToSettings(libFolders);
+        libFolders = settings->checkLibraryDuplicate(libFolders);
+        settings->writeLibraryToSettings(libFolders);
 
         SettingsApp::addPathToListLibrary();
     }
 }
 
 void SettingsApp::addPathToListLibrary(){
-
-    QList<libraryItem> libraryFolders = SettingsData::readStructFromSettings();
+qRegisterMetaType<libraryItem>("libraryItem");
+    QList<libraryItem> libraryFolders = settings->readLibraryFromSettings();
     int size = libraryFolders.size();
 
     SettingsApp::ui->tableDirsType->setRowCount(size);
@@ -109,67 +96,6 @@ void SettingsApp::addPathToListLibrary(){
     ui->tableDirsType->resizeColumnsToContents();
 
 }
-///
-/// \brief SettingsApp::writeStructToSettings
-/// \param data
-///
-void SettingsApp::writeStructToSettings(const QList<libraryFolder> &data)
-{
-        QSettings settings("MediaFinder", "settings");
-        if(data.size()>0){
-            settings.beginWriteArray("library", data.size());
-            for (int i = 0; i < data.size(); ++i) {
-                if (data.at(i).path != "" and data.at(i).type != ""){
-                    settings.setArrayIndex(i);
-                    settings.setValue("libraryItem"+ QString::number(i), QVariant::fromValue(data.at(i)));
-                }
-
-            }
-            settings.endArray();
-        }else{
-            settings.remove("library");
-        }
-}
-///
-/// \brief readStructFromSettings
-/// \return
-///
-QList<libraryFolder> SettingsApp::readStructFromSettings()
-{
-        QSettings settings("MediaFinder", "settings");
-
-        int size = settings.beginReadArray("library");
-        QList<libraryFolder> data;
-        for (int i = 0; i < size; ++i) {
-            settings.setArrayIndex(i);
-            QVariant variant = settings.value("libraryItem"+ QString::number(i));
-            if (variant.canConvert<libraryFolder>()) {
-                libraryFolder libFolder = variant.value<libraryFolder>();
-                data.append(libFolder);
-            }
-        }
-        settings.endArray();
-
-        return data;
-}
-
-// QList<libraryFolder> SettingsApp::checkDuplicate(QList<libraryFolder> libFolder) {
-//         QList<libraryFolder> newLibFolders;
-//         for (const auto &itemFolder : libFolder) {
-//             bool insert = true;
-//             for (const auto &newItemFolder : newLibFolders) {
-//                 if(itemFolder.path==newItemFolder.path){
-//                     insert = false;
-//                     break;
-//                 }
-//             }
-//             if (insert == true){
-//                 newLibFolders << itemFolder;
-//             }
-//         }
-//         return newLibFolders;
-//     // return libFolder;
-// }
 
 void SettingsApp::on_removeLibraryRow_clicked()
 {
