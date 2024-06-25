@@ -4,70 +4,82 @@
 #include <QSettings>
 #include <QMetaType>
 #include <QString>
+#include "dbmanager.h"
+
 Q_DECLARE_METATYPE(libraryItem);
 
 
 const QString SettingsData::INSTALL_PATH = "/opt/MediaFinder";
-SettingsData::SettingsData() {
+SettingsData::SettingsData(DBManager *dbmanager) : m_dbmanager(dbmanager) {
     qRegisterMetaType<libraryItem>("libraryItem");
-// static const QString INSTALL_PATH = "/opt/MediaFinder"
-    // videoExtensions
+}
+
+SettingsData::~SettingsData()
+{
+    delete m_dbmanager;
 }
 
 void SettingsData::writeLibraryToSettings(const QList<libraryItem> &data)
 {
-    QSettings settings("MediaFinder", "settings");
+    this->m_dbmanager->truncateTable("Library");
     if(data.size()>0){
-        settings.beginWriteArray("library", data.size());
-        for (int i = 0; i < data.size(); ++i) {
-            if (data.at(i).path != "" and data.at(i).type != ""){
-                settings.setArrayIndex(i);
-                settings.setValue("libraryItem"+ QString::number(i), QVariant::fromValue(data.at(i)));
-            }
+        for (auto& item : data) {
+            this->m_dbmanager->writeLibrary(item.path, item.type);
         }
-        settings.endArray();
-    }else{
-        settings.remove("library");
     }
 }
 
 QList<libraryItem> SettingsData::readLibraryFromSettings()
 {
-    QSettings settings("MediaFinder", "settings");
+    // QSettings settings("MediaFinder", "settings");
 
-    int size = settings.beginReadArray("library");
-    QList<libraryItem> data;
-    for (int i = 0; i < size; ++i) {
-        settings.setArrayIndex(i);
-        QVariant variant = settings.value("libraryItem"+ QString::number(i));
-        if (variant.canConvert<libraryItem>()) {
-            libraryItem libFolder = variant.value<libraryItem>();
-            data.append(libFolder);
-        }
+    // int size = settings.beginReadArray("library");
+    QList<libraryItem> data={};
+    // for (int i = 0; i < size; ++i) {
+    //     settings.setArrayIndex(i);
+    //     QVariant variant = settings.value("libraryItem"+ QString::number(i));
+    //     if (variant.canConvert<libraryItem>()) {
+    //         libraryItem libFolder = variant.value<libraryItem>();
+    //         data.append(libFolder);
+    //     }
+    // }
+    // settings.endArray();
+    // DBManager ms_dbmanager = *new DBManager();
+
+    QStringList srcData = this->m_dbmanager->readLibrary();
+    for (auto& str : srcData) {
+        QStringList split = str.split(":");
+        data << libraryItem{split[0], split[1]};
+
     }
-    settings.endArray();
-
     return data;
 }
 
 QList<libraryItem> SettingsData::readLibraryFromSettings(QString type)
 {
-    QSettings settings("MediaFinder", "settings");
+    // QSettings settings("MediaFinder", "settings");
 
-    int size = settings.beginReadArray("library");
-    QList<libraryItem> data;
-    for (int i = 0; i < size; ++i) {
-        settings.setArrayIndex(i);
-        QVariant variant = settings.value("libraryItem"+ QString::number(i));
-        if (variant.canConvert<libraryItem>()) {
-            libraryItem libFolder = variant.value<libraryItem>();
-            if(libFolder.type==type){
-                data.append(libFolder);
-            }
-        }
+    // int size = settings.beginReadArray("library");
+    QList<libraryItem> data={};
+    // for (int i = 0; i < size; ++i) {
+    //     settings.setArrayIndex(i);
+    //     QVariant variant = settings.value("libraryItem"+ QString::number(i));
+    //     if (variant.canConvert<libraryItem>()) {
+    //         libraryItem libFolder = variant.value<libraryItem>();
+    //         if(libFolder.type==type){
+    //             data.append(libFolder);
+    //         }
+    //     }
+    // }
+    // settings.endArray();
+
+    QStringList srcData;
+    srcData.append(this->m_dbmanager->readLibrary(type));
+    for (auto& str : srcData) {
+        QStringList split = str.split(":");
+        data << libraryItem{split[0], split[1]};
+
     }
-    settings.endArray();
-
     return data;
 }
 

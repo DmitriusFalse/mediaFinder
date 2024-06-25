@@ -1,21 +1,21 @@
 #include "mainwindow.h"
 #include "settingsapp.h"
 #include "ui_mainwindow.h"
-#include "settingsdata.h"
+// #include "settingsdata.h"
 #include <QDir>
 #include <QIcon>
 #include <QMessageBox>
+
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     qRegisterMetaType<libraryItem>("libraryItem");
-    QFileInfo file(".");
-    qDebug() << "Path: " << file.canonicalFilePath();
 
     connect(ui->listMovieLibrary, &QTreeWidget::itemSelectionChanged, this, &MainWindow::onTreeWidgetItemSelected);
-
-
+    this->m_dbmanager = new DBManager();
+    this->settingsData = new SettingsData(m_dbmanager);
+    this->mediaLibrary = new MediaLibrary(m_dbmanager, settingsData);
 }
 
 MainWindow::~MainWindow()
@@ -25,10 +25,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked()
 {
-
     setDisabled(true);
-    MainWindow::dialog = new SettingsApp(this);
-    qDebug() << "Clicked";
+    MainWindow::dialog = new SettingsApp(this,m_dbmanager, settingsData);
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->setWindowTitle("Settings - MediaFinder");
     // Показываем диалоговое окно при нажатии на кнопку

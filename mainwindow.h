@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "settingsapp.h"
 #include "medialibrary.h"
+#include "dbmanager.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -30,5 +31,6 @@ private:
     SettingsData *settingsData;
     MediaLibrary *mediaLibrary;
     void onTreeWidgetItemSelected();
+    DBManager *m_dbmanager;
 };
 #endif // MAINWINDOW_H

@@ -1,7 +1,7 @@
 #ifndef SETTINGSAPP_H
 #define SETTINGSAPP_H
 #include "settingsdata.h"
-
+#include "dbmanager.h"
 #include <QMainWindow>
 #include <QMetaType>
 #include <QVariant>
@@ -15,7 +15,7 @@ class SettingsApp : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit SettingsApp(QWidget *parent = nullptr);
+    explicit SettingsApp(QWidget *parent, DBManager *dbManager, SettingsData *settings);
     ~SettingsApp();
 
 private slots:
@@ -28,7 +28,8 @@ private:
     Ui::SettingsApp *ui;
     void addPathToListLibrary();
     void saveLibraryFolder();
-    SettingsData *settings;
+    SettingsData *m_settings;
+    DBManager *m_dbManager;
 };
 
 #endif // SETTINGSAPP_H

@@ -4,8 +4,12 @@
 #include <QIcon>
 #include <QFile>
 
-MediaLibrary::MediaLibrary() {
-
+MediaLibrary::MediaLibrary(DBManager *dbmanager, SettingsData *settingsData)
+    : m_settingsData(settingsData)
+    , m_dbmanager(dbmanager)
+{
+    // SettingsData m_settingsData;
+    // m_settingsData = *new SettingsData(m_dbmanager);
 }
 
 QStringList MediaLibrary::scanLibraryMovie(QString path)
@@ -17,7 +21,7 @@ QStringList MediaLibrary::scanLibraryMovie(QString path)
     }
     QStringList listMovie;
     QStringList scanList = directory.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
-    QStringList fileExt = m_settingsData.getVideoExtensions();
+    QStringList fileExt = m_settingsData->getVideoExtensions();
     foreach(const QString &fileName, scanList) {
         QFileInfo fileInfo(path+"/"+fileName);
         if(fileInfo.isFile()) {
@@ -39,13 +43,12 @@ movieCollections MediaLibrary::getRefsreshCollectionMovie()
     QList<movieItem> itemList;
     movieCollections movieColl(itemList);
 
-    QList<libraryItem> library = m_settingsData.readLibraryFromSettings("Movie");
+    QList<libraryItem> library = m_settingsData->readLibraryFromSettings("Movie");
     for (auto& libItem : library) {
         QStringList listMovie = MediaLibrary::scanLibraryMovie(libItem.path);
 
         for (auto& movie : listMovie ) {
             movieItem item;
-            qDebug() << "Movie: " << movie;
             QFileInfo fileInfo(movie);
             item.fileDir = fileInfo.path();
             item.fileName = fileInfo.fileName();
@@ -53,7 +56,7 @@ movieCollections MediaLibrary::getRefsreshCollectionMovie()
             if (QFile::exists(item.fileDir+"/poster.png")) {
                 item.pathIcon = item.fileDir+"/poster.png";
             } else {
-                QString installPath = m_settingsData.getInstallPath();
+                QString installPath = m_settingsData->getInstallPath();
                 item.pathIcon = installPath+"/noposter.png";
             }
             movieColl.append(item);

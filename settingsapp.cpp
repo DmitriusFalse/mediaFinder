@@ -14,9 +14,11 @@
 /// \brief SettingsApp::SettingsApp
 /// \param parent
 //////////////////////////////////////////////////////////////////////////
-SettingsApp::SettingsApp(QWidget *parent)
+SettingsApp::SettingsApp(QWidget *parent, DBManager *dbManager, SettingsData *settings)
     : QMainWindow(parent)
     , ui(new Ui::SettingsApp)
+    , m_settings(settings)
+    , m_dbManager(dbManager)
 {
     ui->setupUi(this);
     setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
@@ -25,6 +27,7 @@ SettingsApp::SettingsApp(QWidget *parent)
 
 SettingsApp::~SettingsApp()
 {
+
     delete ui;
 }
 
@@ -36,7 +39,7 @@ void SettingsApp::saveLibraryFolder(){
         QComboBox *comboBox = qobject_cast<QComboBox*>(ui->tableDirsType->cellWidget(row, 1));
         libFolders << libraryItem {itemPath->text(), comboBox->currentText()};
     }
-    settings->writeLibraryToSettings(libFolders);
+    m_settings->writeLibraryToSettings(libFolders);
 }
 
 void SettingsApp::on_saveButton_clicked()
@@ -59,18 +62,21 @@ void SettingsApp::on_addPath_clicked()
                                                           QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
     if (!directory.isEmpty()) {
-        QList<libraryItem> libFolders = settings->readLibraryFromSettings();
+        QList<libraryItem> libFolders = m_settings->readLibraryFromSettings();
         libFolders << libraryItem{directory, "Movie"};
-        libFolders = settings->checkLibraryDuplicate(libFolders);
-        settings->writeLibraryToSettings(libFolders);
+        libFolders = m_settings->checkLibraryDuplicate(libFolders);
+        m_settings->writeLibraryToSettings(libFolders);
 
         SettingsApp::addPathToListLibrary();
     }
 }
 
 void SettingsApp::addPathToListLibrary(){
-qRegisterMetaType<libraryItem>("libraryItem");
-    QList<libraryItem> libraryFolders = settings->readLibraryFromSettings();
+
+    qRegisterMetaType<libraryItem>("libraryItem");
+
+    QList<libraryItem> libraryFolders = m_settings->readLibraryFromSettings();
+
     int size = libraryFolders.size();
 
     SettingsApp::ui->tableDirsType->setRowCount(size);
@@ -81,8 +87,6 @@ qRegisterMetaType<libraryItem>("libraryItem");
     int column = 1; // номер столбца, куда вы хотите вставить выпадающий список
 
     for (const auto &libFolder : libraryFolders) {
-        qDebug() << "Path:" << libFolder.path << ", Type:" << libFolder.type;
-
         QTableWidgetItem *itemPath = new QTableWidgetItem(libFolder.path);
         itemPath->setFlags(itemPath->flags() & ~Qt::ItemIsEditable);
         ui->tableDirsType->setItem(row, 0, itemPath);

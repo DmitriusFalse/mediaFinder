@@ -32,11 +32,12 @@ struct movieCollections {
 class MediaLibrary
 {
 public:
-    MediaLibrary();
+    MediaLibrary(DBManager *dbmanager, SettingsData *settingsData);
     QStringList scanLibraryMovie(QString path);
     movieCollections getRefsreshCollectionMovie();
 private:
-    SettingsData m_settingsData;
+    SettingsData *m_settingsData;
+    DBManager *m_dbmanager;
 };
 
 #endif // MEDIALIBRARY_H
