@@ -4,27 +4,37 @@
 #include <QSqlQuery>
 #include <QString>
 #include <QStandardPaths>
+#include <QObject>
 
-class DBManager
+class DBManager : public QObject
 {
+    Q_OBJECT
 private:
     QSqlDatabase m_database;
     const QString DB_NAME = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/MediaFinder/mediafinder.sqlite";
 
 public:
-    DBManager();
+    DBManager(QObject *parent);
     ~DBManager();
     bool createTables();
     bool writeLibrary(QString path, QString type);
     bool truncateTable(QString tbName);
+    bool checkConnectingDB();
+    void writeMovieCollectionToDB(QStringList pathlList);
+    void writeTVCollectionToDB(QStringList pathlList);
+    void removeMovieCollectionsLibrary(QString libraryPath);
+    void removeOldRecordInBD(QString type);
+    QStringList readMovieCollection(QString detailLevel);
     QStringList readLibrary();
     QStringList readLibrary(QString type);
-    bool checkConnectingDB();
 private:
     bool openConnection();
     void closeConnection();
     void checkDB();
     void createStructureDB(QString nameTables);
+signals:
+    void signalUpdateProgresBar(QString value);
+    void signalUpdateMainWindow(QString type);
 
 };
 

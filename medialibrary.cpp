@@ -1,19 +1,34 @@
 #include "medialibrary.h"
 #include "settingsdata.h"
+#include "workrefreshmovie.h"
 #include <QDir>
 #include <QIcon>
 #include <QFile>
 
-MediaLibrary::MediaLibrary(DBManager *dbmanager, SettingsData *settingsData)
-    : m_settingsData(settingsData)
+MediaLibrary::MediaLibrary(QObject *parent, DBManager *dbmanager, SettingsData *settingsData)
+    : QObject(parent)
+    , m_settingsData(settingsData)
     , m_dbmanager(dbmanager)
 {
-    // SettingsData m_settingsData;
-    // m_settingsData = *new SettingsData(m_dbmanager);
+    this->progress=0;
+
+    this->m_workerThread = new QThread(this);
+    this->m_workRMovie = new WorkRefreshMovie();
+
+    connect(m_workRMovie, &WorkRefreshMovie::progressUpdated, this, &MediaLibrary::handleProgressUpdate);
+    connect(m_workRMovie, &WorkRefreshMovie::taskScanFolderFinished, this, &MediaLibrary::handleProgressFinish);
+}
+
+MediaLibrary::~MediaLibrary()
+{
+    m_workerThread->quit();
+    m_workerThread->wait();
+    delete m_workerThread;
 }
 
 QStringList MediaLibrary::scanLibraryMovie(QString path)
 {
+
     // SettingsData* settingsData = new SettingsData();
     QDir directory(path);
     if (!directory.exists()) {
@@ -27,41 +42,91 @@ QStringList MediaLibrary::scanLibraryMovie(QString path)
         if(fileInfo.isFile()) {
             QString fileSuffix = fileInfo.suffix();
             if (fileExt.contains(fileSuffix)) {
+                emit m_workRMovie->progressUpdated(path+"/"+fileName);
+
                 listMovie.append(path+"/"+fileName);
             }
         } else if(fileInfo.isDir()) {
             listMovie.append(MediaLibrary::scanLibraryMovie(path+"/"+fileName));
         }
     }
-    // delete settingsData;
+
     return listMovie;
 }
 
-movieCollections MediaLibrary::getRefsreshCollectionMovie()
+void MediaLibrary::refsreshCollectionMovie()
 {
-    // SettingsData* settingsData = new SettingsData();
+    this->removeOldMoviesInDB ();
+    MediaLibrary::startScanLibraryMovie();
+}
+
+movieCollections MediaLibrary::getMovieInBase(QString detailLevel)
+{
+    const QString DETAIL_LEVEL_ALL = "all";
+    const QString DETAIL_LEVEL_SHORT = "short";
+
+
+
+    QList<movieItem> items={};
+    movieCollections movies(items);
+    QStringList srcMovies = this->m_dbmanager->readMovieCollection (detailLevel);
+    //
+        //
+
+    for (auto& item : srcMovies) {
+        movieItem srcMovieItem;
+        QStringList iMovie = item.split ("//");
+        if (detailLevel == DETAIL_LEVEL_ALL) {
+            // id, genre, path, poster, name, libraryPath, description
+            // 0   1      2     3       4     5            6
+            srcMovieItem.id = iMovie[0].toInt ();
+            srcMovieItem.genre = iMovie[1];
+            srcMovieItem.path = iMovie[2];
+            srcMovieItem.poster = iMovie[3];
+            srcMovieItem.name = iMovie[4];
+            srcMovieItem.library_path = iMovie[5];
+            srcMovieItem.description = iMovie[6];
+        } else if (detailLevel == DETAIL_LEVEL_SHORT) {
+            // id, poster, name
+            // 0   1       2
+            srcMovieItem.id = iMovie[0].toInt ();
+            srcMovieItem.poster = iMovie[1];
+            srcMovieItem.name  = iMovie[2];
+        }
+        movies.append (srcMovieItem);
+
+    }
+    return movies;
+}
+
+
+
+void MediaLibrary::handleProgressUpdate(QString str)
+{
+    emit updateProgressBarUI(str);
+}
+
+void MediaLibrary::handleProgressFinish(QStringList str)
+{
+    m_dbmanager->writeMovieCollectionToDB(str);
+}
+
+void MediaLibrary::startScanLibraryMovie()
+{
+
     QList<movieItem> itemList;
     movieCollections movieColl(itemList);
 
     QList<libraryItem> library = m_settingsData->readLibraryFromSettings("Movie");
+    m_workRMovie->setActionScanMovie();
+    m_workRMovie->clearPathList ();
     for (auto& libItem : library) {
-        QStringList listMovie = MediaLibrary::scanLibraryMovie(libItem.path);
-
-        for (auto& movie : listMovie ) {
-            movieItem item;
-            QFileInfo fileInfo(movie);
-            item.fileDir = fileInfo.path();
-            item.fileName = fileInfo.fileName();
-            item.name = fileInfo.fileName();
-            if (QFile::exists(item.fileDir+"/poster.png")) {
-                item.pathIcon = item.fileDir+"/poster.png";
-            } else {
-                QString installPath = m_settingsData->getInstallPath();
-                item.pathIcon = installPath+"/noposter.png";
-            }
-            movieColl.append(item);
-        }
+        m_workRMovie->setPath(libItem.path);
     }
-    // delete settingsData;
-    return movieColl;
+    m_workRMovie->start();
+}
+
+void MediaLibrary::removeOldMoviesInDB()
+{
+    this->m_dbmanager->removeOldRecordInBD ("Movie");
 }

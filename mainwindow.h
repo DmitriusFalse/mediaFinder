@@ -21,16 +21,23 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_pushButton_clicked();
     void onDialogClosed();
     void on_refreshLibrary_clicked();
+    void on_openSettings_clicked();
 
 private:
+    void onTreeWidgetItemSelected();
+    void updateCollections(QString type);
     Ui::MainWindow *ui;
-    SettingsApp *dialog;
+    SettingsApp *dialogSettingsApp;
     SettingsData *settingsData;
     MediaLibrary *mediaLibrary;
-    void onTreeWidgetItemSelected();
     DBManager *m_dbmanager;
+public slots:
+    // void slotUptateProgressBar(const int &i);
+    void slotUptateProgressBar(const QString &str);
+    void slotHideProgressBar();
+    void slotUpdateListLibrary(QString type);
+    void slotUpdateListLibraries();
 };
 #endif // MAINWINDOW_H

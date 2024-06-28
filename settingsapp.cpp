@@ -1,4 +1,6 @@
 #include "settingsapp.h"
+#include "qevent.h"
+#include "qmessagebox.h"
 #include "ui_settingsapp.h"
 #include "settingsdata.h"
 #include <QComboBox>
@@ -23,6 +25,7 @@ SettingsApp::SettingsApp(QWidget *parent, DBManager *dbManager, SettingsData *se
     ui->setupUi(this);
     setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
     SettingsApp::addPathToListLibrary();
+    changeSettings = false;
 }
 
 SettingsApp::~SettingsApp()
@@ -31,43 +34,82 @@ SettingsApp::~SettingsApp()
     delete ui;
 }
 
-void SettingsApp::saveLibraryFolder(){
+void SettingsApp::saveLibraryFolder(bool update){
     QList<libraryItem> libFolders;
     for (int row = 0; row < ui->tableDirsType->rowCount(); ++row) {
-        // Получение значения из первой ячейки строки (например)
         QTableWidgetItem *itemPath = ui->tableDirsType->item(row, 0);
         QComboBox *comboBox = qobject_cast<QComboBox*>(ui->tableDirsType->cellWidget(row, 1));
         libFolders << libraryItem {itemPath->text(), comboBox->currentText()};
     }
     m_settings->writeLibraryToSettings(libFolders);
+    if(update){
+        emit signalUpdateListCollection();
+    }
+}
+
+void SettingsApp::closeEvent(QCloseEvent *event)
+{
+    if (changeSettings==false){
+        qDebug() << changeSettings;
+        event->accept();
+    }else{
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Подтверждение",
+                                      "Сохранить изменения перед выходом?",
+                                      QMessageBox::Yes | QMessageBox::No);
+
+        if (reply == QMessageBox::Yes) {
+            SettingsApp::saveLibraryFolder(true);
+            event->accept(); // Разрешаем закрытие
+        } else {
+            event->accept(); // Отменяем закрытие
+        }
+    }
+
 }
 
 void SettingsApp::on_saveButton_clicked()
 {
-    SettingsApp::saveLibraryFolder();
+    changeSettings = false;
+    SettingsApp::saveLibraryFolder(true);
     close();
 }
 
 void SettingsApp::on_applySaveSettings_clicked()
 {
-    SettingsApp::saveLibraryFolder();
+    // changeSettings = true;
+    SettingsApp::saveLibraryFolder(false);
 }
 
 void SettingsApp::on_addPath_clicked()
 {
+    changeSettings = true;
     qRegisterMetaType<libraryItem>("libraryItem");
+    QList<libraryItem> libFolders = m_settings->readLibraryFromSettings();
     QString directory = QFileDialog::getExistingDirectory(this,
                                                           "Выберите папку",
                                                           QDir::homePath(),
                                                           QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    bool yesAdd = true;
+    for (auto& libFolder : libFolders) {
 
-    if (!directory.isEmpty()) {
-        QList<libraryItem> libFolders = m_settings->readLibraryFromSettings();
+        if(libFolder.path.startsWith (directory+"/")){
+            yesAdd = false;
+        }
+    }
+    if (yesAdd) {
         libFolders << libraryItem{directory, "Movie"};
         libFolders = m_settings->checkLibraryDuplicate(libFolders);
         m_settings->writeLibraryToSettings(libFolders);
 
         SettingsApp::addPathToListLibrary();
+    }else{
+        changeSettings = false;
+        QMessageBox::information(nullptr, "Информация",
+                                 "Путь к библиотеке не добавлен.\n"
+                                 "Путь '/home/noc101/Медиа' является родительским\n"
+                                 "для уже добавленного пути.\n"
+                                 "Пожалуйста, выберите другую папку.");
     }
 }
 
@@ -103,11 +145,9 @@ void SettingsApp::addPathToListLibrary(){
 
 void SettingsApp::on_removeLibraryRow_clicked()
 {
+    changeSettings = true;
     int row = ui->tableDirsType->currentRow();
-
-    // Проверка, что строка действительно выделена (currentRow возвращает -1, если ничего не выделено)
     if (row >= 0) {
-        // Удаление строки из таблицы
         ui->tableDirsType->removeRow(row);
     }
 }

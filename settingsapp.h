@@ -27,9 +27,14 @@ private slots:
 private:
     Ui::SettingsApp *ui;
     void addPathToListLibrary();
-    void saveLibraryFolder();
+    void saveLibraryFolder(bool update);
+    bool changeSettings;
     SettingsData *m_settings;
     DBManager *m_dbManager;
+signals:
+    void signalUpdateListCollection();
+protected:
+    void closeEvent(QCloseEvent *event) override;
 };
 
 #endif // SETTINGSAPP_H
