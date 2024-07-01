@@ -19,17 +19,17 @@ public:
     void clearPathList();
 private:
     void setAction(int newAction);
-    QStringList scanFolders(QString path);
+    QStringList scanFoldersLibrary(QString path);
     SettingsData *m_settingsData;
     QThread workerThread;
     QStringList pathList;
     int action;
 public slots:
-    void startWork(const QString &path);
+    // void startWork(const QString &path);
 signals:
     void progressValueChanged(int value);
     void taskFinished();
-    void taskScanFolderFinished(const QStringList &result);
+    void signalFinishScanFoldersLibrary(const QStringList &result, const QString type);
     void progressUpdated(QString progress);
 protected:
     void run() override;

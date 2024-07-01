@@ -26,7 +26,8 @@ private slots:
     void on_openSettings_clicked();
 
 private:
-    void onTreeWidgetItemSelected();
+    void clickTreeWidgetMovie();
+    void clickTreeWidgetTV();
     void updateCollections(QString type);
     Ui::MainWindow *ui;
     SettingsApp *dialogSettingsApp;

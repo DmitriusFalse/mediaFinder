@@ -25,6 +25,7 @@ public:
     void removeMovieCollectionsLibrary(QString libraryPath);
     void removeOldRecordInBD(QString type);
     QStringList readMovieCollection(QString detailLevel);
+    QStringList readTVCollection(QString detailLevel);
     QStringList readLibrary();
     QStringList readLibrary(QString type);
 private:
@@ -32,6 +33,7 @@ private:
     void closeConnection();
     void checkDB();
     void createStructureDB(QString nameTables);
+    static QRegularExpression re;
 signals:
     void signalUpdateProgresBar(QString value);
     void signalUpdateMainWindow(QString type);

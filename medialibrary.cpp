@@ -16,7 +16,7 @@ MediaLibrary::MediaLibrary(QObject *parent, DBManager *dbmanager, SettingsData *
     this->m_workRMovie = new WorkRefreshMovie();
 
     connect(m_workRMovie, &WorkRefreshMovie::progressUpdated, this, &MediaLibrary::handleProgressUpdate);
-    connect(m_workRMovie, &WorkRefreshMovie::taskScanFolderFinished, this, &MediaLibrary::handleProgressFinish);
+    connect(m_workRMovie, &WorkRefreshMovie::signalFinishScanFoldersLibrary, this, &MediaLibrary::handleProgressFinish);
 }
 
 MediaLibrary::~MediaLibrary()
@@ -60,7 +60,12 @@ void MediaLibrary::refsreshCollectionMovie()
     MediaLibrary::startScanLibraryMovie();
 }
 
-movieCollections MediaLibrary::getMovieInBase(QString detailLevel)
+void MediaLibrary::refsreshCollectionTV()
+{
+    this->startScanLibraryTV ();
+}
+
+movieCollections MediaLibrary::getMovieCollection(QString detailLevel)
 {
     const QString DETAIL_LEVEL_ALL = "all";
     const QString DETAIL_LEVEL_SHORT = "short";
@@ -99,18 +104,62 @@ movieCollections MediaLibrary::getMovieInBase(QString detailLevel)
     return movies;
 }
 
+TVCollection MediaLibrary::getTVCollection(QString detailLevel)
+{
+    // const QString DETAIL_LEVEL_ALL = "all";
+    // const QString DETAIL_LEVEL_SHORT = "short";
+    TVCollection tvcol;
+    QStringList srcTV = this->m_dbmanager->readTVCollection (detailLevel);
 
+    for (const QString& SrcShow : srcTV) {
+        ShowInfo show;
 
+        QStringList tmp= SrcShow.split ("//@//");
+        QString header = tmp[0];
+        QStringList srcInfoShow = header.split ("//");
+        show.ID = srcInfoShow[0].toInt ();
+        show.seriesName = srcInfoShow[1];
+        show.posterPath = srcInfoShow[2];
+
+        QString body= tmp[1];
+        QStringList srcSeries = body.split ("#/@/#");
+
+        foreach (const QString& infoEp, srcSeries) {
+            if (infoEp==""){
+                continue;
+            }
+            QStringList srcEpList = infoEp.split ("//");
+            EpisodeInfo episode;
+            episode.ID = srcEpList[0].toInt ();
+            episode.episodeTitle = srcEpList[1];
+            episode.filePath = srcEpList[2];
+            episode.seasonsNumber = srcEpList[4].toInt ();
+            episode.episodeNumber = srcEpList[5].toInt ();
+
+            show.Episodes.append (episode);
+        }
+        //сортируем наши епизоды
+
+        this->sortEpisodes (show.Episodes);
+        tvcol.Show.append (show);
+
+    }
+    this->sortShows (tvcol.Show);
+    return tvcol;
+
+}
 void MediaLibrary::handleProgressUpdate(QString str)
 {
     emit updateProgressBarUI(str);
 }
-
-void MediaLibrary::handleProgressFinish(QStringList str)
+void MediaLibrary::handleProgressFinish(QStringList str, QString type)
 {
-    m_dbmanager->writeMovieCollectionToDB(str);
+    if (type=="movie"){
+        m_dbmanager->writeMovieCollectionToDB(str);
+    }else if(type=="tv"){
+        m_dbmanager->writeTVCollectionToDB(str);
+    }
 }
-
 void MediaLibrary::startScanLibraryMovie()
 {
 
@@ -125,8 +174,40 @@ void MediaLibrary::startScanLibraryMovie()
     }
     m_workRMovie->start();
 }
+void MediaLibrary::startScanLibraryTV()
+{
+    TVCollection myTv;
 
+    QList<libraryItem> library = m_settingsData->readLibraryFromSettings("TV");
+
+    m_workRMovie->setActionScanTV ();
+    m_workRMovie->clearPathList ();
+    for (auto& libItem : library) {
+        m_workRMovie->setPath(libItem.path);
+    }
+    m_workRMovie->start();
+
+}
 void MediaLibrary::removeOldMoviesInDB()
 {
     this->m_dbmanager->removeOldRecordInBD ("Movie");
+}
+void MediaLibrary::removeOldTVInDB()
+{
+    this->m_dbmanager->removeOldRecordInBD ("TV");
+}
+
+void MediaLibrary::sortEpisodes(QList<EpisodeInfo>& episodes) {
+    std::sort(episodes.begin(), episodes.end(), [](const EpisodeInfo& a, const EpisodeInfo& b) {
+        // Сравниваем по номеру сезона, если они равны - по номеру серии
+        return a.seasonsNumber < b.seasonsNumber ||
+               (a.seasonsNumber == b.seasonsNumber && a.episodeNumber < b.episodeNumber);
+    });
+}
+
+void MediaLibrary::sortShows(QList<ShowInfo>& shows) {
+    std::sort(shows.begin(), shows.end(), [](const ShowInfo& a, const ShowInfo& b) {
+        // Сортировка по номеру сезона, затем по номеру серии
+        return a.seriesName < b.seriesName;
+    });
 }

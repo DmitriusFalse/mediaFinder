@@ -11,6 +11,12 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
 {
 
     qRegisterMetaType<libraryItem>("libraryItem");
+    qRegisterMetaType<movieCollections>("movieCollections");
+    qRegisterMetaType<movieItem>("movieItem");
+    qRegisterMetaType<TVCollection>("TVCollection");
+    qRegisterMetaType<ShowInfo>("SerialInfo");
+    // qRegisterMetaType<SeasonInfo>("SeasonInfo");
+    qRegisterMetaType<EpisodeInfo>("EpisodeInfo");
     ui->setupUi(this);
     this->m_dbmanager = new DBManager(this);
     this->settingsData = new SettingsData(this->m_dbmanager);
@@ -26,8 +32,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
 
     QScrollBar *verticalScrollBar = ui->listMovieLibrary->verticalScrollBar ();
     verticalScrollBar->setStyleSheet("width: 30px;");
-
-    connect(ui->listMovieLibrary, &QTreeWidget::itemSelectionChanged, this, &MainWindow::onTreeWidgetItemSelected);
+    //Соединяем клик в QTreeWidget listMovieLibrary с функцией onTreeWidgetItemSelected
+    connect(ui->listMovieLibrary, &QTreeWidget::itemSelectionChanged, this, &MainWindow::clickTreeWidgetMovie);
+    connect(ui->listTVLibrary, &QTreeWidget::itemSelectionChanged, this, &MainWindow::clickTreeWidgetTV);
     connect(this->mediaLibrary,
             &MediaLibrary::updateProgressBarUI,
             this,
@@ -66,18 +73,39 @@ void MainWindow::onDialogClosed()
 
 void MainWindow::on_refreshLibrary_clicked()
 {
-    ui->PBRefreshLibrary->show ();
-    ui->PBRefreshLibrary->setFormat ("Обновление коллекции фильмов!");
-    mediaLibrary->refsreshCollectionMovie();
+    int index = ui->tabMainWindow->currentIndex ();
+    switch (index) {
+    case 0:{
+        qDebug() << "Refresh Movie";
+        ui->PBRefreshLibrary->show ();
+        ui->PBRefreshLibrary->setFormat ("Обновление коллекции фильмов!");
+        mediaLibrary->refsreshCollectionMovie();
+        break;
+    }
+    case 1: {
+        qDebug() << "Refresh TV";
+        mediaLibrary->refsreshCollectionTV ();
+        break;
+    }
+    default:
+        break;
+    }
+
 }
 
-void MainWindow::onTreeWidgetItemSelected()
+void MainWindow::clickTreeWidgetMovie()
 {
+    qDebug() << "Click Movie";
     QTreeWidgetItem *selectedItem = ui->listMovieLibrary->currentItem();
 
     QString hiddenData = selectedItem->data(0, Qt::UserRole).toString();
     QMessageBox::information(this, "Заголовок", hiddenData);
 
+}
+
+void MainWindow::clickTreeWidgetTV()
+{
+    qDebug() << "Click TV";
 }
 
 void MainWindow::updateCollections(QString type)
@@ -86,7 +114,7 @@ void MainWindow::updateCollections(QString type)
     QStringList action = {"Movie", "TV"};
     switch (action.indexOf(type)) {
     case 0:{
-        movieCollections movies= mediaLibrary->getMovieInBase ("short");
+        movieCollections movies= mediaLibrary->getMovieCollection ("short");
         ui->listMovieLibrary->clear();
 
         for (auto& movie : movies.items) {
@@ -106,27 +134,24 @@ void MainWindow::updateCollections(QString type)
         break;
     }
     case 1:{
-        QTreeWidgetItem *mainItem = new QTreeWidgetItem(ui->listTVLibrary);
+        ui->listTVLibrary->clear ();
+        TVCollection tvcols = mediaLibrary->getTVCollection ("short");
+        for (const auto& show : tvcols.Show) {
+            QTreeWidgetItem *mainItem = new QTreeWidgetItem(ui->listTVLibrary);
+            mainItem->setText(1, show.seriesName);
+            QPixmap pixmap(show.posterPath);
+            QLabel *imageLabel = new QLabel();
+            imageLabel->setPixmap(pixmap.scaled(90, 128));
+            ui->listTVLibrary->setItemWidget(mainItem, 0, imageLabel);
 
-        mainItem->setText(1, "Основной элемент");
+            for (auto& episodes : show.Episodes) {
+                QTreeWidgetItem *subItem1 = new QTreeWidgetItem(mainItem);
+                subItem1->setText(1, episodes.episodeTitle+" S"+QString::number (episodes.seasonsNumber)+" E"+QString::number (episodes.episodeNumber));
+            }
 
-        QPixmap pixmap("/opt/MediaFinder/poster.png");
-        QLabel *imageLabel = new QLabel();
-        imageLabel->setPixmap(pixmap.scaled(90, 128));
-
-        ui->listTVLibrary->setItemWidget(mainItem, 0, imageLabel);
-
-        // Добавляем подпункты
-        QTreeWidgetItem *subItem1 = new QTreeWidgetItem(mainItem);
-        subItem1->setText(1, "Подпункт 1");
-
-
-
-        // Разворачиваем все элементы для отображения
-        ui->listTVLibrary->expandAll();
-
-        ui->listTVLibrary->setWindowTitle("Пример QTreeWidget");
-
+        // ui->listTVLibrary->expandAll();
+        // ui->listTVLibrary->setWindowTitle("Пример QTreeWidget");
+        }
         break;
     }
     }
@@ -169,4 +194,6 @@ void MainWindow::on_openSettings_clicked()
 
     connect(dialogSettingsApp, &SettingsApp::destroyed, this, &MainWindow::onDialogClosed);
 }
+
+
 
