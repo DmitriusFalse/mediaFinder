@@ -19,12 +19,6 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
-private slots:
-    void onDialogClosed();
-    void on_refreshLibrary_clicked();
-    void on_openSettings_clicked();
-
 private:
     void clickTreeWidgetMovie();
     void clickTreeWidgetTV();
@@ -34,6 +28,15 @@ private:
     SettingsData *settingsData;
     MediaLibrary *mediaLibrary;
     DBManager *m_dbmanager;
+
+private slots:
+    void onDialogClosed();
+    void on_refreshLibrary_clicked();
+    void on_openSettings_clicked();
+    void slotChangetSelection();
+
+    void on_pushButton_clicked();
+
 public slots:
     // void slotUptateProgressBar(const int &i);
     void slotUptateProgressBar(const QString &str);

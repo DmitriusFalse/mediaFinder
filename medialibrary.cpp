@@ -4,6 +4,12 @@
 #include <QDir>
 #include <QIcon>
 #include <QFile>
+#include <QtWidgets>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 MediaLibrary::MediaLibrary(QObject *parent, DBManager *dbmanager, SettingsData *settingsData)
     : QObject(parent)
@@ -147,6 +153,21 @@ TVCollection MediaLibrary::getTVCollection(QString detailLevel)
     this->sortShows (tvcol.Show);
     return tvcol;
 
+}
+
+QString MediaLibrary::getInformationTV(QString Name)
+{
+    // QString id = "12345"; // Замените на нужный ID фильма
+    // QUrl url(QString("https://api.themoviedb.org/3/movie/%1").arg(id));
+    // QNetworkRequest request(url);
+
+    // // Установка заголовков
+    // request.setHeader(QNetworkRequest::AuthorizationHeader, "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MzRiMjAxZmI0ZTEzYjM1N2E3ZjBkZWYxMzYxNmRiOSIsInN1YiI6IjY1OTJlY2QwNjUxZmNmNjA5NjhkYTkzYSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.8FHwiVdJWPNxYH5XYvdfNE7dciCL0CUjRTNlVm0r1iY");
+    // request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json"); // Добавили заголовок Accept
+
+    // QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    // connect(manager, &QNetworkAccessManager::finished, this, &MyWidget::onFinished);
+    // manager->get(request);
 }
 void MediaLibrary::handleProgressUpdate(QString str)
 {

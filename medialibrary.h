@@ -77,6 +77,7 @@ public:
     void refsreshCollectionTV();
     movieCollections getMovieCollection(QString detailLevel);
     TVCollection getTVCollection(QString detailLevel);
+    QString getInformationTV(QString Name);
 private:
     void handleProgressUpdate(QString str);
     void handleProgressFinish(QStringList str, QString type);

@@ -35,6 +35,12 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     //Соединяем клик в QTreeWidget listMovieLibrary с функцией onTreeWidgetItemSelected
     connect(ui->listMovieLibrary, &QTreeWidget::itemSelectionChanged, this, &MainWindow::clickTreeWidgetMovie);
     connect(ui->listTVLibrary, &QTreeWidget::itemSelectionChanged, this, &MainWindow::clickTreeWidgetTV);
+
+    //Отработка снятия выделения в Списке сериалов
+    connect(ui->listTVLibrary, &QTreeWidget::itemSelectionChanged, this, &MainWindow::slotChangetSelection);
+    //Отработка снятия выделения в Списке фильмов
+    connect(ui->listMovieLibrary, &QTreeWidget::itemSelectionChanged, this, &MainWindow::slotChangetSelection);
+
     connect(this->mediaLibrary,
             &MediaLibrary::updateProgressBarUI,
             this,
@@ -47,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
             &DBManager::signalUpdateMainWindow,
             this,
             &MainWindow::slotUpdateListLibrary);
+
 
     ui->listMovieLibrary->setAlternatingRowColors(true);
     this->updateCollections("Movie");
@@ -178,6 +185,15 @@ void MainWindow::slotUpdateListLibraries()
     this->updateCollections("Movie");
     this->updateCollections("TV");
 }
+
+void MainWindow::slotChangetSelection()
+{
+    auto treeWidget = qobject_cast<QTreeWidget*>(sender());
+    if (treeWidget->selectedItems().isEmpty()) {
+        // Код, который нужно выполнить при снятии выделения
+        qDebug() << "Выделение снято";
+    }
+}
 void MainWindow::on_openSettings_clicked()
 {
     setDisabled(true);
@@ -196,4 +212,10 @@ void MainWindow::on_openSettings_clicked()
 }
 
 
+
+
+void MainWindow::on_pushButton_clicked()
+{
+
+}
 

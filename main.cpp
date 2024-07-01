@@ -7,6 +7,8 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    qDebug() << "Qt Version:" << QT_VERSION_STR;
+
     a.setApplicationName("MediaFinder");
     QTranslator translator;
     const QStringList uiLanguages = QLocale::system().uiLanguages();
