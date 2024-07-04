@@ -12,6 +12,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     medialibrary.cpp \
+    searchmedia.cpp \
     settingsapp.cpp \
     settingsdata.cpp \
     workrefreshmovie.cpp
@@ -20,12 +21,14 @@ HEADERS += \
     dbmanager.h \
     mainwindow.h \
     medialibrary.h \
+    searchmedia.h \
     settingsapp.h \
     settingsdata.h \
     workrefreshmovie.h
 
 FORMS += \
     mainwindow.ui \
+    searchmedia.ui \
     settingsapp.ui
 
 TRANSLATIONS += \

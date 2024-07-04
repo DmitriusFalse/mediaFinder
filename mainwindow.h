@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "searchmedia.h"
 #include "settingsapp.h"
 #include "medialibrary.h"
 #include "dbmanager.h"
@@ -24,18 +25,18 @@ private:
     void clickTreeWidgetTV();
     void updateCollections(QString type);
     Ui::MainWindow *ui;
-    SettingsApp *dialogSettingsApp;
-    SettingsData *settingsData;
+    DBManager *dbmanager;
     MediaLibrary *mediaLibrary;
-    DBManager *m_dbmanager;
+    SettingsData *settingsData;
+    SettingsApp *dialogSettingsApp;
+    SearchMedia *searchMedia;
 
 private slots:
     void onDialogClosed();
     void on_refreshLibrary_clicked();
     void on_openSettings_clicked();
     void slotChangetSelection();
-
-    void on_pushButton_clicked();
+    void on_loadMediaButton_clicked();
 
 public slots:
     // void slotUptateProgressBar(const int &i);

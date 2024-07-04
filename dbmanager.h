@@ -24,6 +24,7 @@ public:
     void writeTVCollectionToDB(QStringList pathlList);
     void removeMovieCollectionsLibrary(QString libraryPath);
     void removeOldRecordInBD(QString type);
+    QStringList loadGenre();
     QStringList readMovieCollection(QString detailLevel);
     QStringList readTVCollection(QString detailLevel);
     QStringList readLibrary();

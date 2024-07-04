@@ -155,19 +155,39 @@ TVCollection MediaLibrary::getTVCollection(QString detailLevel)
 
 }
 
-QString MediaLibrary::getInformationTV(QString Name)
+void MediaLibrary::sendRequestTMDBSearch(QString Name, QString type)
 {
-    // QString id = "12345"; // Замените на нужный ID фильма
-    // QUrl url(QString("https://api.themoviedb.org/3/movie/%1").arg(id));
-    // QNetworkRequest request(url);
+    QUrl url(QString("https://api.themoviedb.org/3/%1/%2").arg(type, Name));
+    QNetworkRequest request(url);
 
-    // // Установка заголовков
-    // request.setHeader(QNetworkRequest::AuthorizationHeader, "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MzRiMjAxZmI0ZTEzYjM1N2E3ZjBkZWYxMzYxNmRiOSIsInN1YiI6IjY1OTJlY2QwNjUxZmNmNjA5NjhkYTkzYSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.8FHwiVdJWPNxYH5XYvdfNE7dciCL0CUjRTNlVm0r1iY");
-    // request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json"); // Добавили заголовок Accept
+    // Установка заголовков
+    request.setRawHeader(QByteArray("Authorization"), QByteArray("Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MzRiMjAxZmI0ZTEzYjM1N2E3ZjBkZWYxMzYxNmRiOSIsInN1YiI6IjY1OTJlY2QwNjUxZmNmNjA5NjhkYTkzYSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.8FHwiVdJWPNxYH5XYvdfNE7dciCL0CUjRTNlVm0r1iY"));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json"); // Добавили заголовок Accept
 
-    // QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    // connect(manager, &QNetworkAccessManager::finished, this, &MyWidget::onFinished);
-    // manager->get(request);
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    connect(manager, &QNetworkAccessManager::finished, this, &MediaLibrary::slotFinishRequest);
+    manager->get(request);
+}
+
+void MediaLibrary::slotFinishRequest(QNetworkReply *reply)
+{
+    if (reply->error() == QNetworkReply::NoError) {
+        // Запрос выполнен успешно:
+        QByteArray data = reply->readAll(); // Читаем полученные данные
+
+        // Обработка данных (например, парсинг JSON):
+        QJsonDocument jsonDoc = QJsonDocument::fromJson(data);
+        qDebug() << "jsonDoc: " << jsonDoc;
+        QJsonObject jsonObject = jsonDoc.object();
+        qDebug() << "jsonObject: " << jsonObject;
+        // ... извлекаем нужные данные из jsonObject ...
+
+    } else {
+        // Произошла ошибка при выполнении запроса:
+        qDebug() << "Ошибка запроса:" << reply->errorString();
+    }
+
+    reply->deleteLater(); // Освобождаем ресурсы ответа
 }
 void MediaLibrary::handleProgressUpdate(QString str)
 {

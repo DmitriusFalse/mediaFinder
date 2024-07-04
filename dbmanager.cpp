@@ -433,6 +433,19 @@ void DBManager::removeOldRecordInBD(QString type)
 
 }
 
+QStringList DBManager::loadGenre()
+{
+    QStringList genres;
+    QSqlQuery query(this->m_database);
+    query.prepare ("SELECT id, ru FROM Genres");
+    if(query.exec ()){
+        while(query.next()){
+            genres.append (query.value ("id").toString ()+":"+query.value ("ru").toString ());
+        }
+    }
+    return genres;
+}
+
 QStringList DBManager::readMovieCollection(QString detailLevel)
 {
     // qDebug() << "readMovieCollection";

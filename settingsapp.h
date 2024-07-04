@@ -33,6 +33,7 @@ private:
     DBManager *m_dbManager;
 signals:
     void signalUpdateListCollection();
+    void signalWindowClosed();
 protected:
     void closeEvent(QCloseEvent *event) override;
 };

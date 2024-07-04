@@ -1,5 +1,6 @@
 #ifndef MEDIALIBRARY_H
 #define MEDIALIBRARY_H
+#include "qnetworkreply.h"
 #include "settingsdata.h"
 #include "workrefreshmovie.h"
 #include <QObject>
@@ -77,7 +78,9 @@ public:
     void refsreshCollectionTV();
     movieCollections getMovieCollection(QString detailLevel);
     TVCollection getTVCollection(QString detailLevel);
-    QString getInformationTV(QString Name);
+    void sendRequestTMDBSearch(QString nameMedia, QString type="multi");
+public slots:
+    void slotFinishRequest(QNetworkReply *reply);
 private:
     void handleProgressUpdate(QString str);
     void handleProgressFinish(QStringList str, QString type);

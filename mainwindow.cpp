@@ -18,9 +18,12 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     // qRegisterMetaType<SeasonInfo>("SeasonInfo");
     qRegisterMetaType<EpisodeInfo>("EpisodeInfo");
     ui->setupUi(this);
-    this->m_dbmanager = new DBManager(this);
-    this->settingsData = new SettingsData(this->m_dbmanager);
-    this->mediaLibrary = new MediaLibrary(this, this->m_dbmanager, settingsData);
+    this->dbmanager = new DBManager(this);
+    this->settingsData = new SettingsData(this->dbmanager);
+    this->mediaLibrary = new MediaLibrary(this, this->dbmanager, settingsData);
+    this->searchMedia = new SearchMedia(this, this->mediaLibrary,this->dbmanager);
+
+    this->dialogSettingsApp = new SettingsApp(this,dbmanager, settingsData);
 
     ui->PBRefreshLibrary->hide();
     ui->listMovieLibrary->setStyleSheet("QTreeWidget::item { height: 128px; }");
@@ -45,15 +48,17 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
             &MediaLibrary::updateProgressBarUI,
             this,
             &MainWindow::slotUptateProgressBar);
-    connect(this->m_dbmanager,
+    connect(this->dbmanager,
             &DBManager::signalUpdateProgresBar,
             this,
             &MainWindow::slotUptateProgressBar);
-    connect(this->m_dbmanager,
+    connect(this->dbmanager,
             &DBManager::signalUpdateMainWindow,
             this,
             &MainWindow::slotUpdateListLibrary);
 
+    connect(this->searchMedia, &SearchMedia::windowClosed, this, &MainWindow::onDialogClosed);
+    connect(this->dialogSettingsApp, &SettingsApp::signalWindowClosed, this, &MainWindow::onDialogClosed);
 
     ui->listMovieLibrary->setAlternatingRowColors(true);
     this->updateCollections("Movie");
@@ -66,9 +71,12 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
 MainWindow::~MainWindow()
 {
     delete ui;
-    // delete this->m_dbmanager;
-    delete this->settingsData;
+    delete this->dialogSettingsApp;
+    // delete this->searchMedia;
     delete this->mediaLibrary;
+    delete this->settingsData;
+    delete this->dbmanager;
+
 }
 
 void MainWindow::onDialogClosed()
@@ -196,26 +204,43 @@ void MainWindow::slotChangetSelection()
 }
 void MainWindow::on_openSettings_clicked()
 {
-    setDisabled(true);
-    MainWindow::dialogSettingsApp = new SettingsApp(this,m_dbmanager, settingsData);
+    this->setDisabled(true);
+    this->dialogSettingsApp->setDisabled(false);
+
 
     connect (this->dialogSettingsApp,
             &SettingsApp::signalUpdateListCollection,
             this,
             &MainWindow::slotUpdateListLibraries);
-    dialogSettingsApp->setAttribute(Qt::WA_DeleteOnClose);
+    // dialogSettingsApp->setAttribute(Qt::WA_DeleteOnClose);
     dialogSettingsApp->setWindowTitle("Settings - MediaFinder");
     // Показываем диалоговое окно при нажатии на кнопку
     dialogSettingsApp->show();
-
-    connect(dialogSettingsApp, &SettingsApp::destroyed, this, &MainWindow::onDialogClosed);
 }
 
-
-
-
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_loadMediaButton_clicked()
 {
+    MainWindow::setDisabled (true);
+    this->searchMedia->setDisabled (false);
+    // this->searchWindow->setAttribute(Qt::WA_DeleteOnClose);
+    this->searchMedia->setWindowTitle("Search media - MediaFinder");
 
+    switch (ui->tabMainWindow->currentIndex ()) {
+    case 0:{ //Movie
+        QTreeWidgetItem *selectedItem = ui->listMovieLibrary->currentItem();
+        this->searchMedia->setSearchWord (selectedItem->text(1));
+        this->searchMedia->fillFields ("Movie");
+        break;
+    }
+    case 1:{ //TV
+        QTreeWidgetItem *selectedItem = ui->listTVLibrary->currentItem();
+        this->searchMedia->setSearchWord (selectedItem->text(1));
+        this->searchMedia->fillFields ("TV");
+        break;
+    }
+    }
+
+
+    this->searchMedia->show();
 }
 

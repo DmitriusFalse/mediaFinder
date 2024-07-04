@@ -32,7 +32,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="loadMediaButton">
         <property name="text">
          <string>Загрузить</string>
         </property>

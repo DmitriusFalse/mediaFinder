@@ -65,6 +65,7 @@ void SettingsApp::closeEvent(QCloseEvent *event)
             event->accept(); // Отменяем закрытие
         }
     }
+    emit signalWindowClosed();
 
 }
 
