@@ -1,34 +1,13 @@
 #ifndef SEARCHMEDIA_H
 #define SEARCHMEDIA_H
 
+#include "GenreList.h"
 #include "medialibrary.h"
 #include "dbmanager.h"
+#include "qnetworkreply.h"
 #include <QMainWindow>
 
 
-struct GenreList   {
-public:
-
-    struct genre {
-        int id;
-        QString name;
-    };
-    QString getGenre(int id){
-        auto it = genreMap.find(id);
-        if (it != genreMap.end()) {
-            return it.value().name;
-        } else {
-            qDebug() << "Жанр с ID" << id << "не найден.";
-            return QString::number (id);
-        }
-    }
-    GenreList& addGenre(int id, const QString& name) {
-        genreMap.insert(id, genre{id, name});
-        return *this;
-    }
-private:
-    QHash<uint, genre> genreMap;
-};
 
 namespace Ui {
 class SearchMedia;
@@ -45,6 +24,18 @@ public:
     void setSearchWord(const QString &newNameSearch);
     void setTypeMediaSearch(const QString &newTypeMediaSearch);
 
+    int getIdSelectMedia() const;
+    void setIdSelectMedia(int newIdSelectMedia);
+
+    QString getSelectType() const;
+    void setSelectType(const QString &newSelectType);
+
+    int getIdTVDB() const;
+    void setIdTVDB(int newIdTVDB);
+
+    int getIdMovieDB() const;
+    void setIdMovieDB(int newIdMovieDB);
+
 private:
     Ui::SearchMedia *uiSearch;
     QString nameSearch;
@@ -52,19 +43,36 @@ private:
     GenreList *genres;
     void closeEvent(QCloseEvent *event) override;
 
+    int idSelectMedia;
+    int idTVDB;
+    int idMovieDB;
+
+    short countSendRequest;
+    QString selectType;
+
 
     MediaLibrary *mediaLibrary;
     DBManager *dbManager;
-
+    ShowInfo *showTv;
     void sendRequestTMDBSearch(QString Name, QString type);
     void sendRequestTMDBGetImage();
+    void sendRequestTMDBGetInformation();
+    void sendRequestTMDBGetInformationEpisodes(int count);
 signals:
     void windowClosed();
+    void selectMedia();
 private slots:
+
     void on_searchButton_clicked();
     void slotViewOverviewMedia();
     void slotFinishRequestFindMedia(QNetworkReply *reply, QString media_type);
     void slotUpdateImagesInTree(QNetworkReply *reply, int index);
+    void slotChangetSelection();
+    void slotFinishRequestChooseMedia(QNetworkReply *reply);
+    void slotFinishRequestChooseMediaEpisodes(QNetworkReply *reply);
+    void endSelectMedia();
+    void on_okButton_clicked();
+
 };
 
 #endif // SEARCHMEDIA_H

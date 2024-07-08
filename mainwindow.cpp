@@ -25,6 +25,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
 
     this->dialogSettingsApp = new SettingsApp(this,dbmanager, settingsData);
 
+    this->progressBar = new DialogShowProgress;
+
     ui->PBRefreshLibrary->hide();
     ui->listMovieLibrary->setStyleSheet("QTreeWidget::item { height: 128px; }");
     ui->listMovieLibrary->setHeaderLabels({"Афиша","Название"});
@@ -56,6 +58,11 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
             &DBManager::signalUpdateMainWindow,
             this,
             &MainWindow::slotUpdateListLibrary);
+
+    connect(this->dbmanager,
+            &DBManager::signalUpdateMainWindowByID,
+            this,
+            &MainWindow::slotUpdateListLibraryByID);
 
     connect(this->searchMedia, &SearchMedia::windowClosed, this, &MainWindow::onDialogClosed);
     connect(this->dialogSettingsApp, &SettingsApp::signalWindowClosed, this, &MainWindow::onDialogClosed);
@@ -128,47 +135,113 @@ void MainWindow::updateCollections(QString type)
 
     QStringList action = {"Movie", "TV"};
     switch (action.indexOf(type)) {
-    case 0:{
-        movieCollections movies= mediaLibrary->getMovieCollection ("short");
-        ui->listMovieLibrary->clear();
+        case 0:{
+            movieCollections movies= mediaLibrary->getMovieCollection ("short");
+            ui->listMovieLibrary->clear();
 
-        for (auto& movie : movies.items) {
+            for (auto& movie : movies.items) {
 
-            QTreeWidgetItem *item = new QTreeWidgetItem(ui->listMovieLibrary);
+                QTreeWidgetItem *item = new QTreeWidgetItem(ui->listMovieLibrary);
 
-            QPixmap pixmap(movie.poster);
-            QLabel *imageLabel = new QLabel();
-            imageLabel->setPixmap(pixmap.scaled(90, 128));
+                QPixmap pixmap;
 
-            ui->listMovieLibrary->setItemWidget(item, 0, imageLabel);
+                if(QFile::exists (movie.poster)){
+                    pixmap.load (movie.poster);
+                }else{
+                    pixmap.load ("/opt/MediaFinder/poster.png");
+                }
 
-            item->setText(1, movie.name);
-            item->setData(0, Qt::UserRole, movie.id);
+                QLabel *imageLabel = new QLabel();
+                imageLabel->setPixmap(pixmap.scaled(90, 128));
 
-        }
-        break;
-    }
-    case 1:{
-        ui->listTVLibrary->clear ();
-        TVCollection tvcols = mediaLibrary->getTVCollection ("short");
-        for (const auto& show : tvcols.Show) {
-            QTreeWidgetItem *mainItem = new QTreeWidgetItem(ui->listTVLibrary);
-            mainItem->setText(1, show.seriesName);
-            QPixmap pixmap(show.posterPath);
-            QLabel *imageLabel = new QLabel();
-            imageLabel->setPixmap(pixmap.scaled(90, 128));
-            ui->listTVLibrary->setItemWidget(mainItem, 0, imageLabel);
+                ui->listMovieLibrary->setItemWidget(item, 0, imageLabel);
 
-            for (auto& episodes : show.Episodes) {
-                QTreeWidgetItem *subItem1 = new QTreeWidgetItem(mainItem);
-                subItem1->setText(1, episodes.episodeTitle+" S"+QString::number (episodes.seasonsNumber)+" E"+QString::number (episodes.episodeNumber));
+                item->setText(1, movie.name);
+                item->setData(0, Qt::UserRole, movie.id);
+
             }
-
-        // ui->listTVLibrary->expandAll();
-        // ui->listTVLibrary->setWindowTitle("Пример QTreeWidget");
+            break;
         }
-        break;
+        case 1:{
+            ui->listTVLibrary->clear ();
+            TVCollection tvcols = mediaLibrary->getTVCollection ("short");
+            for (const auto& show : tvcols.Show) {
+                QTreeWidgetItem *mainItem = new QTreeWidgetItem(ui->listTVLibrary);
+                mainItem->setText(1, show.nameShow);
+
+                QPixmap pixmap;
+                if(QFile::exists (show.poster)){
+                    pixmap.load (show.poster);
+                }else{
+                    pixmap.load ("/opt/MediaFinder/poster.png");
+                }
+                QLabel *imageLabel = new QLabel();
+                imageLabel->setPixmap(pixmap.scaled(90, 128));
+                ui->listTVLibrary->setItemWidget(mainItem, 0, imageLabel);
+                mainItem->setData(0, Qt::UserRole, show.ID);
+
+                foreach (const uint seasonNumber, show.Episodes.keys()) {
+                    const QMap<uint, EpisodeInfo>& episodes = show.Episodes[seasonNumber];
+                    foreach (const uint episodeNumber, episodes.keys()) {
+                        const EpisodeInfo& episodeInfo = episodes[episodeNumber];
+                        QTreeWidgetItem *subItem1 = new QTreeWidgetItem(mainItem);
+                        subItem1->setText(1, episodeInfo.episodeTitle+" S"+QString::number (episodeInfo.seasonsNumber)+" E"+QString::number (episodeInfo.episodeNumber));
+                    }
+                }
+
+            }
+            break;
+        }
     }
+}
+
+void MainWindow::updateCollectionsByID(QString type, int id)
+{
+    QStringList action = {"Movie", "TV"};
+    switch (action.indexOf(type)) {
+        case 0:{ // movie
+
+
+            break;
+            }
+        case 1:{ //tv
+                for (int index = 0; index < ui->listTVLibrary->topLevelItemCount(); ++index) {
+                    QTreeWidgetItem *item = ui->listTVLibrary->topLevelItem(index);
+                    int ID = item->data(0, Qt::UserRole).toInt();
+                    if(id==ID){
+
+                        QList<QTreeWidgetItem*> children = item->takeChildren();
+                        for (QTreeWidgetItem *child : children) {
+                            delete child;
+                        }
+
+                        ShowInfo show = mediaLibrary->getShowInfoByID ("short", id);
+                        QPixmap pixmap;
+                        if(QFile::exists (show.poster)){
+                            pixmap.load (show.poster);
+                        }else{
+                            pixmap.load ("/opt/MediaFinder/poster.png");
+                        }
+                        QLabel *imageLabel = new QLabel();
+                        imageLabel->setPixmap(pixmap.scaled(90, 128));
+                        ui->listTVLibrary->setItemWidget(item, 0, imageLabel);
+
+                        foreach (const uint seasonNumber, show.Episodes.keys()) {
+                            const QMap<uint, EpisodeInfo>& episodes = show.Episodes[seasonNumber];
+                            foreach (const uint episodeNumber, episodes.keys()) {
+                                const EpisodeInfo& episodeInfo = episodes[episodeNumber];
+                                QTreeWidgetItem *subItem1 = new QTreeWidgetItem(item);
+                                subItem1->setText(1, episodeInfo.episodeTitle+" S"+QString::number (episodeInfo.seasonsNumber)+" E"+QString::number (episodeInfo.episodeNumber));
+                            }
+                        }
+                        break;
+                    }
+                }
+
+
+
+            break;
+            }
     }
 }
 void MainWindow::slotUptateProgressBar(const QString &str)
@@ -185,6 +258,12 @@ void MainWindow::slotUpdateListLibrary(QString type)
 {
     ui->PBRefreshLibrary->hide ();
     MainWindow::updateCollections(type);
+}
+
+void MainWindow::slotUpdateListLibraryByID(QString type, int id)
+{
+    ui->PBRefreshLibrary->hide ();
+    MainWindow::updateCollectionsByID(type, id);
 }
 
 void MainWindow::slotUpdateListLibraries()
@@ -224,16 +303,21 @@ void MainWindow::on_loadMediaButton_clicked()
     this->searchMedia->setDisabled (false);
     // this->searchWindow->setAttribute(Qt::WA_DeleteOnClose);
     this->searchMedia->setWindowTitle("Search media - MediaFinder");
-
+    QTreeWidgetItem *selectedItem;
     switch (ui->tabMainWindow->currentIndex ()) {
     case 0:{ //Movie
-        QTreeWidgetItem *selectedItem = ui->listMovieLibrary->currentItem();
+        selectedItem = ui->listMovieLibrary->currentItem();
+        int idMediaDB = selectedItem->data(0, Qt::UserRole).toInt();
+        this->searchMedia->setIdMovieDB (idMediaDB);
         this->searchMedia->setSearchWord (selectedItem->text(1));
         this->searchMedia->fillFields ("Movie");
         break;
     }
     case 1:{ //TV
-        QTreeWidgetItem *selectedItem = ui->listTVLibrary->currentItem();
+        selectedItem = ui->listTVLibrary->currentItem();
+        int idMediaDB = selectedItem->data(0, Qt::UserRole).toInt();
+        qDebug() << idMediaDB;
+        this->searchMedia->setIdTVDB (idMediaDB);
         this->searchMedia->setSearchWord (selectedItem->text(1));
         this->searchMedia->fillFields ("TV");
         break;

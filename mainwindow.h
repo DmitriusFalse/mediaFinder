@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "dialogshowprogress.h"
 #include "searchmedia.h"
 #include "settingsapp.h"
 #include "medialibrary.h"
@@ -24,12 +25,14 @@ private:
     void clickTreeWidgetMovie();
     void clickTreeWidgetTV();
     void updateCollections(QString type);
+    void updateCollectionsByID(QString type, int id);
     Ui::MainWindow *ui;
     DBManager *dbmanager;
     MediaLibrary *mediaLibrary;
     SettingsData *settingsData;
     SettingsApp *dialogSettingsApp;
     SearchMedia *searchMedia;
+    DialogShowProgress *progressBar;
 
 private slots:
     void onDialogClosed();
@@ -43,6 +46,7 @@ public slots:
     void slotUptateProgressBar(const QString &str);
     void slotHideProgressBar();
     void slotUpdateListLibrary(QString type);
+    void slotUpdateListLibraryByID(QString type, int id);
     void slotUpdateListLibraries();
 };
 #endif // MAINWINDOW_H

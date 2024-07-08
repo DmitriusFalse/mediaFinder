@@ -9,6 +9,7 @@ CONFIG += c++17
 
 SOURCES += \
     dbmanager.cpp \
+    dialogshowprogress.cpp \
     main.cpp \
     mainwindow.cpp \
     medialibrary.cpp \
@@ -18,15 +19,20 @@ SOURCES += \
     workrefreshmovie.cpp
 
 HEADERS += \
+    GenreList.h \
+    LibraryItem.h \
     dbmanager.h \
+    dialogshowprogress.h \
     mainwindow.h \
     medialibrary.h \
+    movieCollections.h \
     searchmedia.h \
     settingsapp.h \
     settingsdata.h \
     workrefreshmovie.h
 
 FORMS += \
+    dialogshowprogress.ui \
     mainwindow.ui \
     searchmedia.ui \
     settingsapp.ui

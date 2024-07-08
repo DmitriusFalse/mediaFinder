@@ -1,26 +1,12 @@
 #ifndef SETTINGSDATA_H
 #define SETTINGSDATA_H
+#include "LibraryItem.h"
 #include "dbmanager.h"
 #include <QMetaType>
 #include <QString>
 #include <QJsonObject>
 
-struct libraryItem {
-    QString path;
-    QString type;
 
-    friend QDataStream &operator<<(QDataStream &out, const libraryItem &libItem)
-    {
-        out << libItem.path << libItem.type;
-        return out;
-    }
-
-    friend QDataStream &operator>>(QDataStream &in, libraryItem &libItem)
-    {
-        in >> libItem.path >> libItem.type;
-        return in;
-    }
-};
 
 class SettingsData
 {

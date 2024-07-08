@@ -1,5 +1,6 @@
 #ifndef DBMANAGER_H
 #define DBMANAGER_H
+#include "movieCollections.h"
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QString>
@@ -27,18 +28,25 @@ public:
     QStringList loadGenre();
     QStringList readMovieCollection(QString detailLevel);
     QStringList readTVCollection(QString detailLevel);
+    QString readTVShowByID(QString detailLevel, int id);
     QStringList readLibrary();
     QStringList readLibrary(QString type);
+    void extracted(ShowInfo &show);
+    void updateTvShow(ShowInfo show, int id);
+    void updateTvShowPoster(QString url, QString NameShow);
 private:
     bool openConnection();
     void closeConnection();
     void checkDB();
     void createStructureDB(QString nameTables);
+    void updateReviews(QList<Reviews> reviews, QString NameShow);
+    void updateTvShowEpisode();
     static QRegularExpression re;
 signals:
     void signalUpdateProgresBar(QString value);
     void signalUpdateMainWindow(QString type);
-
+    void signalUpdateMainWindowByID(QString type, int id);
+    void signalUpdatePoster(QString url, QString NameShow);
 };
 
 #endif // DBMANAGER_H

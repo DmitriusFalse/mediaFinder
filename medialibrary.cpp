@@ -68,6 +68,7 @@ void MediaLibrary::refsreshCollectionMovie()
 
 void MediaLibrary::refsreshCollectionTV()
 {
+    this->removeOldTVInDB();
     this->startScanLibraryTV ();
 }
 
@@ -124,8 +125,8 @@ TVCollection MediaLibrary::getTVCollection(QString detailLevel)
         QString header = tmp[0];
         QStringList srcInfoShow = header.split ("//");
         show.ID = srcInfoShow[0].toInt ();
-        show.seriesName = srcInfoShow[1];
-        show.posterPath = srcInfoShow[2];
+        show.nameShow = srcInfoShow[1];
+        show.poster = srcInfoShow[2];
 
         QString body= tmp[1];
         QStringList srcSeries = body.split ("#/@/#");
@@ -142,53 +143,51 @@ TVCollection MediaLibrary::getTVCollection(QString detailLevel)
             episode.seasonsNumber = srcEpList[4].toInt ();
             episode.episodeNumber = srcEpList[5].toInt ();
 
-            show.Episodes.append (episode);
+            show.addEpisodes(episode);
         }
         //сортируем наши епизоды
 
-        this->sortEpisodes (show.Episodes);
+        // this->sortEpisodes (show.Episodes);
         tvcol.Show.append (show);
 
     }
     this->sortShows (tvcol.Show);
     return tvcol;
-
 }
 
-void MediaLibrary::sendRequestTMDBSearch(QString Name, QString type)
+ShowInfo MediaLibrary::getShowInfoByID(QString detailLevel, int id)
 {
-    QUrl url(QString("https://api.themoviedb.org/3/%1/%2").arg(type, Name));
-    QNetworkRequest request(url);
 
-    // Установка заголовков
-    request.setRawHeader(QByteArray("Authorization"), QByteArray("Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MzRiMjAxZmI0ZTEzYjM1N2E3ZjBkZWYxMzYxNmRiOSIsInN1YiI6IjY1OTJlY2QwNjUxZmNmNjA5NjhkYTkzYSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.8FHwiVdJWPNxYH5XYvdfNE7dciCL0CUjRTNlVm0r1iY"));
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json"); // Добавили заголовок Accept
+    ShowInfo show;
+    QString SrcShow = this->m_dbmanager->readTVShowByID (detailLevel, id);
 
-    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    connect(manager, &QNetworkAccessManager::finished, this, &MediaLibrary::slotFinishRequest);
-    manager->get(request);
-}
+    QStringList tmp= SrcShow.split ("//@//");
+    QString header = tmp[0];
+    QStringList srcInfoShow = header.split ("//");
+    show.ID = srcInfoShow[0].toInt ();
+    show.nameShow = srcInfoShow[1];
+    show.poster = srcInfoShow[2];
 
-void MediaLibrary::slotFinishRequest(QNetworkReply *reply)
-{
-    if (reply->error() == QNetworkReply::NoError) {
-        // Запрос выполнен успешно:
-        QByteArray data = reply->readAll(); // Читаем полученные данные
+    QString body= tmp[1];
+    QStringList srcSeries = body.split ("#/@/#");
 
-        // Обработка данных (например, парсинг JSON):
-        QJsonDocument jsonDoc = QJsonDocument::fromJson(data);
-        qDebug() << "jsonDoc: " << jsonDoc;
-        QJsonObject jsonObject = jsonDoc.object();
-        qDebug() << "jsonObject: " << jsonObject;
-        // ... извлекаем нужные данные из jsonObject ...
+    foreach (const QString& infoEp, srcSeries) {
+        if (infoEp==""){
+            continue;
+        }
+        QStringList srcEpList = infoEp.split ("//");
+        EpisodeInfo episode;
+        episode.ID = srcEpList[0].toInt ();
+        episode.episodeTitle = srcEpList[1];
+        episode.filePath = srcEpList[2];
+        episode.seasonsNumber = srcEpList[4].toInt ();
+        episode.episodeNumber = srcEpList[5].toInt ();
 
-    } else {
-        // Произошла ошибка при выполнении запроса:
-        qDebug() << "Ошибка запроса:" << reply->errorString();
+        show.addEpisodes(episode);
     }
-
-    reply->deleteLater(); // Освобождаем ресурсы ответа
+    return show;
 }
+
 void MediaLibrary::handleProgressUpdate(QString str)
 {
     emit updateProgressBarUI(str);
@@ -235,6 +234,7 @@ void MediaLibrary::removeOldMoviesInDB()
 }
 void MediaLibrary::removeOldTVInDB()
 {
+    qDebug() << "removeOldTVInDB";
     this->m_dbmanager->removeOldRecordInBD ("TV");
 }
 
@@ -249,6 +249,6 @@ void MediaLibrary::sortEpisodes(QList<EpisodeInfo>& episodes) {
 void MediaLibrary::sortShows(QList<ShowInfo>& shows) {
     std::sort(shows.begin(), shows.end(), [](const ShowInfo& a, const ShowInfo& b) {
         // Сортировка по номеру сезона, затем по номеру серии
-        return a.seriesName < b.seriesName;
+        return a.nameShow < b.nameShow;
     });
 }
