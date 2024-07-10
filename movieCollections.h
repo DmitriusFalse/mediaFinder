@@ -40,11 +40,19 @@ struct EpisodeInfo {
     QString air_date;
     QString still_path;
     QString overview;
+    QString pathToSerial;
+    QString libraryPath;
 };
 struct Reviews {
     QString nameShow;
     QString author;
     QString content;
+};
+struct Videos {
+    QString key;
+    QString getYouTubeEmbed(){
+        return "https://www.youtube.com/embed/" + this->key;
+    }
 };
 
 struct ShowInfo {
@@ -62,6 +70,7 @@ struct ShowInfo {
     int numberOfSeasons; // количество сезонов
     int numberOfEpisodes; // количество серий всего
     QList<Reviews> reviews;
+    QList<Videos> videos;
     QMap<uint, QMap<uint,EpisodeInfo>> Episodes;
     void addEpisodes(EpisodeInfo episode){
         this->Episodes[episode.seasonsNumber][episode.episodeNumber] = episode;
@@ -71,6 +80,12 @@ struct ShowInfo {
     }
     void addReviews(Reviews review){
         this->reviews.append(review);
+    }
+    void addVideos(Videos video){
+        this->videos.append(video);
+    }
+    void addVideos(QString key){
+        this->addVideos(Videos{.key = key});
     }
 };
 

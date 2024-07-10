@@ -71,19 +71,71 @@ void DBManager::createStructureDB(QString nameTables) {
     query.finish();
 }
 
-void DBManager::updateReviews(QList<Reviews> reviews, QString NameShow)
+void DBManager::updateReviewsTV(QList<Reviews> reviews, QString NameShow)
 {
     QSqlQuery query(this->m_database);
     //Удаляем старые обзоры перед обновлением
-    query.prepare("DELETE FROM Reviews WHERE nameShow = :nameShow");
+    query.prepare("DELETE FROM ReviewsTV WHERE nameShow = :nameShow");
     query.bindValue(":nameShow", NameShow);
     query.exec();
 
     for (const auto& review : reviews) {
-        query.prepare("INSERT INTO Reviews (nameShow, author, content) VALUE (:nameShow, :author, :content)");
+        query.prepare("INSERT INTO ReviewsTV (nameShow, author, content) VALUE (:nameShow, :author, :content)");
         query.bindValue("nameShow",NameShow);
         query.bindValue("author",review.author);
         query.bindValue("content",review.content);
+        if(!query.exec()){
+            qDebug() << "Ошибка выполнения запроса:" << query.lastError().text();
+        }
+    }
+}
+
+void DBManager::updateTvShowEpisode(ShowInfo show)
+{
+    QSqlQuery query(this->m_database);
+    // Перебираем все сезоны и эпизоды сериала
+    foreach (const uint seasonNumber, show.Episodes.keys()) {
+        const QMap<uint, EpisodeInfo>& episodes = show.Episodes[seasonNumber];
+        foreach (const uint episodeNumber, episodes.keys()) {
+            const EpisodeInfo& episode = episodes[episodeNumber];
+            qDebug() << "Обновляем серии";
+
+            // Обновляем информацию об эпизоде в таблице TVEpisodes
+            query.prepare ("UPDATE TVEpisodes SET "
+                          "Overview = :overview, "
+                          "Poster = :poster, "
+                          "NameEpisode = :nameEpisode, "
+                          "idShow = :idShow, "
+                          "air_date = :air_date "
+                          "WHERE NameShow=:name AND Episode = :episode AND Season = :season");
+            query.bindValue (":overview", episode.overview);
+            query.bindValue (":poster", episode.still_path);
+            query.bindValue (":nameEpisode", episode.episodeTitle);
+            query.bindValue (":idShow", episode.ID);
+            query.bindValue (":air_date", episode.air_date);
+            query.bindValue (":name", show.nameShow);
+            query.bindValue (":episode", episode.episodeNumber);
+            query.bindValue (":season", episode.seasonsNumber);
+            if (!query.exec()) {
+                // Выводим сообщение об ошибке, если запрос не выполнен
+                qDebug() << "Ошибка выполнения запроса:" << query.lastError().text();
+            }
+        }
+    }
+}
+
+void DBManager::updateVideosTV(QList<Videos> videos, QString NameShow)
+{
+    QSqlQuery query(this->m_database);
+    //Удаляем старые видео перед обновлением
+    query.prepare("DELETE FROM VideosTV WHERE nameShow = :nameShow");
+    query.bindValue(":nameShow", NameShow);
+    query.exec();
+
+    for (const Videos& video : videos) {
+        query.prepare("INSERT INTO VideosTV (nameShow, key) VALUE (:nameShow, :key)");
+        query.bindValue("nameShow",NameShow);
+        query.bindValue("key",video.key);
         if(!query.exec()){
             qDebug() << "Ошибка выполнения запроса:" << query.lastError().text();
         }
@@ -209,43 +261,18 @@ void DBManager::updateTvShow(ShowInfo show, int id)
             query.bindValue (":name", show.nameShow);
             query.bindValue (":oldName", oldName);
             if(query.exec()){
+                //Обновляем информацию о Эпизодах
+                this->updateTvShowEpisode(show);
                 // Вносим обзоры в базу
-                this->updateReviews(show.reviews, show.nameShow);
-                // Перебираем все сезоны и эпизоды сериала
-                foreach (const uint seasonNumber, show.Episodes.keys()) {
-                    const QMap<uint, EpisodeInfo>& episodes = show.Episodes[seasonNumber];
-                    foreach (const uint episodeNumber, episodes.keys()) {
-                        const EpisodeInfo& episode = episodes[episodeNumber];
-                        qDebug() << "Обновляем серии";
+                this->updateReviewsTV(show.reviews, show.nameShow);
+                // Обновляем видео ролики
+                this->updateVideosTV(show.videos, show.nameShow);
 
-                        // Обновляем информацию об эпизоде в таблице TVEpisodes
-                        query.prepare ("UPDATE TVEpisodes SET "
-                                      "Overview = :overview, "
-                                      "Poster = :poster, "
-                                      "NameEpisode = :nameEpisode, "
-                                      "idShow = :idShow, "
-                                      "air_date = :air_date "
-                                      "WHERE NameShow=:name AND Episode = :episode AND Season = :season");
-                        query.bindValue (":overview", episode.overview);
-                        query.bindValue (":poster", episode.still_path);
-                        query.bindValue (":nameEpisode", episode.episodeTitle);
-                        query.bindValue (":idShow", episode.ID);
-                        query.bindValue (":air_date", episode.air_date);
-                        query.bindValue (":name", show.nameShow);
-                        query.bindValue (":episode", episode.episodeNumber);
-                        query.bindValue (":season", episode.seasonsNumber);
-                        if (!query.exec()) {
-                            // Выводим сообщение об ошибке, если запрос не выполнен
-                            qDebug() << "Ошибка выполнения запроса:" << query.lastError().text();
-                        }
-                    }
-                }
                 // Отправляем сигнал об обновлении главного окна
                 emit signalUpdateMainWindowByID("TV", id);
             }else{
                 qDebug () << query.lastError ().text ();
             }
-
         }else{
             qDebug () << query.lastError ().text ();
         }
@@ -257,6 +284,21 @@ void DBManager::updateTvShow(ShowInfo show, int id)
 void DBManager::updateTvShowPoster(QString url, QString NameShow)
 {
 
+}
+
+QString DBManager::getPathToShowTV(QString nameShow)
+{
+    QString pathToSerial;
+    QSqlQuery query(this->m_database);
+    query.prepare("SELECT DISTINCT PathToSerial FROM TVEpisodes WHERE NameShow = :nameShow");
+    query.bindValue(":nameShow",nameShow);
+    if(query.exec()){
+        query.next();
+        pathToSerial = query.value("PathToSerial").toString();
+    }else{
+        qDebug() << query.lastError().text();
+    }
+    return pathToSerial;
 }
 
 
@@ -638,7 +680,7 @@ QStringList DBManager::readTVCollection(QString detailLevel)
                     if (detailLevel == DETAIL_LEVEL_ALL) { // Полная информация
 
                         QString LibraryPath = querySeries.value("LibraryPath").toString();
-                        QString Description = querySeries.value("Description").toString();
+                        QString Description = querySeries.value("overview").toString();
 
                         body = QString("%1//%2//%3//%4//%5//%6//%7//%8//%9")
                         .arg(IDEpisode,NameEpisode,PathToSerial, LibraryPath, Description, Poster, File, Season, Episode);
@@ -701,7 +743,7 @@ QString DBManager::readTVShowByID(QString detailLevel, int id)
                     if (detailLevel == DETAIL_LEVEL_ALL) { // Полная информация
 
                         QString LibraryPath = querySeries.value("LibraryPath").toString();
-                        QString Description = querySeries.value("Description").toString();
+                        QString Description = querySeries.value("overview").toString();
 
                         body = QString("%1//%2//%3//%4//%5//%6//%7//%8//%9")
                                    .arg(IDEpisode,NameEpisode,PathToSerial, LibraryPath, Description, Poster, File, Season, Episode);
@@ -718,6 +760,47 @@ QString DBManager::readTVShowByID(QString detailLevel, int id)
         }
     }
     return Show;
+}
+
+ShowInfo DBManager::getShowTVShowByID(int id)
+{
+    ShowInfo showTv;
+    QSqlQuery queryTVShow(this->m_database);
+    queryTVShow.prepare("SELECT id, NameShow, Poster FROM TVShow WHERE id=:id");
+    queryTVShow.bindValue (":id", id);
+    if(queryTVShow.exec ()){
+        if(queryTVShow.next()){
+
+            showTv.idShow = queryTVShow.value ("ID").toInt();
+            showTv.nameShow = queryTVShow.value ("NameShow").toString ();
+            showTv.poster = queryTVShow.value ("Poster").toString ();
+
+            QSqlQuery querySeries(this->m_database);
+            querySeries.prepare ("SELECT * FROM TVEpisodes WHERE NameShow = :nameShow");
+            querySeries.bindValue (":nameShow", showTv.nameShow);
+
+
+            if(querySeries.exec ()){
+                while (querySeries.next ()){
+                    EpisodeInfo episode;
+
+                    episode.ID = querySeries.value("ID").toInt();
+                    episode.pathToSerial = querySeries.value("PathToSerial").toString();
+                    episode.still_path = querySeries.value("Poster").toString();
+                    episode.episodeNumber = querySeries.value("Episode").toInt();
+                    episode.seasonsNumber = querySeries.value("Season").toInt();
+                    episode.filePath = querySeries.value("File").toString();
+                    episode.episodeTitle = querySeries.value("NameEpisode").toString();
+                    episode.libraryPath = querySeries.value("LibraryPath").toString();
+                    episode.overview = querySeries.value("overview").toString();
+                    showTv.addEpisodes(episode);
+                }
+            }else{
+                qDebug() << querySeries.lastError ().text ();
+            }
+        }
+    }
+    return showTv;
 }
 
 

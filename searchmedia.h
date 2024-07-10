@@ -50,14 +50,16 @@ private:
     short countSendRequest;
     QString selectType;
 
-
+    // QNetworkAccessManager *managerNetwork;
     MediaLibrary *mediaLibrary;
     DBManager *dbManager;
     ShowInfo *showTv;
+    ShowInfo oldNameShow;
     void sendRequestTMDBSearch(QString Name, QString type);
-    void sendRequestTMDBGetImage();
+    void sendRequestTMDBSearchGetImage();
     void sendRequestTMDBGetInformation();
     void sendRequestTMDBGetInformationEpisodes(int count);
+    void sendRequestTMDBGetImage();
 signals:
     void windowClosed();
     void selectMedia();
@@ -70,6 +72,8 @@ private slots:
     void slotChangetSelection();
     void slotFinishRequestChooseMedia(QNetworkReply *reply);
     void slotFinishRequestChooseMediaEpisodes(QNetworkReply *reply);
+    void slotSavePosterFile(QNetworkReply *reply, QString pathFile, QString nameShow);
+
     void endSelectMedia();
     void on_okButton_clicked();
 

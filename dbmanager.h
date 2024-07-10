@@ -29,18 +29,21 @@ public:
     QStringList readMovieCollection(QString detailLevel);
     QStringList readTVCollection(QString detailLevel);
     QString readTVShowByID(QString detailLevel, int id);
+    ShowInfo getShowTVShowByID(int id);
     QStringList readLibrary();
     QStringList readLibrary(QString type);
     void extracted(ShowInfo &show);
     void updateTvShow(ShowInfo show, int id);
     void updateTvShowPoster(QString url, QString NameShow);
+    QString getPathToShowTV(QString nameShow);
 private:
     bool openConnection();
     void closeConnection();
     void checkDB();
     void createStructureDB(QString nameTables);
-    void updateReviews(QList<Reviews> reviews, QString NameShow);
-    void updateTvShowEpisode();
+    void updateReviewsTV(QList<Reviews> reviews, QString NameShow);
+    void updateTvShowEpisode(ShowInfo show);
+    void updateVideosTV(QList<Videos> videos, QString NameShow);
     static QRegularExpression re;
 signals:
     void signalUpdateProgresBar(QString value);

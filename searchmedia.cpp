@@ -8,6 +8,7 @@
 #include <QJsonObject>
 #include <QUrl>
 #include <QJsonArray>
+#include <QFileInfo>
 
 SearchMedia::SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db)
     : QMainWindow(parent)
@@ -21,7 +22,7 @@ SearchMedia::SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db)
     setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
     this->genres = new GenreList;
     this->showTv = new ShowInfo;
-
+    // this->managerNetwork = new QNetworkAccessManager(this);
     uiSearch->viewSearchTree->setColumnWidth(0,128);
     uiSearch->viewSearchTree->setColumnWidth(2,96);
     uiSearch->viewSearchTree->setColumnWidth(3,128);
@@ -30,6 +31,7 @@ SearchMedia::SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db)
     connect(uiSearch->viewSearchTree, &QTreeWidget::itemSelectionChanged, this, &SearchMedia::slotChangetSelection);
 
     this->setIdSelectMedia (0);
+
 }
 
 SearchMedia::~SearchMedia()
@@ -57,6 +59,7 @@ void SearchMedia::fillFields(QString type)
     if(type=="Movie"){
         uiSearch->typeMedia->setCurrentIndex (1);
     }else if(type=="TV"){
+        this->oldNameShow = dbManager->getShowTVShowByID(idTVDB);
         uiSearch->typeMedia->setCurrentIndex (2);
     }
 
@@ -143,10 +146,12 @@ void SearchMedia::sendRequestTMDBSearch(QString Name, QString type)
 }
 
 
-void SearchMedia::sendRequestTMDBGetImage()
+void SearchMedia::sendRequestTMDBSearchGetImage()
 {
-    qDebug() << "Получаем картинки";
+    qDebug() << "Получаем картинки в окне поиска";
 
+    //https://image.tmdb.org/t/p/original
+    //https://image.tmdb.org/t/p/w500/
 
     for (int index = 0; index < uiSearch->viewSearchTree->topLevelItemCount(); ++index) {
         QTreeWidgetItem *item = uiSearch->viewSearchTree->topLevelItem(index);
@@ -224,6 +229,91 @@ void SearchMedia::sendRequestTMDBGetInformationEpisodes(int count)
     }
 
 
+}
+
+void SearchMedia::sendRequestTMDBGetImage()
+{
+    //https://image.tmdb.org/t/p/original
+    //https://image.tmdb.org/t/p/w500/
+    countSendRequest = 0;
+    QString nameShow = this->oldNameShow.nameShow;
+    QString pathToShowTV = dbManager->getPathToShowTV(nameShow);
+    if(this->showTv->poster.startsWith("/")){
+        countSendRequest++;
+        QFileInfo posterFile(this->showTv->poster);
+
+
+        QString namePoster = this->showTv->nameShow;
+        namePoster = pathToShowTV+"/"+namePoster.replace(" ","-")+"."+posterFile.suffix();
+
+        QUrl imageUrl("https://image.tmdb.org/t/p/original"+this->showTv->poster);
+
+        QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+        connect(manager, &QNetworkAccessManager::finished, this,
+                [this, namePoster,nameShow](QNetworkReply *reply) {
+                    this->slotSavePosterFile(reply, namePoster,nameShow);
+                });
+
+        QUrl url(imageUrl);
+        QNetworkRequest request(url);
+        manager->get(request);
+        this->showTv->poster = namePoster;
+
+    }
+    if(this->showTv->logoPath.startsWith("/")){
+        countSendRequest++;
+        QFileInfo logoPathFile(this->showTv->logoPath);
+        QString nameLogo = "production-compaines."+logoPathFile.suffix();
+        QUrl imageUrl("https://image.tmdb.org/t/p/original"+this->showTv->logoPath);
+        QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+        connect(manager, &QNetworkAccessManager::finished, this,
+                [this, nameLogo,nameShow](QNetworkReply *reply) {
+                    this->slotSavePosterFile(reply, nameLogo,nameShow);
+                });
+
+        QUrl url(imageUrl);
+        QNetworkRequest request(url);
+        manager->get(request);
+        this->showTv->logoPath = nameLogo;
+    }
+
+
+    foreach (const uint seasonNumber, this->showTv->Episodes.keys()) {
+        QMap<uint, EpisodeInfo>& episodes = this->showTv->Episodes[seasonNumber];
+        foreach (const uint episodeNumber, episodes.keys()) {
+            EpisodeInfo& episode = episodes[episodeNumber];
+            QFileInfo posterEpisodeFile(episode.still_path);
+            QString namePosterEpisode = pathToShowTV+"/S"+QString::number(episode.seasonsNumber)+"E"+QString::number(episode.episodeNumber)+"-poster."+posterEpisodeFile.suffix();
+
+
+            QUrl imageUrl("https://image.tmdb.org/t/p/original"+episode.still_path);
+            QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+            connect(manager, &QNetworkAccessManager::finished, this,
+                    [this, namePosterEpisode,nameShow](QNetworkReply *reply) {
+                        this->slotSavePosterFile(reply, namePosterEpisode,nameShow);
+                    });
+            QUrl url(imageUrl);
+            QNetworkRequest request(url);
+            countSendRequest++;
+            manager->get(request);
+            episode.still_path = namePosterEpisode;
+        }
+    }
+    // for (int index = 0; index < uiSearch->viewSearchTree->topLevelItemCount(); ++index) {
+    //     QTreeWidgetItem *item = uiSearch->viewSearchTree->topLevelItem(index);
+    //     QString posterUrl = item->data(0, Qt::UserRole).toString();
+    //     QUrl imageUrl("https://image.tmdb.org/t/p/w154/"+posterUrl);
+
+    //     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    //     connect(manager, &QNetworkAccessManager::finished, this,
+    //             [this, index](QNetworkReply *reply) {
+    //                 this->slotUpdateImagesInTree(reply, index);
+    //             });
+
+    //     QUrl url(imageUrl);
+    //     QNetworkRequest request(url);
+    //     manager->get(request);
+    // }
 }
 
 void SearchMedia::slotViewOverviewMedia()
@@ -305,7 +395,7 @@ void SearchMedia::slotFinishRequestFindMedia(QNetworkReply *reply, QString media
         uiSearch->viewSearchTree->setColumnWidth(1,lenghtName);
         disconnect (uiSearch->viewSearchTree, &QTreeWidget::itemSelectionChanged, this, &SearchMedia::slotViewOverviewMedia);
         connect(uiSearch->viewSearchTree, &QTreeWidget::itemSelectionChanged, this, &SearchMedia::slotViewOverviewMedia);
-        this->sendRequestTMDBGetImage();
+        this->sendRequestTMDBSearchGetImage();
 
     } else {
         // Произошла ошибка при выполнении запроса:
@@ -365,6 +455,16 @@ void SearchMedia::slotFinishRequestChooseMedia(QNetworkReply *reply)
         this->showTv->numberOfSeasons = jsonObject.value ("number_of_seasons").toInt ();
         this->showTv->overview = jsonObject.value ("overview").toString ();
         this->showTv->status = jsonObject.value ("status").toString ();
+
+        QJsonObject videos = jsonObject.value ("videos").toObject().value("results").toObject();
+        for (const QJsonValue& video : videos) {
+            QJsonObject itemVideo = video.toObject();
+            QString site = itemVideo.value("site").toString();
+            if(site == "YouTube") {
+                QString key = itemVideo.value("key").toString();
+                this->showTv->addVideos(key);
+            }
+        }
         QJsonObject jsonReviews = jsonObject.value ("reviews").toObject();
         int countResult = jsonReviews.value("total_results").toInt();
         if (countResult > 0){
@@ -409,6 +509,7 @@ void SearchMedia::slotFinishRequestChooseMedia(QNetworkReply *reply)
         this->showTv->logoPath = logoPath.join (",");
         qDebug() << "Данные о сериале получены";
         sendRequestTMDBGetInformationEpisodes(this->showTv->numberOfSeasons);
+
         // dbManager->updateTvShow (*this->show, getIdTVDB());
 
     } else {
@@ -448,9 +549,35 @@ void SearchMedia::slotFinishRequestChooseMediaEpisodes(QNetworkReply *reply)
     qDebug() << "Обновляем базу-1";
     if(countSendRequest==1){
         qDebug() << "Обновляем базу-2";
+        this->sendRequestTMDBGetImage();
+
+        // dbManager->updateTvShow (*this->showTv, getIdTVDB());
+    }
+    countSendRequest--;
+    reply->deleteLater();
+}
+
+void SearchMedia::slotSavePosterFile(QNetworkReply *reply, QString pathFile, QString nameShow)
+{
+    if (reply->error() == QNetworkReply::NoError) {
+        QByteArray imageData = reply->readAll();
+        QImage image;
+        QFile file(pathFile);
+        if (!file.open(QIODevice::WriteOnly)) {
+            qDebug() << "Failed to open file for writing:" << file.errorString();
+        }
+        file.write(imageData);
+        file.close();
+    } else {
+        qDebug() << "Ошибка запроса:" << reply->errorString();
+    }
+
+    if(countSendRequest==1){
+        qDebug() << "Обновляем картинки";
         dbManager->updateTvShow (*this->showTv, getIdTVDB());
     }
     countSendRequest--;
+
     reply->deleteLater();
 }
 
