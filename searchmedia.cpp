@@ -10,11 +10,12 @@
 #include <QJsonArray>
 #include <QFileInfo>
 
-SearchMedia::SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db)
+SearchMedia::SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db, DialogShowProgress *sp)
     : QMainWindow(parent)
     , uiSearch(new  Ui::SearchMedia)
     , mediaLibrary(mLib)
     , dbManager(db)
+    , showProgres(sp)
 {
     uiSearch->setupUi(this);
     setTypeMediaSearch ("Multi");
@@ -36,7 +37,10 @@ SearchMedia::SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db)
 
 SearchMedia::~SearchMedia()
 {
-    // delete genres;
+    disconnect(uiSearch->okButton, &QPushButton::clicked, this, &SearchMedia::endSelectMedia);
+    disconnect(uiSearch->viewSearchTree, &QTreeWidget::itemSelectionChanged, this, &SearchMedia::slotChangetSelection);
+    delete this->showTv;
+    delete genres;
     delete uiSearch;
 }
 void SearchMedia::on_searchButton_clicked()
@@ -154,6 +158,7 @@ void SearchMedia::sendRequestTMDBSearchGetImage()
     //https://image.tmdb.org/t/p/w500/
 
     for (int index = 0; index < uiSearch->viewSearchTree->topLevelItemCount(); ++index) {
+        showProgres->updateProgres();
         QTreeWidgetItem *item = uiSearch->viewSearchTree->topLevelItem(index);
         QString posterUrl = item->data(0, Qt::UserRole).toString();
         QUrl imageUrl("https://image.tmdb.org/t/p/w154/"+posterUrl);
@@ -173,6 +178,7 @@ void SearchMedia::sendRequestTMDBSearchGetImage()
 void SearchMedia::sendRequestTMDBGetInformation()
 {
     qDebug() << "Получаем информацию о выбранном Фильме/Сериале";
+    showProgres->updateProgres();
     QString urlString = QString("https://api.themoviedb.org/3/%1/%2")
                             .arg(getSelectType())
                             .arg(QString::number(getIdSelectMedia()));
@@ -200,9 +206,13 @@ void SearchMedia::sendRequestTMDBGetInformation()
 
 void SearchMedia::sendRequestTMDBGetInformationEpisodes(int count)
 {
-    qDebug() << "Получаем информацию о выбранном Фильме/Сериале";
+    qDebug() << "Получаем информацию о епизодах Сериале";
     countSendRequest = 0;
+    showProgres->setMainLineMessage("Получаем подробную информацию о эпизодах Шоу");
+    showProgres->updateProgres();
     for (int index = 1; index <= count; ++index) {
+        showProgres->updateProgres();
+        showProgres->setTextProgres("Запрос на Сезон "+QString::number(index));
         countSendRequest++;
         qDebug() << countSendRequest;
         QString urlString = QString("https://api.themoviedb.org/3/%1/%2/season/%3")
@@ -238,7 +248,10 @@ void SearchMedia::sendRequestTMDBGetImage()
     countSendRequest = 0;
     QString nameShow = this->oldNameShow.nameShow;
     QString pathToShowTV = dbManager->getPathToShowTV(nameShow);
+    showProgres->setMainLineMessage("Получаем изображения");
+    showProgres->updateProgres();
     if(this->showTv->poster.startsWith("/")){
+        showProgres->updateProgres();
         countSendRequest++;
         QFileInfo posterFile(this->showTv->poster);
 
@@ -261,6 +274,7 @@ void SearchMedia::sendRequestTMDBGetImage()
 
     }
     if(this->showTv->logoPath.startsWith("/")){
+        showProgres->updateProgres();
         countSendRequest++;
         QFileInfo logoPathFile(this->showTv->logoPath);
         QString nameLogo = "production-compaines."+logoPathFile.suffix();
@@ -281,6 +295,7 @@ void SearchMedia::sendRequestTMDBGetImage()
     foreach (const uint seasonNumber, this->showTv->Episodes.keys()) {
         QMap<uint, EpisodeInfo>& episodes = this->showTv->Episodes[seasonNumber];
         foreach (const uint episodeNumber, episodes.keys()) {
+            showProgres->updateProgres();
             EpisodeInfo& episode = episodes[episodeNumber];
             QFileInfo posterEpisodeFile(episode.still_path);
             QString namePosterEpisode = pathToShowTV+"/S"+QString::number(episode.seasonsNumber)+"E"+QString::number(episode.episodeNumber)+"-poster."+posterEpisodeFile.suffix();
@@ -399,7 +414,7 @@ void SearchMedia::slotFinishRequestFindMedia(QNetworkReply *reply, QString media
 
     } else {
         // Произошла ошибка при выполнении запроса:
-        qDebug() << "Ошибка запроса:" << reply->errorString();
+        qDebug() << "1Ошибка запроса:" << reply->errorString();
     }
     reply->deleteLater(); // Освобождаем ресурсы ответа
 }
@@ -407,6 +422,7 @@ void SearchMedia::slotFinishRequestFindMedia(QNetworkReply *reply, QString media
 void SearchMedia::slotUpdateImagesInTree(QNetworkReply *reply, int index)
 {
     if (reply->error() == QNetworkReply::NoError) {
+        showProgres->updateProgres();
         QByteArray imageData = reply->readAll();
         QImage image;
         if (image.loadFromData(imageData)) {
@@ -418,7 +434,7 @@ void SearchMedia::slotUpdateImagesInTree(QNetworkReply *reply, int index)
 
         }
     } else {
-        qDebug() << "Ошибка запроса:" << reply->errorString();
+        qDebug() << "2Ошибка запроса:" << reply->errorString();
     }
     reply->deleteLater();
 }
@@ -444,7 +460,11 @@ void SearchMedia::slotChangetSelection()
 void SearchMedia::slotFinishRequestChooseMedia(QNetworkReply *reply)
 {
     qDebug() << "Получаем ответ после поиска";
+
     if (reply->error() == QNetworkReply::NoError) {
+        showProgres->updateProgres();
+        showProgres->setMainLineMessage("Получаем информацию о выбраном шоу");
+        showProgres->setTextProgres("Основная информация");
         QByteArray data = reply->readAll(); // Читаем полученные данные
         QJsonObject jsonObject = QJsonDocument::fromJson(data).object ();
         this->showTv->idShow = jsonObject.value ("id").toInt ();
@@ -458,6 +478,7 @@ void SearchMedia::slotFinishRequestChooseMedia(QNetworkReply *reply)
 
         QJsonObject videos = jsonObject.value ("videos").toObject().value("results").toObject();
         for (const QJsonValue& video : videos) {
+            showProgres->setTextProgres("YouTube видео");
             QJsonObject itemVideo = video.toObject();
             QString site = itemVideo.value("site").toString();
             if(site == "YouTube") {
@@ -468,7 +489,7 @@ void SearchMedia::slotFinishRequestChooseMedia(QNetworkReply *reply)
         QJsonObject jsonReviews = jsonObject.value ("reviews").toObject();
         int countResult = jsonReviews.value("total_results").toInt();
         if (countResult > 0){
-
+            showProgres->setTextProgres("Обзоры от пользователей");
             QJsonArray reviewsResults = jsonReviews.value ("results").toArray ();
             for (const QJsonValue& srcReviewsResults : reviewsResults) {
                 QJsonObject itemSrcReviewsResults = srcReviewsResults.toObject();
@@ -476,7 +497,7 @@ void SearchMedia::slotFinishRequestChooseMedia(QNetworkReply *reply)
                 QString reviewAuthor = itemSrcReviewsResults.value("author").toString();
                 Reviews review;
                 review.author = reviewAuthor;
-                review.author = reviewContent;
+                review.content = reviewContent;
                 review.nameShow = this->showTv->nameShow;
                 this->showTv->addReviews(review);
             }
@@ -493,6 +514,7 @@ void SearchMedia::slotFinishRequestChooseMedia(QNetworkReply *reply)
         QStringList GenreList;
         QJsonArray genres = jsonObject.value ("genres").toArray ();
         for (const QJsonValue& srcGenre : genres) {
+            showProgres->setTextProgres("Жанры");
             QJsonObject itemGenre = srcGenre.toObject();
             GenreList.append (itemGenre.value ("name").toString ());
 
@@ -501,6 +523,7 @@ void SearchMedia::slotFinishRequestChooseMedia(QNetworkReply *reply)
         QJsonArray production_companies = jsonObject.value ("production_companies").toArray ();
         QStringList productionCompanies,logoPath;
         for (const QJsonValue& srcProduction_companies : production_companies) {
+            showProgres->setTextProgres("Компания производитель");
             QJsonObject itemProduction_companies= srcProduction_companies.toObject();
             logoPath.append (itemProduction_companies.value ("logo_path").toString ());
             productionCompanies.append (itemProduction_companies.value ("name").toString ());
@@ -508,12 +531,13 @@ void SearchMedia::slotFinishRequestChooseMedia(QNetworkReply *reply)
         this->showTv->production_companies = productionCompanies.join (",");
         this->showTv->logoPath = logoPath.join (",");
         qDebug() << "Данные о сериале получены";
+        showProgres->setTextProgres("");
         sendRequestTMDBGetInformationEpisodes(this->showTv->numberOfSeasons);
 
         // dbManager->updateTvShow (*this->show, getIdTVDB());
 
     } else {
-        qDebug() << "Ошибка запроса:" << reply->errorString();
+        qDebug() << "3Ошибка запроса:" << reply->errorString();
     }
     reply->deleteLater();
 }
@@ -537,15 +561,16 @@ void SearchMedia::slotFinishRequestChooseMediaEpisodes(QNetworkReply *reply)
             episode->episodeTitle = itemEpisodes.value ("name").toString ();
             episode->air_date = itemEpisodes.value ("air_date").toString ();
             episode->still_path = itemEpisodes.value ("still_path").toString ();
+            showProgres->setTextProgres("Ответ на Сезон "+QString::number(episode->seasonsNumber)+" Эпизод "+QString::number(episode->episodeNumber));
             if(episode->episodeNumber>0 && episode->seasonsNumber>0){
                this->showTv->addEpisodes(*episode);
             }
             delete episode;
         }
     } else {
-        qDebug() << "Ошибка запроса:" << reply->errorString();
+        qDebug() << "4Ошибка запроса:" << reply->errorString();
     }
-
+    showProgres->setTextProgres("");
     qDebug() << "Обновляем базу-1";
     if(countSendRequest==1){
         qDebug() << "Обновляем базу-2";
@@ -560,21 +585,27 @@ void SearchMedia::slotFinishRequestChooseMediaEpisodes(QNetworkReply *reply)
 void SearchMedia::slotSavePosterFile(QNetworkReply *reply, QString pathFile, QString nameShow)
 {
     if (reply->error() == QNetworkReply::NoError) {
+        showProgres->updateProgres();
         QByteArray imageData = reply->readAll();
         QImage image;
         QFile file(pathFile);
         if (!file.open(QIODevice::WriteOnly)) {
             qDebug() << "Failed to open file for writing:" << file.errorString();
         }
+        // showProgres->setTextProgres("Записываем "+pathFile);
         file.write(imageData);
         file.close();
     } else {
-        qDebug() << "Ошибка запроса:" << reply->errorString();
+        qDebug() << "5Ошибка запроса:" << reply->errorString();
     }
 
     if(countSendRequest==1){
         qDebug() << "Обновляем картинки";
+        showProgres->setMainLineMessage("Записываем собранную информацию в базу!");
         dbManager->updateTvShow (*this->showTv, getIdTVDB());
+        showProgres->setTextProgres("");
+        showProgres->setMainLineMessage("Завершено");
+        showProgres->closeProgres();
     }
     countSendRequest--;
 
@@ -583,8 +614,8 @@ void SearchMedia::slotSavePosterFile(QNetworkReply *reply, QString pathFile, QSt
 
 void SearchMedia::endSelectMedia()
 {
-    qDebug() << getIdSelectMedia ();
-    qDebug() << getSelectType ();
+    showProgres->updateProgres();
+    showProgres->show();
     qDebug() << "Close end search and select media!";
     this->sendRequestTMDBGetInformation();
 }

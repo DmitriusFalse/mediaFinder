@@ -2,6 +2,7 @@
 #define SEARCHMEDIA_H
 
 #include "GenreList.h"
+#include "dialogshowprogress.h"
 #include "medialibrary.h"
 #include "dbmanager.h"
 #include "qnetworkreply.h"
@@ -18,7 +19,7 @@ class SearchMedia : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db);
+    explicit SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db, DialogShowProgress *sp);
     ~SearchMedia();
     void fillFields(QString type);
     void setSearchWord(const QString &newNameSearch);
@@ -55,6 +56,7 @@ private:
     DBManager *dbManager;
     ShowInfo *showTv;
     ShowInfo oldNameShow;
+    DialogShowProgress *showProgres;
     void sendRequestTMDBSearch(QString Name, QString type);
     void sendRequestTMDBSearchGetImage();
     void sendRequestTMDBGetInformation();

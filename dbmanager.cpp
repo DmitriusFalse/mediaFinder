@@ -80,12 +80,14 @@ void DBManager::updateReviewsTV(QList<Reviews> reviews, QString NameShow)
     query.exec();
 
     for (const auto& review : reviews) {
-        query.prepare("INSERT INTO ReviewsTV (nameShow, author, content) VALUE (:nameShow, :author, :content)");
-        query.bindValue("nameShow",NameShow);
-        query.bindValue("author",review.author);
-        query.bindValue("content",review.content);
+        query.clear();
+        // QString q = "INSERT INTO ReviewsTV (nameShow, author, content) VALUE ("+review.nameShow+", "+review.nameShow+", "+review.nameShow+"")";
+        query.prepare("INSERT INTO ReviewsTV (nameShow, author, content) VALUES (:name, :a, :c)");
+        query.bindValue(":name", review.nameShow);
+        query.bindValue(":a", review.author);
+        query.bindValue(":c", review.content);
         if(!query.exec()){
-            qDebug() << "Ошибка выполнения запроса:" << query.lastError().text();
+            qDebug() << "1-1 Ошибка выполнения запроса:" << query.lastError().text();
         }
     }
 }
@@ -118,7 +120,7 @@ void DBManager::updateTvShowEpisode(ShowInfo show)
             query.bindValue (":season", episode.seasonsNumber);
             if (!query.exec()) {
                 // Выводим сообщение об ошибке, если запрос не выполнен
-                qDebug() << "Ошибка выполнения запроса:" << query.lastError().text();
+                qDebug() << "2Ошибка выполнения запроса:" << query.lastError().text();
             }
         }
     }
@@ -133,11 +135,11 @@ void DBManager::updateVideosTV(QList<Videos> videos, QString NameShow)
     query.exec();
 
     for (const Videos& video : videos) {
-        query.prepare("INSERT INTO VideosTV (nameShow, key) VALUE (:nameShow, :key)");
+        query.prepare("INSERT INTO VideosTV (nameShow, key) VALUES (:nameShow, :key)");
         query.bindValue("nameShow",NameShow);
         query.bindValue("key",video.key);
         if(!query.exec()){
-            qDebug() << "Ошибка выполнения запроса:" << query.lastError().text();
+            qDebug() << "3Ошибка выполнения запроса:" << query.lastError().text();
         }
     }
 }

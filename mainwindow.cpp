@@ -21,11 +21,12 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     this->dbmanager = new DBManager(this);
     this->settingsData = new SettingsData(this->dbmanager);
     this->mediaLibrary = new MediaLibrary(this, this->dbmanager, settingsData);
-    this->searchMedia = new SearchMedia(this, this->mediaLibrary,this->dbmanager);
+    this->progressBar = new DialogShowProgress;
+
 
     this->dialogSettingsApp = new SettingsApp(this,dbmanager, settingsData);
 
-    this->progressBar = new DialogShowProgress;
+
 
     ui->PBRefreshLibrary->hide();
     ui->listMovieLibrary->setStyleSheet("QTreeWidget::item { height: 128px; }");
@@ -64,7 +65,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
             this,
             &MainWindow::slotUpdateListLibraryByID);
 
-    connect(this->searchMedia, &SearchMedia::windowClosed, this, &MainWindow::onDialogClosed);
+    connect(this->progressBar, &DialogShowProgress::emitCloseProgres, this, &MainWindow::onDialogClosed);
+    //
     connect(this->dialogSettingsApp, &SettingsApp::signalWindowClosed, this, &MainWindow::onDialogClosed);
 
     ui->listMovieLibrary->setAlternatingRowColors(true);
@@ -244,6 +246,7 @@ void MainWindow::updateCollectionsByID(QString type, int id)
             }
     }
 }
+
 void MainWindow::slotUptateProgressBar(const QString &str)
 {
     ui->PBRefreshLibrary->setFormat(str);
@@ -299,6 +302,8 @@ void MainWindow::on_openSettings_clicked()
 
 void MainWindow::on_loadMediaButton_clicked()
 {
+    this->searchMedia = new SearchMedia(this, this->mediaLibrary,this->dbmanager,progressBar);
+    connect(this->searchMedia, &SearchMedia::windowClosed, this, &MainWindow::onDialogClosed);
     MainWindow::setDisabled (true);
     this->searchMedia->setDisabled (false);
     // this->searchWindow->setAttribute(Qt::WA_DeleteOnClose);

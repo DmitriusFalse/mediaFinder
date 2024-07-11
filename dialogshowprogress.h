@@ -15,10 +15,21 @@ public:
     explicit DialogShowProgress(QWidget *parent = nullptr);
     ~DialogShowProgress();
 
+    void closeProgres();
+
+    void updateProgres();
+    void setTextProgres(QString text);
+
+
+    void setMainLineMessage(const QString &newMainLineMessage);
+
 private:
     Ui::DialogShowProgress *ui;
+    QString mainLineMessage;
 public slots:
     void slotUpdateProgress();
+signals:
+    void emitCloseProgres();
 };
 
 #endif // DIALOGSHOWPROGRESS_H
