@@ -26,16 +26,22 @@ public:
     void removeMovieCollectionsLibrary(QString libraryPath);
     void removeOldRecordInBD(QString type);
     QStringList loadGenre();
+    QList<Videos> getVideos(QString name);
+    QList<Reviews> getReviews(QString name);
     QStringList readMovieCollection(QString detailLevel);
     QStringList readTVCollection(QString detailLevel);
+    TVCollection getTVCollection();
+    MovieCollections getMovieCollection();
     QString readTVShowByID(QString detailLevel, int id);
     ShowInfo getShowTVShowByID(int id);
+    MovieInfo getMovieByID(int id);
     QStringList readLibrary();
     QStringList readLibrary(QString type);
     void extracted(ShowInfo &show);
     void updateTvShow(ShowInfo show, int id);
-    void updateTvShowPoster(QString url, QString NameShow);
+    void updateMovie(MovieInfo movie, int id);
     QString getPathToShowTV(QString nameShow);
+    QString getPathToMovie(QString name);
 private:
     bool openConnection();
     void closeConnection();

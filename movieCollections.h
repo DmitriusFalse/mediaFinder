@@ -2,32 +2,54 @@
 #define MOVIECOLLECTIONS_H
 #include "qdebug.h"
 #include <QString>
-struct movieItem{
+
+struct Reviews {
+    QString nameShow;
+    QString author;
+    QString content;
+};
+struct Videos {
+    QString key;
+    QString getYouTubeEmbed(){
+        return "https://www.youtube.com/embed/" + this->key;
+    }
+};
+
+struct MovieInfo{
     int id;
+    int IDMovie;
+    int imdbID;
     QString genre;
     QString path;
     QString poster;
+    QString originalName;
     QString name;
+    QString originalLang;
+    QString release_date;
     QString library_path;
-    QString description;
+    QString overview;
+    QString production_companies;
+    QString logoCompanies;
+    QString Status;
+    QList<Reviews> reviews;
+    QList<Videos> videos;
+    void addReviews(Reviews review){
+        this->reviews.append(review);
+    }
+    void addVideos(Videos video){
+        this->videos.append(video);
+    }
+    void addVideos(QList<Videos> video){
+        this->videos.append(video);
+    }
+    void addVideos(QString key){
+        this->addVideos(Videos{.key = key});
+    }
 };
-struct movieCollections {
-    QList<movieItem> items;
-    int size;
-    movieCollections(QList<movieItem>& itemsList) : items(itemsList) {
-        this->size=items.size ();
-    }
-    void append(const movieItem &item) {
-        items.append(item);
-        size++;
-    }
-    void remove(int index) {
-        if (index >= 0 && index < items.size()) {
-            items.removeAt(index); // Удаляем элемент по индексу
-            size--;
-        } else {
-            qDebug() << "Ошибка: Неверный индекс для удаления элемента.";
-        }
+struct MovieCollections {
+    QList<MovieInfo> movies;
+    void addMovie(const MovieInfo &item) {
+        movies.append(item);
     }
 };
 
@@ -43,18 +65,6 @@ struct EpisodeInfo {
     QString pathToSerial;
     QString libraryPath;
 };
-struct Reviews {
-    QString nameShow;
-    QString author;
-    QString content;
-};
-struct Videos {
-    QString key;
-    QString getYouTubeEmbed(){
-        return "https://www.youtube.com/embed/" + this->key;
-    }
-};
-
 struct ShowInfo {
     int ID;
     QString nameShow;
@@ -90,6 +100,14 @@ struct ShowInfo {
 };
 
 struct TVCollection {
+private:
+public:
     QList<ShowInfo> Show;
+    void addShow(ShowInfo newShow){
+        this->Show.append(newShow);
+    }
+    uint size(){
+        return this->Show.size();
+    }
 };
 #endif // MOVIECOLLECTIONS_H

@@ -23,6 +23,8 @@ SearchMedia::SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db, Dia
     setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
     this->genres = new GenreList;
     this->showTv = new ShowInfo;
+    this->movie = new MovieInfo;
+    // this->oldMovie= new MovieInfo;
     // this->managerNetwork = new QNetworkAccessManager(this);
     uiSearch->viewSearchTree->setColumnWidth(0,128);
     uiSearch->viewSearchTree->setColumnWidth(2,96);
@@ -61,13 +63,12 @@ void SearchMedia::fillFields(QString type)
 {
     uiSearch->searchWordEdit->setText (nameSearch);
     if(type=="Movie"){
+        this->oldMovie = dbManager->getMovieByID(idMovieDB);
         uiSearch->typeMedia->setCurrentIndex (1);
     }else if(type=="TV"){
         this->oldNameShow = dbManager->getShowTVShowByID(idTVDB);
         uiSearch->typeMedia->setCurrentIndex (2);
     }
-
-
 }
 
 void SearchMedia::setSearchWord(const QString &newNameSearch)
@@ -175,6 +176,7 @@ void SearchMedia::sendRequestTMDBSearchGetImage()
     }
 }
 
+
 void SearchMedia::sendRequestTMDBGetInformation()
 {
     qDebug() << "Получаем информацию о выбранном Фильме/Сериале";
@@ -243,8 +245,63 @@ void SearchMedia::sendRequestTMDBGetInformationEpisodes(int count)
 
 void SearchMedia::sendRequestTMDBGetImage()
 {
+    if(getSelectType()=="movie"){
+        this->getImageMovie();
+    }else if(getSelectType()=="tv"){
+        this->getImageTVShow();
+    }
     //https://image.tmdb.org/t/p/original
     //https://image.tmdb.org/t/p/w500/
+
+    // for (int index = 0; index < uiSearch->viewSearchTree->topLevelItemCount(); ++index) {
+    //     QTreeWidgetItem *item = uiSearch->viewSearchTree->topLevelItem(index);
+    //     QString posterUrl = item->data(0, Qt::UserRole).toString();
+    //     QUrl imageUrl("https://image.tmdb.org/t/p/w154/"+posterUrl);
+
+    //     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    //     connect(manager, &QNetworkAccessManager::finished, this,
+    //             [this, index](QNetworkReply *reply) {
+    //                 this->slotUpdateImagesInTree(reply, index);
+    //             });
+
+    //     QUrl url(imageUrl);
+    //     QNetworkRequest request(url);
+    //     manager->get(request);
+    // }
+}
+void SearchMedia::getImageMovie()
+{
+    countSendRequest = 0;
+    QString name = this->oldMovie.name;
+    QString path = dbManager->getPathToMovie(name);
+    showProgres->setMainLineMessage("Получаем изображения");
+    showProgres->updateProgres();
+    if(this->movie->poster.startsWith("/")){
+        showProgres->updateProgres();
+        countSendRequest++;
+
+        QFileInfo posterFile(this->movie->poster);
+        QString namePoster = this->movie->name;
+        namePoster = path+"/"+namePoster.replace(" ","-")+"."+posterFile.suffix();
+        QUrl imageUrl("https://image.tmdb.org/t/p/original"+this->movie->poster);
+
+        QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+        connect(manager, &QNetworkAccessManager::finished, this,
+                [this, namePoster,name](QNetworkReply *reply) {
+                    this->slotSavePosterFile(reply, namePoster,name);
+                });
+
+        QUrl url(imageUrl);
+        QNetworkRequest request(url);
+        manager->get(request);
+        this->movie->poster = namePoster;
+
+    }
+
+}
+
+void SearchMedia::getImageTVShow()
+{
     countSendRequest = 0;
     QString nameShow = this->oldNameShow.nameShow;
     QString pathToShowTV = dbManager->getPathToShowTV(nameShow);
@@ -314,21 +371,6 @@ void SearchMedia::sendRequestTMDBGetImage()
             episode.still_path = namePosterEpisode;
         }
     }
-    // for (int index = 0; index < uiSearch->viewSearchTree->topLevelItemCount(); ++index) {
-    //     QTreeWidgetItem *item = uiSearch->viewSearchTree->topLevelItem(index);
-    //     QString posterUrl = item->data(0, Qt::UserRole).toString();
-    //     QUrl imageUrl("https://image.tmdb.org/t/p/w154/"+posterUrl);
-
-    //     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    //     connect(manager, &QNetworkAccessManager::finished, this,
-    //             [this, index](QNetworkReply *reply) {
-    //                 this->slotUpdateImagesInTree(reply, index);
-    //             });
-
-    //     QUrl url(imageUrl);
-    //     QNetworkRequest request(url);
-    //     manager->get(request);
-    // }
 }
 
 void SearchMedia::slotViewOverviewMedia()
@@ -460,85 +502,25 @@ void SearchMedia::slotChangetSelection()
 void SearchMedia::slotFinishRequestChooseMedia(QNetworkReply *reply)
 {
     qDebug() << "Получаем ответ после поиска";
-
+    qDebug() << "getSelectType() " << getSelectType();
     if (reply->error() == QNetworkReply::NoError) {
-        showProgres->updateProgres();
-        showProgres->setMainLineMessage("Получаем информацию о выбраном шоу");
-        showProgres->setTextProgres("Основная информация");
         QByteArray data = reply->readAll(); // Читаем полученные данные
         QJsonObject jsonObject = QJsonDocument::fromJson(data).object ();
-        this->showTv->idShow = jsonObject.value ("id").toInt ();
-        this->showTv->poster = jsonObject.value ("poster_path").toString ();
-        this->showTv->nameShow = jsonObject.value ("name").toString ();
-        this->showTv->originalNameShow = jsonObject.value ("original_name").toString ();
-        this->showTv->numberOfEpisodes = jsonObject.value ("number_of_episodes").toInt ();
-        this->showTv->numberOfSeasons = jsonObject.value ("number_of_seasons").toInt ();
-        this->showTv->overview = jsonObject.value ("overview").toString ();
-        this->showTv->status = jsonObject.value ("status").toString ();
 
-        QJsonObject videos = jsonObject.value ("videos").toObject().value("results").toObject();
-        for (const QJsonValue& video : videos) {
-            showProgres->setTextProgres("YouTube видео");
-            QJsonObject itemVideo = video.toObject();
-            QString site = itemVideo.value("site").toString();
-            if(site == "YouTube") {
-                QString key = itemVideo.value("key").toString();
-                this->showTv->addVideos(key);
-            }
+        if(getSelectType()=="movie"){
+            this->processResponseMovie(jsonObject);
+            // dbManager->updateMovie(movie);
+        }else if(getSelectType()=="tv"){
+            this->processResponseTV(jsonObject);
         }
-        QJsonObject jsonReviews = jsonObject.value ("reviews").toObject();
-        int countResult = jsonReviews.value("total_results").toInt();
-        if (countResult > 0){
-            showProgres->setTextProgres("Обзоры от пользователей");
-            QJsonArray reviewsResults = jsonReviews.value ("results").toArray ();
-            for (const QJsonValue& srcReviewsResults : reviewsResults) {
-                QJsonObject itemSrcReviewsResults = srcReviewsResults.toObject();
-                QString reviewContent = itemSrcReviewsResults.value("content").toString();
-                QString reviewAuthor = itemSrcReviewsResults.value("author").toString();
-                Reviews review;
-                review.author = reviewAuthor;
-                review.content = reviewContent;
-                review.nameShow = this->showTv->nameShow;
-                this->showTv->addReviews(review);
-            }
-
-        }
-
-        // QJsonArray seasons = jsonObject.value ("seasons").toArray ();
-        // for (const QJsonValue& srcSeason : seasons) {
-        //     QJsonObject itemSeason = srcSeason.toObject();
-        //     int season_number = itemSeason.value("season_number").toInt ();
-        //     int episode_count = itemSeason.value("episode_count").toInt ();
-        //     QString idSeason = itemSeason.value("id").toString ();
-        // }
-        QStringList GenreList;
-        QJsonArray genres = jsonObject.value ("genres").toArray ();
-        for (const QJsonValue& srcGenre : genres) {
-            showProgres->setTextProgres("Жанры");
-            QJsonObject itemGenre = srcGenre.toObject();
-            GenreList.append (itemGenre.value ("name").toString ());
-
-        }
-        this->showTv->genres = GenreList.join (",");
-        QJsonArray production_companies = jsonObject.value ("production_companies").toArray ();
-        QStringList productionCompanies,logoPath;
-        for (const QJsonValue& srcProduction_companies : production_companies) {
-            showProgres->setTextProgres("Компания производитель");
-            QJsonObject itemProduction_companies= srcProduction_companies.toObject();
-            logoPath.append (itemProduction_companies.value ("logo_path").toString ());
-            productionCompanies.append (itemProduction_companies.value ("name").toString ());
-        }
-        this->showTv->production_companies = productionCompanies.join (",");
-        this->showTv->logoPath = logoPath.join (",");
-        qDebug() << "Данные о сериале получены";
-        showProgres->setTextProgres("");
-        sendRequestTMDBGetInformationEpisodes(this->showTv->numberOfSeasons);
 
         // dbManager->updateTvShow (*this->show, getIdTVDB());
 
     } else {
         qDebug() << "3Ошибка запроса:" << reply->errorString();
     }
+    showProgres->updateProgres();
+    qDebug() << "processResponseMovie";
     reply->deleteLater();
 }
 
@@ -602,7 +584,11 @@ void SearchMedia::slotSavePosterFile(QNetworkReply *reply, QString pathFile, QSt
     if(countSendRequest==1){
         qDebug() << "Обновляем картинки";
         showProgres->setMainLineMessage("Записываем собранную информацию в базу!");
-        dbManager->updateTvShow (*this->showTv, getIdTVDB());
+        if(getSelectType()=="movie"){
+            dbManager->updateMovie(*movie, getIdMovieDB());
+        }else if(getSelectType()=="tv"){
+            dbManager->updateTvShow (*this->showTv, getIdTVDB());
+        }
         showProgres->setTextProgres("");
         showProgres->setMainLineMessage("Завершено");
         showProgres->closeProgres();
@@ -610,6 +596,128 @@ void SearchMedia::slotSavePosterFile(QNetworkReply *reply, QString pathFile, QSt
     countSendRequest--;
 
     reply->deleteLater();
+}
+
+void SearchMedia::processResponseTV(QJsonObject jsonObject)
+{
+
+    showProgres->updateProgres();
+    showProgres->setMainLineMessage("Получаем информацию о выбраном шоу");
+    showProgres->setTextProgres("Основная информация");
+
+    this->showTv->idShow = jsonObject.value ("id").toInt ();
+    this->showTv->poster = jsonObject.value ("poster_path").toString ();
+    this->showTv->nameShow = jsonObject.value ("name").toString ();
+    this->showTv->originalNameShow = jsonObject.value ("original_name").toString ();
+    this->showTv->numberOfEpisodes = jsonObject.value ("number_of_episodes").toInt ();
+    this->showTv->numberOfSeasons = jsonObject.value ("number_of_seasons").toInt ();
+    this->showTv->overview = jsonObject.value ("overview").toString ();
+    this->showTv->status = jsonObject.value ("status").toString ();
+
+    QJsonObject videos = jsonObject.value ("videos").toObject().value("results").toObject();
+    for (const QJsonValue& video : videos) {
+        showProgres->setTextProgres("YouTube видео");
+        QJsonObject itemVideo = video.toObject();
+        QString site = itemVideo.value("site").toString();
+        if(site == "YouTube") {
+            QString key = itemVideo.value("key").toString();
+            this->showTv->addVideos(key);
+        }
+    }
+    QJsonObject jsonReviews = jsonObject.value ("reviews").toObject();
+    int countResult = jsonReviews.value("total_results").toInt();
+    if (countResult > 0){
+        showProgres->setTextProgres("Обзоры от пользователей");
+        QJsonArray reviewsResults = jsonReviews.value ("results").toArray ();
+        for (const QJsonValue& srcReviewsResults : reviewsResults) {
+            QJsonObject itemSrcReviewsResults = srcReviewsResults.toObject();
+            QString reviewContent = itemSrcReviewsResults.value("content").toString();
+            QString reviewAuthor = itemSrcReviewsResults.value("author").toString();
+            Reviews review;
+            review.author = reviewAuthor;
+            review.content = reviewContent;
+            review.nameShow = this->showTv->nameShow;
+            this->showTv->addReviews(review);
+        }
+    }
+    QStringList GenreList;
+    QJsonArray genres = jsonObject.value ("genres").toArray ();
+    for (const QJsonValue& srcGenre : genres) {
+        showProgres->setTextProgres("Жанры");
+        QJsonObject itemGenre = srcGenre.toObject();
+        GenreList.append (itemGenre.value ("name").toString ());
+    }
+    this->showTv->genres = GenreList.join (",");
+    QJsonArray production_companies = jsonObject.value ("production_companies").toArray ();
+    QStringList productionCompanies,logoPath;
+    for (const QJsonValue& srcProduction_companies : production_companies) {
+        showProgres->setTextProgres("Компания производитель");
+        QJsonObject itemProduction_companies= srcProduction_companies.toObject();
+        logoPath.append (itemProduction_companies.value ("logo_path").toString ());
+        productionCompanies.append (itemProduction_companies.value ("name").toString ());
+    }
+    this->showTv->production_companies = productionCompanies.join (",");
+    this->showTv->logoPath = logoPath.join (",");
+    qDebug() << "Данные о сериале получены";
+    showProgres->setTextProgres("");
+    sendRequestTMDBGetInformationEpisodes(this->showTv->numberOfSeasons);
+}
+
+void SearchMedia::processResponseMovie(QJsonObject jsonObject)
+{
+    showProgres->updateProgres();
+    showProgres->setMainLineMessage("Получаем информацию о выбраном фильме");
+    showProgres->setTextProgres("Основная информация");
+
+
+    movie->IDMovie = jsonObject.value("id").toInt();
+    movie->imdbID = jsonObject.value("imdb_id").toInt();
+    movie->overview = jsonObject.value("overview").toString();
+    movie->originalName = jsonObject.value("original_title").toString();
+    movie->name = jsonObject.value("title").toString();
+    movie->originalLang = jsonObject.value("original_language").toString();
+    movie->poster = jsonObject.value("poster_path").toString();
+    movie->release_date = jsonObject.value("release_date").toString();
+    movie->Status = jsonObject.value("status").toString();
+
+    QStringList GenreList;
+    QJsonArray genres = jsonObject.value ("genres").toArray ();
+    for (const QJsonValue& srcGenre : genres) {
+        showProgres->setTextProgres("Жанры");
+        QJsonObject itemGenre = srcGenre.toObject();
+        GenreList.append (itemGenre.value ("name").toString ());
+    }
+    movie->genre = GenreList.join(",");
+
+    QJsonArray production_companies = jsonObject.value ("production_companies").toArray ();
+    QStringList productionCompanies,logoPath;
+    for (const QJsonValue& srcProduction_companies : production_companies) {
+        showProgres->setTextProgres("Компания производитель");
+        QJsonObject itemProduction_companies= srcProduction_companies.toObject();
+        logoPath.append (itemProduction_companies.value ("logo_path").toString ());
+        productionCompanies.append (itemProduction_companies.value ("name").toString ());
+    }
+    movie->production_companies = productionCompanies.join(",");
+    movie->logoCompanies = logoPath.join(",");
+
+    QJsonObject jsonReviews = jsonObject.value ("reviews").toObject();
+    int countResult = jsonReviews.value("total_results").toInt();
+    if (countResult > 0){
+        showProgres->setTextProgres("Обзоры от пользователей");
+        QJsonArray reviewsResults = jsonReviews.value ("results").toArray ();
+        for (const QJsonValue& srcReviewsResults : reviewsResults) {
+            QJsonObject itemSrcReviewsResults = srcReviewsResults.toObject();
+            QString reviewContent = itemSrcReviewsResults.value("content").toString();
+            QString reviewAuthor = itemSrcReviewsResults.value("author").toString();
+            Reviews review;
+            review.author = reviewAuthor;
+            review.content = reviewContent;
+            review.nameShow = this->movie->originalName;
+            this->movie->addReviews(review);
+        }
+    }
+    this->sendRequestTMDBGetImage();
+
 }
 
 void SearchMedia::endSelectMedia()

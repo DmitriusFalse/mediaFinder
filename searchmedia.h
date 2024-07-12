@@ -56,12 +56,17 @@ private:
     DBManager *dbManager;
     ShowInfo *showTv;
     ShowInfo oldNameShow;
+    MovieInfo *movie;
+    MovieInfo oldMovie;
     DialogShowProgress *showProgres;
     void sendRequestTMDBSearch(QString Name, QString type);
     void sendRequestTMDBSearchGetImage();
     void sendRequestTMDBGetInformation();
     void sendRequestTMDBGetInformationEpisodes(int count);
     void sendRequestTMDBGetImage();
+
+    void getImageMovie();
+    void getImageTVShow();
 signals:
     void windowClosed();
     void selectMedia();
@@ -76,6 +81,8 @@ private slots:
     void slotFinishRequestChooseMediaEpisodes(QNetworkReply *reply);
     void slotSavePosterFile(QNetworkReply *reply, QString pathFile, QString nameShow);
 
+    void processResponseTV(QJsonObject jsonObject);
+    void processResponseMovie(QJsonObject jsonObject);
     void endSelectMedia();
     void on_okButton_clicked();
 

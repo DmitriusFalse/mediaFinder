@@ -16,9 +16,6 @@ public:
     QStringList scanLibraryMovie(QString path);
     void refsreshCollectionMovie();
     void refsreshCollectionTV();
-    movieCollections getMovieCollection(QString detailLevel);
-    TVCollection getTVCollection(QString detailLevel);
-    ShowInfo getShowInfoByID(QString detailLevel, int id);
 
 public slots:
 

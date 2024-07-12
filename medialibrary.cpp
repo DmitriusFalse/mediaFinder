@@ -72,122 +72,6 @@ void MediaLibrary::refsreshCollectionTV()
     this->startScanLibraryTV ();
 }
 
-movieCollections MediaLibrary::getMovieCollection(QString detailLevel)
-{
-    const QString DETAIL_LEVEL_ALL = "all";
-    const QString DETAIL_LEVEL_SHORT = "short";
-
-
-
-    QList<movieItem> items={};
-    movieCollections movies(items);
-    QStringList srcMovies = this->m_dbmanager->readMovieCollection (detailLevel);
-    //
-        //
-
-    for (auto& item : srcMovies) {
-        movieItem srcMovieItem;
-        QStringList iMovie = item.split ("//");
-        if (detailLevel == DETAIL_LEVEL_ALL) {
-            // id, genre, path, poster, name, libraryPath, description
-            // 0   1      2     3       4     5            6
-            srcMovieItem.id = iMovie[0].toInt ();
-            srcMovieItem.genre = iMovie[1];
-            srcMovieItem.path = iMovie[2];
-            srcMovieItem.poster = iMovie[3];
-            srcMovieItem.name = iMovie[4];
-            srcMovieItem.library_path = iMovie[5];
-            srcMovieItem.description = iMovie[6];
-        } else if (detailLevel == DETAIL_LEVEL_SHORT) {
-            // id, poster, name
-            // 0   1       2
-            srcMovieItem.id = iMovie[0].toInt ();
-            srcMovieItem.poster = iMovie[1];
-            srcMovieItem.name  = iMovie[2];
-        }
-        movies.append (srcMovieItem);
-
-    }
-    return movies;
-}
-
-TVCollection MediaLibrary::getTVCollection(QString detailLevel)
-{
-    // const QString DETAIL_LEVEL_ALL = "all";
-    // const QString DETAIL_LEVEL_SHORT = "short";
-    TVCollection tvcol;
-    QStringList srcTV = this->m_dbmanager->readTVCollection (detailLevel);
-
-    for (const QString& SrcShow : srcTV) {
-        ShowInfo show;
-
-        QStringList tmp= SrcShow.split ("//@//");
-        QString header = tmp[0];
-        QStringList srcInfoShow = header.split ("//");
-        show.ID = srcInfoShow[0].toInt ();
-        show.nameShow = srcInfoShow[1];
-        show.poster = srcInfoShow[2];
-
-        QString body= tmp[1];
-        QStringList srcSeries = body.split ("#/@/#");
-
-        foreach (const QString& infoEp, srcSeries) {
-            if (infoEp==""){
-                continue;
-            }
-            QStringList srcEpList = infoEp.split ("//");
-            EpisodeInfo episode;
-            episode.ID = srcEpList[0].toInt ();
-            episode.episodeTitle = srcEpList[1];
-            episode.filePath = srcEpList[2];
-            episode.seasonsNumber = srcEpList[4].toInt ();
-            episode.episodeNumber = srcEpList[5].toInt ();
-
-            show.addEpisodes(episode);
-        }
-        //сортируем наши епизоды
-
-        // this->sortEpisodes (show.Episodes);
-        tvcol.Show.append (show);
-
-    }
-    this->sortShows (tvcol.Show);
-    return tvcol;
-}
-
-ShowInfo MediaLibrary::getShowInfoByID(QString detailLevel, int id)
-{
-
-    ShowInfo show;
-    QString SrcShow = this->m_dbmanager->readTVShowByID (detailLevel, id);
-
-    QStringList tmp= SrcShow.split ("//@//");
-    QString header = tmp[0];
-    QStringList srcInfoShow = header.split ("//");
-    show.ID = srcInfoShow[0].toInt ();
-    show.nameShow = srcInfoShow[1];
-    show.poster = srcInfoShow[2];
-
-    QString body= tmp[1];
-    QStringList srcSeries = body.split ("#/@/#");
-
-    foreach (const QString& infoEp, srcSeries) {
-        if (infoEp==""){
-            continue;
-        }
-        QStringList srcEpList = infoEp.split ("//");
-        EpisodeInfo episode;
-        episode.ID = srcEpList[0].toInt ();
-        episode.episodeTitle = srcEpList[1];
-        episode.filePath = srcEpList[2];
-        episode.seasonsNumber = srcEpList[4].toInt ();
-        episode.episodeNumber = srcEpList[5].toInt ();
-
-        show.addEpisodes(episode);
-    }
-    return show;
-}
-
 void MediaLibrary::handleProgressUpdate(QString str)
 {
     emit updateProgressBarUI(str);
@@ -203,8 +87,7 @@ void MediaLibrary::handleProgressFinish(QStringList str, QString type)
 void MediaLibrary::startScanLibraryMovie()
 {
 
-    QList<movieItem> itemList;
-    movieCollections movieColl(itemList);
+    MovieCollections movieColl;
 
     QList<libraryItem> library = m_settingsData->readLibraryFromSettings("Movie");
     m_workRMovie->setActionScanMovie();

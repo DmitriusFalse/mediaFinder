@@ -11,8 +11,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
 {
 
     qRegisterMetaType<libraryItem>("libraryItem");
-    qRegisterMetaType<movieCollections>("movieCollections");
-    qRegisterMetaType<movieItem>("movieItem");
+    qRegisterMetaType<MovieCollections>("movieCollections");
+    qRegisterMetaType<MovieInfo>("movieItem");
     qRegisterMetaType<TVCollection>("TVCollection");
     qRegisterMetaType<ShowInfo>("SerialInfo");
     // qRegisterMetaType<SeasonInfo>("SeasonInfo");
@@ -123,7 +123,7 @@ void MainWindow::clickTreeWidgetMovie()
     QTreeWidgetItem *selectedItem = ui->listMovieLibrary->currentItem();
 
     QString hiddenData = selectedItem->data(0, Qt::UserRole).toString();
-    QMessageBox::information(this, "Заголовок", hiddenData);
+    // QMessageBox::information(this, "Заголовок", hiddenData);
 
 }
 
@@ -138,10 +138,10 @@ void MainWindow::updateCollections(QString type)
     QStringList action = {"Movie", "TV"};
     switch (action.indexOf(type)) {
         case 0:{
-            movieCollections movies= mediaLibrary->getMovieCollection ("short");
+            MovieCollections movies= dbmanager->getMovieCollection ();
             ui->listMovieLibrary->clear();
 
-            for (auto& movie : movies.items) {
+            for (auto& movie : movies.movies) {
 
                 QTreeWidgetItem *item = new QTreeWidgetItem(ui->listMovieLibrary);
 
@@ -166,7 +166,7 @@ void MainWindow::updateCollections(QString type)
         }
         case 1:{
             ui->listTVLibrary->clear ();
-            TVCollection tvcols = mediaLibrary->getTVCollection ("short");
+            TVCollection tvcols = dbmanager->getTVCollection ();
             for (const auto& show : tvcols.Show) {
                 QTreeWidgetItem *mainItem = new QTreeWidgetItem(ui->listTVLibrary);
                 mainItem->setText(1, show.nameShow);
@@ -217,7 +217,7 @@ void MainWindow::updateCollectionsByID(QString type, int id)
                             delete child;
                         }
 
-                        ShowInfo show = mediaLibrary->getShowInfoByID ("short", id);
+                        ShowInfo show = dbmanager->getShowTVShowByID (id);
                         QPixmap pixmap;
                         if(QFile::exists (show.poster)){
                             pixmap.load (show.poster);

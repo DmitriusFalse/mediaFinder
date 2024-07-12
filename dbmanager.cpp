@@ -283,10 +283,45 @@ void DBManager::updateTvShow(ShowInfo show, int id)
     }
 }
 
-void DBManager::updateTvShowPoster(QString url, QString NameShow)
+void DBManager::updateMovie(MovieInfo movie, int id)
 {
+    QSqlQuery query(this->m_database);
+    query.prepare("UPDATE Movie SET "
+                  "Genre=:genre,"
+                  "poster=:poster,"
+                  "name=:name,"
+                  "Description=:overview,"
+                  "idMovie=:idmovie,"
+                  "originalLang=:originallang,"
+                  "imdbID=:idimdb,"
+                  "release_date=:releasedate,"
+                  "originalName=:originalname,"
+                  "Status=:status "
+                  "WHERE id=:id");
+    query.bindValue(":genre",movie.genre);
+    query.bindValue(":poster",movie.poster);
+    query.bindValue(":name",movie.name);
+    query.bindValue(":overview",movie.overview);
+    query.bindValue(":idmovie",movie.IDMovie);
+    query.bindValue(":originallang",movie.originalLang);
+    query.bindValue(":idimdb",movie.imdbID);
+    query.bindValue(":releasedate",movie.release_date);
+    query.bindValue(":originalname",movie.originalName);
+    query.bindValue(":status,",movie.Status);
+    query.bindValue(":id",id);
+
+    if(query.exec()){
+        this->updateReviewsTV(movie.reviews, movie.name);
+        // Обновляем видео ролики
+        this->updateVideosTV(movie.videos, movie.name);
+        // Отправляем сигнал об обновлении главного окна
+        emit signalUpdateMainWindowByID("Movie", id);
+    }else{
+        qDebug() << "Update Movie Error: " << query.lastError().text();
+    }
 
 }
+
 
 QString DBManager::getPathToShowTV(QString nameShow)
 {
@@ -301,6 +336,22 @@ QString DBManager::getPathToShowTV(QString nameShow)
         qDebug() << query.lastError().text();
     }
     return pathToSerial;
+}
+
+QString DBManager::getPathToMovie(QString name)
+{
+    QString path;
+    QSqlQuery query(this->m_database);
+    query.prepare("SELECT DISTINCT path FROM Movie WHERE name = :name");
+    query.bindValue(":name",name);
+    if(query.exec()){
+        query.next();
+        path = query.value("path").toString();
+    }else{
+        qDebug() << query.lastError().text();
+    }
+    QFileInfo fileinfo(path);
+    return fileinfo.path();
 }
 
 
@@ -603,6 +654,41 @@ QStringList DBManager::loadGenre()
     return genres;
 }
 
+QList<Videos> DBManager::getVideos(QString name)
+{
+    QList<Videos> videos;
+    QSqlQuery query(this->m_database);
+    query.prepare("SELECT * VideosTV WHERE NameShow=:name");
+    query.bindValue(":name", name);
+
+    if(query.exec()){
+        while (query.next()) {
+            Videos video;
+            video.key = query.value("key").toString();
+            videos.append(video);
+        }
+    }
+    return videos;
+}
+
+QList<Reviews> DBManager::getReviews(QString name)
+{
+    QList<Reviews> reviews;
+    QSqlQuery query(this->m_database);
+    query.prepare("SELECT * ReviewsTV WHERE NameShow=:name");
+    query.bindValue(":name", name);
+    if(query.exec()){
+        while (query.next()) {
+            Reviews review;
+            review.author = query.value("author").toString();
+            review.content = query.value("content").toString();
+            review.nameShow = query.value("nameShow").toString();
+            reviews.append(review);
+        }
+    }
+    return reviews;
+}
+
 QStringList DBManager::readMovieCollection(QString detailLevel)
 {
     // qDebug() << "readMovieCollection";
@@ -706,6 +792,86 @@ QStringList DBManager::readTVCollection(QString detailLevel)
     return listTV;
 }
 
+TVCollection DBManager::getTVCollection()
+{
+    TVCollection tvcol;
+    //Получаем список сериалов в Базе
+    QSqlQuery queryTVShow(this->m_database);
+    queryTVShow.prepare("SELECT id, NameShow, Poster FROM TVShow");
+    if(queryTVShow.exec ()){
+        //Обрабатываем каждый сериал отдельно
+        while (queryTVShow.next()) {
+
+            ShowInfo tvShow;
+            tvShow.idShow = queryTVShow.value ("ID").toInt();
+            tvShow.nameShow = queryTVShow.value ("NameShow").toString ();
+            tvShow.poster = queryTVShow.value ("Poster").toString ();
+
+            // Получаем информацию о сериях сериала!
+            QSqlQuery querySeries(this->m_database);
+            querySeries.prepare ("SELECT * FROM TVEpisodes WHERE NameShow = :nameShow");
+            querySeries.bindValue (":nameShow", tvShow.nameShow);
+
+            if(querySeries.exec ()){
+                while (querySeries.next ()){
+                    EpisodeInfo episode;
+
+                    episode.ID = querySeries.value("ID").toInt();
+
+                    episode.pathToSerial = querySeries.value("PathToSerial").toString();
+                    episode.still_path = querySeries.value("Poster").toString();
+                    episode.episodeNumber = querySeries.value("Episode").toInt();
+                    episode.seasonsNumber = querySeries.value("Season").toInt();
+                    episode.filePath = querySeries.value("File").toString();
+                    episode.episodeTitle = querySeries.value("NameEpisode").toString();
+                    episode.libraryPath = querySeries.value("LibraryPath").toString();
+                    episode.overview = querySeries.value("overview").toString();
+
+                    tvShow.addEpisodes(episode);
+                }
+            }else{
+                qDebug() << querySeries.lastError ().text ();
+            }
+            tvcol.addShow(tvShow);
+        }
+    }else{
+        qDebug() << queryTVShow.lastError ().text ();
+    }
+    return tvcol;
+}
+
+MovieCollections DBManager::getMovieCollection()
+{
+    MovieCollections movCol;
+    QSqlQuery query(this->m_database);
+
+    query.prepare("SELECT * FROM Movie");
+    if(query.exec ()){
+        while (query.next()) {
+            MovieInfo movie;
+            movie.id = query.value("id").toInt();
+            movie.poster = query.value("poster").toString();
+            movie.name = query.value("name").toString();
+            movie.genre = query.value("Genre").toString();
+            movie.path = query.value("path").toString();
+            movie.library_path = query.value("Library_path").toString();
+            movie.overview = query.value("Description").toString();
+            movie.IDMovie = query.value("idMovie").toInt();
+            movie.imdbID = query.value("imdbID").toInt();
+            movie.originalName = query.value("originalName").toString();
+            movie.originalLang = query.value("originalLang").toString();
+            movie.release_date = query.value("release_date").toString();
+            movie.production_companies = query.value("Description").toString();
+            movie.logoCompanies = query.value("Description").toString();
+            movie.Status = query.value("Status").toString();
+            movie.reviews = this->getReviews(movie.name);
+            movie.videos = this->getVideos(movie.name);
+            movCol.addMovie(movie);
+            }
+        }
+    return movCol;
+}
+
 QString DBManager::readTVShowByID(QString detailLevel, int id)
 {
     const QString DETAIL_LEVEL_ALL = "all";
@@ -803,6 +969,38 @@ ShowInfo DBManager::getShowTVShowByID(int id)
         }
     }
     return showTv;
+}
+
+MovieInfo DBManager::getMovieByID(int id)
+{
+    MovieInfo movie;
+    QSqlQuery query(this->m_database);
+    query.prepare("SELECT * FROM Movie WHERE id=:id");
+    query.bindValue(":id", id);
+    if(query.exec()){
+        query.next();
+        movie.id = query.value("id").toInt();
+        movie.poster = query.value("poster").toString();
+        movie.name = query.value("name").toString();
+        movie.genre = query.value("Genre").toString();
+        movie.path = query.value("path").toString();
+        movie.library_path = query.value("Library_path").toString();
+        movie.overview = query.value("Description").toString();
+        movie.IDMovie = query.value("idMovie").toInt();
+        movie.imdbID = query.value("imdbID").toInt();
+        movie.originalName = query.value("originalName").toString();
+        movie.originalLang = query.value("originalLang").toString();
+        movie.release_date = query.value("release_date").toString();
+        movie.production_companies = query.value("Description").toString();
+        movie.logoCompanies = query.value("Description").toString();
+        movie.Status = query.value("Status").toString();
+        movie.reviews = this->getReviews(movie.name);
+        movie.videos = this->getVideos(movie.name);
+    }else{
+        qDebug() << "getMovieByID: " << query.lastError().text();
+    }
+
+    return movie;
 }
 
 
