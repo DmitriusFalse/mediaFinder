@@ -162,7 +162,10 @@ void SearchMedia::sendRequestTMDBSearchGetImage()
         showProgres->updateProgres();
         QTreeWidgetItem *item = uiSearch->viewSearchTree->topLevelItem(index);
         QString posterUrl = item->data(0, Qt::UserRole).toString();
-        QUrl imageUrl("https://image.tmdb.org/t/p/w154/"+posterUrl);
+        if(posterUrl==""){
+            continue;
+        }
+        QUrl imageUrl("https://image.tmdb.org/t/p/w154"+posterUrl);
 
         QNetworkAccessManager *manager = new QNetworkAccessManager(this);
         connect(manager, &QNetworkAccessManager::finished, this,
@@ -424,7 +427,9 @@ void SearchMedia::slotFinishRequestFindMedia(QNetworkReply *reply, QString media
                 original_name = itemObject.value("original_title").toString();
                 date = itemObject.value("release_date").toString();
             }
-
+            if(name.size()==0){
+                continue;
+            }
 
             overview = itemObject.value("overview").toString();
             poster_path = itemObject.value("poster_path").toString();
@@ -437,7 +442,17 @@ void SearchMedia::slotFinishRequestFindMedia(QNetworkReply *reply, QString media
                 }
             }
             QTreeWidgetItem *item = new QTreeWidgetItem(uiSearch->viewSearchTree);
-            item->setData(0, Qt::UserRole, poster_path); // Poster
+            if(poster_path.startsWith("/")){
+                item->setData(0, Qt::UserRole, poster_path); // Poster
+            }else{
+
+            QPixmap pixmap;
+            pixmap.load ("/opt/MediaFinder/poster.png");
+            QLabel *imageLabel = new QLabel();
+            imageLabel->setPixmap(pixmap.scaled(90, 128));
+            uiSearch->viewSearchTree->setItemWidget(item, 0, imageLabel);
+
+            }
             item->setData(1, Qt::UserRole, overview); // Overview
             item->setData(2, Qt::UserRole, id); // id
             item->setData(3, Qt::UserRole, type); // id

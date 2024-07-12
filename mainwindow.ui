@@ -33,6 +33,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="loadMediaButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Загрузить</string>
         </property>

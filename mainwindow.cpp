@@ -120,6 +120,7 @@ void MainWindow::on_refreshLibrary_clicked()
 void MainWindow::clickTreeWidgetMovie()
 {
     qDebug() << "Click Movie";
+    ui->loadMediaButton->setDisabled(false);
     QTreeWidgetItem *selectedItem = ui->listMovieLibrary->currentItem();
 
     QString hiddenData = selectedItem->data(0, Qt::UserRole).toString();
@@ -130,6 +131,10 @@ void MainWindow::clickTreeWidgetMovie()
 void MainWindow::clickTreeWidgetTV()
 {
     qDebug() << "Click TV";
+    ui->loadMediaButton->setDisabled(false);
+    QTreeWidgetItem *selectedItem = ui->listTVLibrary->currentItem();
+    int srcID = selectedItem->data(0, Qt::UserRole).toInt();
+    ui->lineEdit_2->setText(QString::number(srcID));
 }
 
 void MainWindow::updateCollections(QString type)
@@ -180,6 +185,7 @@ void MainWindow::updateCollections(QString type)
                 QLabel *imageLabel = new QLabel();
                 imageLabel->setPixmap(pixmap.scaled(90, 128));
                 ui->listTVLibrary->setItemWidget(mainItem, 0, imageLabel);
+                qDebug() << show.ID;
                 mainItem->setData(0, Qt::UserRole, show.ID);
 
                 foreach (const uint seasonNumber, show.Episodes.keys()) {
@@ -200,8 +206,23 @@ void MainWindow::updateCollections(QString type)
 void MainWindow::updateCollectionsByID(QString type, int id)
 {
     QStringList action = {"Movie", "TV"};
+    qDebug() << "type " << type << " id " << id;
     switch (action.indexOf(type)) {
         case 0:{ // movie
+
+            QTreeWidgetItem *selectedItem = ui->listMovieLibrary->currentItem();
+            int srcID = selectedItem->data(0, Qt::UserRole).toInt();
+            MovieInfo movie = dbmanager->getMovieByID(id);
+            QPixmap pixmap;
+            if(QFile::exists (movie.poster)){
+                pixmap.load (movie.poster);
+            }else{
+                pixmap.load ("/opt/MediaFinder/poster.png");
+            }
+            QLabel *imageLabel = new QLabel();
+            imageLabel->setPixmap(pixmap.scaled(90, 128));
+            ui->listMovieLibrary->setItemWidget(selectedItem, 0, imageLabel);
+            selectedItem->setText(1,movie.name);
 
 
             break;
@@ -210,32 +231,43 @@ void MainWindow::updateCollectionsByID(QString type, int id)
                 for (int index = 0; index < ui->listTVLibrary->topLevelItemCount(); ++index) {
                     QTreeWidgetItem *item = ui->listTVLibrary->topLevelItem(index);
                     int ID = item->data(0, Qt::UserRole).toInt();
-                    if(id==ID){
 
+                    if (id == ID) {
+                        qDebug() << "Update ID:" << ID;
+
+                        // Удаление существующих дочерних элементов
                         QList<QTreeWidgetItem*> children = item->takeChildren();
                         for (QTreeWidgetItem *child : children) {
                             delete child;
                         }
 
-                        ShowInfo show = dbmanager->getShowTVShowByID (id);
+                        // Получение информации о шоу из базы данных
+                        ShowInfo show = dbmanager->getShowTVShowByID(id);
+
+                        // Загрузка постера шоу
                         QPixmap pixmap;
-                        if(QFile::exists (show.poster)){
-                            pixmap.load (show.poster);
-                        }else{
-                            pixmap.load ("/opt/MediaFinder/poster.png");
+                        if (QFile::exists(show.poster)) {
+                            pixmap.load(show.poster);
+                        } else {
+                            pixmap.load("/opt/MediaFinder/poster.png");
                         }
+
+                        // Создание QLabel для отображения постера и установка его в QTreeWidgetItem
                         QLabel *imageLabel = new QLabel();
                         imageLabel->setPixmap(pixmap.scaled(90, 128));
                         ui->listTVLibrary->setItemWidget(item, 0, imageLabel);
 
-                        foreach (const uint seasonNumber, show.Episodes.keys()) {
+                        // Добавление информации о сезонах и эпизодах
+                        for (const uint seasonNumber : show.Episodes.keys()) {
                             const QMap<uint, EpisodeInfo>& episodes = show.Episodes[seasonNumber];
-                            foreach (const uint episodeNumber, episodes.keys()) {
+                            for (const uint episodeNumber : episodes.keys()) {
                                 const EpisodeInfo& episodeInfo = episodes[episodeNumber];
-                                QTreeWidgetItem *subItem1 = new QTreeWidgetItem(item);
-                                subItem1->setText(1, episodeInfo.episodeTitle+" S"+QString::number (episodeInfo.seasonsNumber)+" E"+QString::number (episodeInfo.episodeNumber));
+                                QTreeWidgetItem *subItem = new QTreeWidgetItem(item);
+                                subItem->setText(1, episodeInfo.episodeTitle + " S" + QString::number(episodeInfo.seasonsNumber) + " E" + QString::number(episodeInfo.episodeNumber));
                             }
                         }
+
+                        // Прерывание цикла после обновления нужного элемента
                         break;
                     }
                 }
@@ -282,6 +314,7 @@ void MainWindow::slotChangetSelection()
     if (treeWidget->selectedItems().isEmpty()) {
         // Код, который нужно выполнить при снятии выделения
         qDebug() << "Выделение снято";
+        ui->loadMediaButton->setDisabled(true);
     }
 }
 void MainWindow::on_openSettings_clicked()
@@ -302,6 +335,7 @@ void MainWindow::on_openSettings_clicked()
 
 void MainWindow::on_loadMediaButton_clicked()
 {
+    //Открытие окна поиска
     this->searchMedia = new SearchMedia(this, this->mediaLibrary,this->dbmanager,progressBar);
     connect(this->searchMedia, &SearchMedia::windowClosed, this, &MainWindow::onDialogClosed);
     MainWindow::setDisabled (true);
@@ -319,12 +353,26 @@ void MainWindow::on_loadMediaButton_clicked()
         break;
     }
     case 1:{ //TV
-        selectedItem = ui->listTVLibrary->currentItem();
-        int idMediaDB = selectedItem->data(0, Qt::UserRole).toInt();
-        qDebug() << idMediaDB;
-        this->searchMedia->setIdTVDB (idMediaDB);
-        this->searchMedia->setSearchWord (selectedItem->text(1));
-        this->searchMedia->fillFields ("TV");
+        selectedItem = ui->listTVLibrary->currentItem(); // Получение текущего выделенного элемента
+        if (selectedItem != nullptr) {
+            QTreeWidgetItem *parentItem = selectedItem->parent(); // Получение родительского элемента
+            int idMediaDB = 0;
+            QString searchText="";
+            if (parentItem != nullptr) {
+                idMediaDB = parentItem->data(0, Qt::UserRole).toInt();
+                searchText = parentItem->text(1);
+            } else {
+                idMediaDB = selectedItem->data(0, Qt::UserRole).toInt();
+                searchText = selectedItem->text(1);
+            }
+            qDebug() << idMediaDB;
+            this->searchMedia->setIdTVDB (idMediaDB);
+            this->searchMedia->setSearchWord (searchText);
+            this->searchMedia->fillFields ("TV");
+        }
+
+
+
         break;
     }
     }

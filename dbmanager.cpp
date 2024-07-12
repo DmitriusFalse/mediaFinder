@@ -797,15 +797,24 @@ TVCollection DBManager::getTVCollection()
     TVCollection tvcol;
     //Получаем список сериалов в Базе
     QSqlQuery queryTVShow(this->m_database);
-    queryTVShow.prepare("SELECT id, NameShow, Poster FROM TVShow");
+    queryTVShow.prepare("SELECT * FROM TVShow");
     if(queryTVShow.exec ()){
         //Обрабатываем каждый сериал отдельно
         while (queryTVShow.next()) {
 
             ShowInfo tvShow;
-            tvShow.idShow = queryTVShow.value ("ID").toInt();
+            tvShow.ID = queryTVShow.value ("id").toInt();
+            tvShow.idShow = queryTVShow.value ("idShow").toInt();
             tvShow.nameShow = queryTVShow.value ("NameShow").toString ();
             tvShow.poster = queryTVShow.value ("Poster").toString ();
+            tvShow.overview = queryTVShow.value ("Overview").toString ();
+            tvShow.originalNameShow = queryTVShow.value ("Original_nameShow").toString ();
+            tvShow.numberOfEpisodes = queryTVShow.value ("Number_of_episodes").toInt();
+            tvShow.numberOfSeasons = queryTVShow.value ("Number_of_seasons").toInt();
+            tvShow.status = queryTVShow.value ("Status").toString();
+            tvShow.genres = queryTVShow.value ("Genres").toString();
+            tvShow.production_companies = queryTVShow.value ("production_companies_name").toString();
+            tvShow.logoPath = queryTVShow.value ("production_companies_logo_path").toString();
 
             // Получаем информацию о сериях сериала!
             QSqlQuery querySeries(this->m_database);
@@ -934,14 +943,23 @@ ShowInfo DBManager::getShowTVShowByID(int id)
 {
     ShowInfo showTv;
     QSqlQuery queryTVShow(this->m_database);
-    queryTVShow.prepare("SELECT id, NameShow, Poster FROM TVShow WHERE id=:id");
+    queryTVShow.prepare("SELECT * FROM TVShow WHERE id=:id");
     queryTVShow.bindValue (":id", id);
     if(queryTVShow.exec ()){
         if(queryTVShow.next()){
 
-            showTv.idShow = queryTVShow.value ("ID").toInt();
+            showTv.ID = queryTVShow.value ("id").toInt();
+            showTv.idShow = queryTVShow.value ("idShow").toInt();
             showTv.nameShow = queryTVShow.value ("NameShow").toString ();
             showTv.poster = queryTVShow.value ("Poster").toString ();
+            showTv.overview = queryTVShow.value ("Overview").toString ();
+            showTv.originalNameShow = queryTVShow.value ("Original_nameShow").toString ();
+            showTv.numberOfEpisodes = queryTVShow.value ("Number_of_episodes").toInt();
+            showTv.numberOfSeasons = queryTVShow.value ("Number_of_seasons").toInt();
+            showTv.status = queryTVShow.value ("Status").toString();
+            showTv.genres = queryTVShow.value ("Genres").toString();
+            showTv.production_companies = queryTVShow.value ("production_companies_name").toString();
+            showTv.logoPath = queryTVShow.value ("production_companies_logo_path").toString();
 
             QSqlQuery querySeries(this->m_database);
             querySeries.prepare ("SELECT * FROM TVEpisodes WHERE NameShow = :nameShow");
