@@ -144,6 +144,17 @@ void DBManager::updateVideosTV(QList<Videos> videos, QString NameShow)
     }
 }
 
+QString DBManager::removeLeadingZeros(const QString &input)
+{
+    QString result = input;
+    // Удаляем ведущие нули
+    while (result.startsWith('0') && result.length() > 1) {
+        result.remove(0, 1);
+    }
+    return result;
+
+}
+
 bool DBManager::writeLibrary(QString path, QString type) {
     QSqlQuery query(this->m_database);
 
@@ -519,7 +530,8 @@ void DBManager::writeTVCollectionToDB(QStringList pathlList)
             NumSeason = match.captured(1);  // Извлекаем номер сезона
             NumEpisode = match.captured(2); // Извлекаем номер серии
         }
-
+        NumSeason = this->removeLeadingZeros(NumSeason);
+        NumEpisode = this->removeLeadingZeros(NumEpisode);
         query.prepare("SELECT id FROM TVShow WHERE NameShow = :name");
         query.bindValue(":name", NameShow);
         if(query.exec ()){
@@ -658,7 +670,7 @@ QList<Videos> DBManager::getVideos(QString name)
 {
     QList<Videos> videos;
     QSqlQuery query(this->m_database);
-    query.prepare("SELECT * VideosTV WHERE NameShow=:name");
+    query.prepare("SELECT * FROM VideosTV WHERE NameShow=:name");
     query.bindValue(":name", name);
 
     if(query.exec()){
@@ -675,7 +687,7 @@ QList<Reviews> DBManager::getReviews(QString name)
 {
     QList<Reviews> reviews;
     QSqlQuery query(this->m_database);
-    query.prepare("SELECT * ReviewsTV WHERE NameShow=:name");
+    query.prepare("SELECT * FROM ReviewsTV WHERE NameShow=:name");
     query.bindValue(":name", name);
     if(query.exec()){
         while (query.next()) {
@@ -969,7 +981,6 @@ ShowInfo DBManager::getShowTVShowByID(int id)
             if(querySeries.exec ()){
                 while (querySeries.next ()){
                     EpisodeInfo episode;
-
                     episode.ID = querySeries.value("ID").toInt();
                     episode.pathToSerial = querySeries.value("PathToSerial").toString();
                     episode.still_path = querySeries.value("Poster").toString();

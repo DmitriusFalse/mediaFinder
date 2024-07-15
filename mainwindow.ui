@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1191</width>
-    <height>922</height>
+    <width>1206</width>
+    <height>1041</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -82,6 +82,9 @@
       </item>
       <item row="0" column="0">
        <widget class="QTabWidget" name="tabMainWindow">
+        <property name="autoFillBackground">
+         <bool>true</bool>
+        </property>
         <property name="tabPosition">
          <enum>QTabWidget::TabPosition::West</enum>
         </property>
@@ -94,9 +97,24 @@
          </attribute>
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <layout class="QHBoxLayout" name="listMovieLibraryLayout">
+            <property name="sizeConstraint">
+             <enum>QLayout::SizeConstraint::SetMaximumSize</enum>
+            </property>
             <item>
              <widget class="QTreeWidget" name="listMovieLibrary">
+              <property name="minimumSize">
+               <size>
+                <width>500</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>500</width>
+                <height>16777215</height>
+               </size>
+              </property>
               <column>
                <property name="text">
                 <string>Афиша</string>
@@ -112,50 +130,261 @@
            </layout>
           </item>
           <item>
-           <layout class="QVBoxLayout" name="verticalLayout">
+           <layout class="QVBoxLayout" name="mainDetailsLayout">
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <spacer name="horizontalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="bodyDetailsMovieLayout">
               <item>
-               <widget class="QLabel" name="label">
-                <property name="text">
-                 <string>Название</string>
+               <layout class="QVBoxLayout" name="rightLayout">
+                <property name="sizeConstraint">
+                 <enum>QLayout::SizeConstraint::SetMinAndMaxSize</enum>
                 </property>
-               </widget>
+                <item>
+                 <widget class="QLabel" name="posterLabel">
+                  <property name="minimumSize">
+                   <size>
+                    <width>200</width>
+                    <height>300</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>200</width>
+                    <height>300</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="imdbLayout">
+                  <item>
+                   <widget class="QLabel" name="imdbLabel">
+                    <property name="maximumSize">
+                     <size>
+                      <width>75</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>IMDB ID:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="imdbText">
+                    <property name="text">
+                     <string>TextLabel</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="TMDBLayout">
+                  <item>
+                   <widget class="QLabel" name="TMDBLabel">
+                    <property name="maximumSize">
+                     <size>
+                      <width>75</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>TMDB ID:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="TMDBText">
+                    <property name="text">
+                     <string>TextLabel</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="statusLayout">
+                  <item>
+                   <widget class="QLabel" name="statusLabel">
+                    <property name="maximumSize">
+                     <size>
+                      <width>75</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>Status:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="statusText">
+                    <property name="text">
+                     <string>TextLabel</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <spacer name="verticalSpacer">
+                  <property name="orientation">
+                   <enum>Qt::Orientation::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>20</width>
+                    <height>40</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
               </item>
               <item>
-               <widget class="QLineEdit" name="lineEdit">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="text">
-                 <string>Пример</string>
-                </property>
-               </widget>
+               <layout class="QVBoxLayout" name="leftLayout">
+                <item>
+                 <layout class="QHBoxLayout" name="nameMovieLayout">
+                  <item>
+                   <widget class="QLabel" name="nameMovieLabel">
+                    <property name="text">
+                     <string>Название:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="NameMovieEdit">
+                    <property name="enabled">
+                     <bool>true</bool>
+                    </property>
+                    <property name="text">
+                     <string>Пример</string>
+                    </property>
+                    <property name="readOnly">
+                     <bool>true</bool>
+                    </property>
+                    <property name="clearButtonEnabled">
+                     <bool>false</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QVBoxLayout" name="overviewLayout">
+                  <item>
+                   <widget class="QLabel" name="overviewLabel">
+                    <property name="maximumSize">
+                     <size>
+                      <width>16777215</width>
+                      <height>25</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>Описание:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPlainTextEdit" name="overviewEdit">
+                    <property name="enabled">
+                     <bool>true</bool>
+                    </property>
+                    <property name="lineWrapMode">
+                     <enum>QPlainTextEdit::LineWrapMode::WidgetWidth</enum>
+                    </property>
+                    <property name="readOnly">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <layout class="QHBoxLayout" name="genreLayout">
+                    <item>
+                     <widget class="QLabel" name="genreLabel">
+                      <property name="maximumSize">
+                       <size>
+                        <width>60</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="text">
+                       <string>Жанры:</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="genreText">
+                      <property name="text">
+                       <string>TextLabel</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
               </item>
              </layout>
             </item>
             <item>
-             <widget class="QPlainTextEdit" name="plainTextEdit">
-              <property name="maximumSize">
-               <size>
-                <width>16777215</width>
-                <height>150</height>
-               </size>
+             <layout class="QVBoxLayout" name="bottomLayout">
+              <property name="spacing">
+               <number>0</number>
               </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="verticalSpacer">
-              <property name="orientation">
-               <enum>Qt::Orientation::Vertical</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>40</height>
-               </size>
-              </property>
-             </spacer>
+              <item>
+               <layout class="QVBoxLayout" name="reviewsLayout">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="reviewsLabel">
+                  <property name="text">
+                   <string>Отзывы:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <layout class="QVBoxLayout" name="reviewsContentLayout">
+                  <item>
+                   <widget class="QScrollArea" name="scrollArea">
+                    <property name="widgetResizable">
+                     <bool>true</bool>
+                    </property>
+                    <widget class="QWidget" name="scrollAreaReviews">
+                     <property name="geometry">
+                      <rect>
+                       <x>0</x>
+                       <y>0</y>
+                       <width>555</width>
+                       <height>399</height>
+                      </rect>
+                     </property>
+                    </widget>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </item>
+             </layout>
             </item>
            </layout>
           </item>
@@ -167,9 +396,21 @@
          </attribute>
          <layout class="QHBoxLayout" name="horizontalLayout_7">
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <layout class="QHBoxLayout" name="TVshowListLayout">
             <item>
              <widget class="QTreeWidget" name="listTVLibrary">
+              <property name="minimumSize">
+               <size>
+                <width>500</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>500</width>
+                <height>16777215</height>
+               </size>
+              </property>
               <column>
                <property name="text">
                 <string>Афиша</string>
@@ -185,33 +426,621 @@
            </layout>
           </item>
           <item>
-           <layout class="QVBoxLayout" name="verticalLayout_2">
+           <layout class="QVBoxLayout" name="wrapTVShowLayout">
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_6">
+             <layout class="QVBoxLayout" name="TVShowInfoLayout">
               <item>
-               <widget class="QLabel" name="label_2">
-                <property name="text">
-                 <string>TextLabel</string>
+               <widget class="QTabWidget" name="TVShowInfoTab">
+                <property name="currentIndex">
+                 <number>0</number>
                 </property>
+                <property name="tabsClosable">
+                 <bool>false</bool>
+                </property>
+                <widget class="QWidget" name="infoShow">
+                 <attribute name="title">
+                  <string>Основная информация</string>
+                 </attribute>
+                 <layout class="QVBoxLayout" name="verticalLayout_2">
+                  <item>
+                   <layout class="QVBoxLayout" name="ShowInfoLayout">
+                    <item>
+                     <layout class="QHBoxLayout" name="bodyShowLayout">
+                      <item>
+                       <layout class="QVBoxLayout" name="bodyShowLeftLayout">
+                        <item>
+                         <widget class="QLabel" name="posterTVShowLabel">
+                          <property name="minimumSize">
+                           <size>
+                            <width>200</width>
+                            <height>300</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>200</width>
+                            <height>300</height>
+                           </size>
+                          </property>
+                          <property name="text">
+                           <string>posterLabel</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <layout class="QHBoxLayout" name="infoCountSLayout">
+                          <item>
+                           <widget class="QLabel" name="infoCountSText">
+                            <property name="minimumSize">
+                             <size>
+                              <width>75</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>75</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>Сезонов:</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QLabel" name="infoCountSLabel">
+                            <property name="minimumSize">
+                             <size>
+                              <width>125</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>125</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>-</string>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </item>
+                        <item>
+                         <layout class="QHBoxLayout" name="infoCountELayout">
+                          <item>
+                           <widget class="QLabel" name="infoCountEText">
+                            <property name="minimumSize">
+                             <size>
+                              <width>75</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>75</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>Серий:</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QLabel" name="infoCountELabel">
+                            <property name="minimumSize">
+                             <size>
+                              <width>125</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>125</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>-</string>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </item>
+                        <item>
+                         <layout class="QHBoxLayout" name="TMDBTVshowIDLayout">
+                          <item>
+                           <widget class="QLabel" name="TMDBTVshowIDLabel">
+                            <property name="minimumSize">
+                             <size>
+                              <width>75</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>75</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>TMDB ID:</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QLabel" name="TMDBTVshowIDText">
+                            <property name="minimumSize">
+                             <size>
+                              <width>125</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>125</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>-</string>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </item>
+                        <item>
+                         <layout class="QHBoxLayout" name="statusTVShowLayout">
+                          <item>
+                           <widget class="QLabel" name="statusTVShowLabel">
+                            <property name="minimumSize">
+                             <size>
+                              <width>75</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>75</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>Статус:</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QLabel" name="statusTVShowText">
+                            <property name="minimumSize">
+                             <size>
+                              <width>125</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>125</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>-</string>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </item>
+                        <item>
+                         <spacer name="verticalSpacer_4">
+                          <property name="orientation">
+                           <enum>Qt::Orientation::Vertical</enum>
+                          </property>
+                          <property name="sizeHint" stdset="0">
+                           <size>
+                            <width>20</width>
+                            <height>40</height>
+                           </size>
+                          </property>
+                         </spacer>
+                        </item>
+                       </layout>
+                      </item>
+                      <item>
+                       <layout class="QVBoxLayout" name="bodyShowRightLayout">
+                        <property name="sizeConstraint">
+                         <enum>QLayout::SizeConstraint::SetMinimumSize</enum>
+                        </property>
+                        <item>
+                         <layout class="QHBoxLayout" name="originalNameShowLayout">
+                          <property name="sizeConstraint">
+                           <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
+                          </property>
+                          <item>
+                           <widget class="QLabel" name="originalNameShowLabel">
+                            <property name="minimumSize">
+                             <size>
+                              <width>126</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>126</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>Название(ориг.):</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QLineEdit" name="originalNameShowText"/>
+                          </item>
+                         </layout>
+                        </item>
+                        <item>
+                         <layout class="QHBoxLayout" name="NameTVShowLayout">
+                          <property name="sizeConstraint">
+                           <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
+                          </property>
+                          <item>
+                           <widget class="QLabel" name="NameTVShowLabel">
+                            <property name="minimumSize">
+                             <size>
+                              <width>125</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>126</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>Название(Локал.):</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QLineEdit" name="nameTVShow">
+                            <property name="readOnly">
+                             <bool>true</bool>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </item>
+                        <item>
+                         <layout class="QVBoxLayout" name="overviewTVShowLayout">
+                          <property name="sizeConstraint">
+                           <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
+                          </property>
+                          <item>
+                           <widget class="QLabel" name="overviewTVShowLabel">
+                            <property name="text">
+                             <string>Описание:</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QTextEdit" name="overviewTVShowText"/>
+                          </item>
+                          <item>
+                           <spacer name="verticalSpacer_2">
+                            <property name="orientation">
+                             <enum>Qt::Orientation::Vertical</enum>
+                            </property>
+                            <property name="sizeHint" stdset="0">
+                             <size>
+                              <width>20</width>
+                              <height>40</height>
+                             </size>
+                            </property>
+                           </spacer>
+                          </item>
+                         </layout>
+                        </item>
+                        <item>
+                         <spacer name="horizontalSpacer_6">
+                          <property name="orientation">
+                           <enum>Qt::Orientation::Horizontal</enum>
+                          </property>
+                          <property name="sizeHint" stdset="0">
+                           <size>
+                            <width>40</width>
+                            <height>20</height>
+                           </size>
+                          </property>
+                         </spacer>
+                        </item>
+                       </layout>
+                      </item>
+                     </layout>
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacer_2">
+                      <property name="orientation">
+                       <enum>Qt::Orientation::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>40</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
+                     <layout class="QHBoxLayout" name="tvshowDetailsLayout"/>
+                    </item>
+                   </layout>
+                  </item>
+                 </layout>
+                </widget>
+                <widget class="QWidget" name="infoEpisode">
+                 <attribute name="title">
+                  <string>О серии</string>
+                 </attribute>
+                 <layout class="QVBoxLayout" name="verticalLayout">
+                  <item>
+                   <layout class="QVBoxLayout" name="EpisodeInfoLayout">
+                    <item>
+                     <layout class="QHBoxLayout" name="bodyEpisodeLayout">
+                      <item>
+                       <layout class="QVBoxLayout" name="bodyEpisodeLeftLayout">
+                        <item>
+                         <widget class="QLabel" name="posterEpisode">
+                          <property name="minimumSize">
+                           <size>
+                            <width>200</width>
+                            <height>300</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>200</width>
+                            <height>300</height>
+                           </size>
+                          </property>
+                          <property name="text">
+                           <string>posterEpisode</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <layout class="QHBoxLayout" name="airDateLayout">
+                          <item>
+                           <widget class="QLabel" name="airDateText">
+                            <property name="minimumSize">
+                             <size>
+                              <width>75</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>75</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>Дата выхода:</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QLabel" name="airDateLabel">
+                            <property name="minimumSize">
+                             <size>
+                              <width>125</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>125</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>-</string>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </item>
+                        <item>
+                         <layout class="QHBoxLayout" name="TMDBEpisodeLayout">
+                          <item>
+                           <widget class="QLabel" name="TMDBIdEpisodeLabel">
+                            <property name="minimumSize">
+                             <size>
+                              <width>75</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>75</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>TMDB ID:</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QLabel" name="TMDBIdEpisodeText">
+                            <property name="minimumSize">
+                             <size>
+                              <width>125</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>125</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>-</string>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </item>
+                        <item>
+                         <spacer name="verticalSpacer_6">
+                          <property name="orientation">
+                           <enum>Qt::Orientation::Vertical</enum>
+                          </property>
+                          <property name="sizeHint" stdset="0">
+                           <size>
+                            <width>20</width>
+                            <height>40</height>
+                           </size>
+                          </property>
+                         </spacer>
+                        </item>
+                       </layout>
+                      </item>
+                      <item>
+                       <layout class="QVBoxLayout" name="bodyEpisodeRightLayout">
+                        <item>
+                         <layout class="QHBoxLayout" name="nameEpisodeLayout">
+                          <item>
+                           <widget class="QLabel" name="nameEpisodeLabel">
+                            <property name="minimumSize">
+                             <size>
+                              <width>75</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>75</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>Название:</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QLabel" name="nameEpisodeText">
+                            <property name="minimumSize">
+                             <size>
+                              <width>0</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>16777215</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>-</string>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </item>
+                        <item>
+                         <layout class="QVBoxLayout" name="overviewEpisodeLayout">
+                          <item>
+                           <widget class="QLabel" name="overviewEpisodeLabel">
+                            <property name="text">
+                             <string>Описание:</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QLabel" name="overviewEpisodeText">
+                            <property name="text">
+                             <string>-</string>
+                            </property>
+                            <property name="textFormat">
+                             <enum>Qt::TextFormat::RichText</enum>
+                            </property>
+                            <property name="wordWrap">
+                             <bool>true</bool>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <spacer name="verticalSpacer_5">
+                            <property name="orientation">
+                             <enum>Qt::Orientation::Vertical</enum>
+                            </property>
+                            <property name="sizeHint" stdset="0">
+                             <size>
+                              <width>20</width>
+                              <height>40</height>
+                             </size>
+                            </property>
+                           </spacer>
+                          </item>
+                          <item>
+                           <spacer name="horizontalSpacer_7">
+                            <property name="orientation">
+                             <enum>Qt::Orientation::Horizontal</enum>
+                            </property>
+                            <property name="sizeHint" stdset="0">
+                             <size>
+                              <width>40</width>
+                              <height>20</height>
+                             </size>
+                            </property>
+                           </spacer>
+                          </item>
+                         </layout>
+                        </item>
+                       </layout>
+                      </item>
+                     </layout>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacer_4">
+                    <property name="orientation">
+                     <enum>Qt::Orientation::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </widget>
                </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="lineEdit_2"/>
               </item>
              </layout>
             </item>
             <item>
-             <widget class="QPlainTextEdit" name="plainTextEdit_2"/>
-            </item>
-            <item>
-             <spacer name="verticalSpacer_2">
+             <spacer name="horizontalSpacer_5">
               <property name="orientation">
-               <enum>Qt::Orientation::Vertical</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>20</width>
-                <height>40</height>
+                <width>40</width>
+                <height>20</height>
                </size>
               </property>
              </spacer>
@@ -231,7 +1060,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1191</width>
+     <width>1206</width>
      <height>23</height>
     </rect>
    </property>

@@ -50,6 +50,7 @@ private:
     void updateReviewsTV(QList<Reviews> reviews, QString NameShow);
     void updateTvShowEpisode(ShowInfo show);
     void updateVideosTV(QList<Videos> videos, QString NameShow);
+    QString removeLeadingZeros(const QString& input);
     static QRegularExpression re;
 signals:
     void signalUpdateProgresBar(QString value);

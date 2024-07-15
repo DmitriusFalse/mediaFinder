@@ -1,10 +1,16 @@
 #include "mainwindow.h"
+#include <QTextDocument>
 #include "settingsapp.h"
 #include "ui_mainwindow.h"
 #include <QScrollBar>
 #include <QDir>
 #include <QIcon>
 #include <QMessageBox>
+#include <QTextBlock>
+#include <QGraphicsBlurEffect>
+#include <QPainter>
+#include <QGraphicsScene>
+#include <QGraphicsPixmapItem>
 
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow)
@@ -26,7 +32,11 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
 
     this->dialogSettingsApp = new SettingsApp(this,dbmanager, settingsData);
 
+    // this->TvShowLayout = ui->ShowInfoLayout;
+    // this->EpisodeLayout = ui->EpisodeInfoLayout;
 
+    ui->TVShowInfoLayout->removeItem(this->TvShowLayout);
+    ui->TVShowInfoLayout->removeItem(this->EpisodeLayout);
 
     ui->PBRefreshLibrary->hide();
     ui->listMovieLibrary->setStyleSheet("QTreeWidget::item { height: 128px; }");
@@ -73,8 +83,10 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     this->updateCollections("Movie");
     this->updateCollections("TV");
 
-
-
+    this->setLayoutVisibility(ui->mainDetailsLayout, false);
+    this->setLayoutVisibility(ui->wrapTVShowLayout, false);
+    ui->TVShowInfoTab->setCurrentIndex(0);
+    ui->TVShowInfoTab->setTabEnabled(1, false);
 }
 
 MainWindow::~MainWindow()
@@ -119,22 +131,108 @@ void MainWindow::on_refreshLibrary_clicked()
 
 void MainWindow::clickTreeWidgetMovie()
 {
+
     qDebug() << "Click Movie";
+    this->setLayoutVisibility(ui->mainDetailsLayout, true);
     ui->loadMediaButton->setDisabled(false);
     QTreeWidgetItem *selectedItem = ui->listMovieLibrary->currentItem();
 
-    QString hiddenData = selectedItem->data(0, Qt::UserRole).toString();
-    // QMessageBox::information(this, "Заголовок", hiddenData);
+    int id = selectedItem->data(0, Qt::UserRole).toInt();
 
+    MovieInfo movie = dbmanager->getMovieByID(id);
+
+    QPixmap posterPixmap(movie.poster);
+
+    if(QFile::exists (movie.poster)){
+        posterPixmap.load (movie.poster);
+    }else{
+        posterPixmap.load ("/opt/MediaFinder/poster.png");
+    }
+
+    QPixmap scaledPixmap = posterPixmap.scaled(200, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    ui->posterLabel->setPixmap(scaledPixmap);
+    ui->posterLabel->setWindowTitle(movie.name);
+    if(movie.name.size()>0){
+        ui->NameMovieEdit->setText(movie.name);
+    }else{
+        ui->NameMovieEdit->setText("-");
+    }
+    if(movie.overview.size()>0){
+        ui->overviewEdit->setPlainText(movie.overview);
+    }
+    if(movie.imdbID>0){
+        ui->imdbText->setText(QString::number(movie.imdbID));
+    }else{
+        ui->imdbText->setText("-");
+    }
+    if(movie.IDMovie>0){
+        ui->TMDBText->setText(QString::number(movie.IDMovie));
+    }else{
+        ui->TMDBText->setText("-");
+    }
+    if(movie.Status.size()>0){
+        ui->statusText->setText(movie.Status);
+    }else{
+        ui->statusText->setText("-");
+    }
+    ui->genreText->setText(movie.genre);
+    // ui->reviewsLayout;
+    QVBoxLayout *reviewDynamicLayout = new QVBoxLayout();
+    QWidget *containerWidget = new QWidget();
+    containerWidget->setLayout(reviewDynamicLayout);
+    for (const Reviews& review : movie.reviews) {
+
+        QLabel *titleReviewLabel = new QLabel(review.author);
+        QLabel *contentReviewLabel = new QLabel(review.content);
+
+        QFrame *separated = new QFrame();
+        separated->setFrameShape(QFrame::HLine);
+
+        contentReviewLabel->setWordWrap(true);
+        contentReviewLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+        // contentReviewLabel->setFixedHeight(textHeight);
+        // QLabel *contentReviewLabel = new QLabel(review.content);
+        reviewDynamicLayout->addWidget(titleReviewLabel);
+        reviewDynamicLayout->addWidget(contentReviewLabel);
+        reviewDynamicLayout->addWidget(separated);
+        reviewDynamicLayout->addWidget(separated);
+    }
+    ui->scrollArea->setWidget(containerWidget);
+    // ui->reviewsContentLayout->addLayout(reviewDynamicLayout);
 }
 
 void MainWindow::clickTreeWidgetTV()
 {
     qDebug() << "Click TV";
-    ui->loadMediaButton->setDisabled(false);
+
     QTreeWidgetItem *selectedItem = ui->listTVLibrary->currentItem();
-    int srcID = selectedItem->data(0, Qt::UserRole).toInt();
-    ui->lineEdit_2->setText(QString::number(srcID));
+    QTreeWidgetItem *parentItem = selectedItem->parent(); // Получение родительского элемента
+    this->setLayoutVisibility(ui->wrapTVShowLayout, true);
+
+    if (parentItem != nullptr) {
+        //Episode select
+        qDebug() << "1";
+        ui->TVShowInfoTab->setTabEnabled(1, true);
+        ui->TVShowInfoTab->setCurrentIndex(1);
+        int seasonsNumber = selectedItem->data(1, Qt::UserRole).toInt();
+        int episodeNumber = selectedItem->data(2, Qt::UserRole).toInt();
+        int srcID = parentItem->data(0, Qt::UserRole).toInt();
+
+        this->fillTvShowEpisodeForm(srcID, seasonsNumber, episodeNumber);
+
+    } else {
+        ui->TVShowInfoTab->setCurrentIndex(0);
+        ui->TVShowInfoTab->setTabEnabled(1, false);
+
+        int srcID = selectedItem->data(0, Qt::UserRole).toInt();
+
+        this->fillTvShowForm(srcID);
+    }
+
+
+    ui->loadMediaButton->setDisabled(false);
+
 }
 
 void MainWindow::updateCollections(QString type)
@@ -194,6 +292,8 @@ void MainWindow::updateCollections(QString type)
                         const EpisodeInfo& episodeInfo = episodes[episodeNumber];
                         QTreeWidgetItem *subItem1 = new QTreeWidgetItem(mainItem);
                         subItem1->setText(1, episodeInfo.episodeTitle+" S"+QString::number (episodeInfo.seasonsNumber)+" E"+QString::number (episodeInfo.episodeNumber));
+                        subItem1->setData(1,Qt::UserRole,episodeInfo.seasonsNumber);
+                        subItem1->setData(2,Qt::UserRole,episodeInfo.episodeNumber);
                     }
                 }
 
@@ -279,6 +379,149 @@ void MainWindow::updateCollectionsByID(QString type, int id)
     }
 }
 
+void MainWindow::setLayoutVisibility(QLayout *layout, bool visible)
+{
+    if (!layout) return;
+
+    for (int i = 0; i < layout->count(); ++i) {
+        QLayoutItem *item = layout->itemAt(i);
+
+        // Если элемент является виджетом
+        if (QWidgetItem *widgetItem = dynamic_cast<QWidgetItem *>(item)) {
+            QWidget *widget = widgetItem->widget();
+            if (widget) {
+                if (visible) {
+                    widget->show();
+                } else {
+                    widget->hide();
+                }
+            }
+        }
+
+        // Если элемент является другой компоновкой
+        if (QLayout *childLayout = item->layout()) {
+            setLayoutVisibility(childLayout, visible);
+        }
+    }
+}
+
+void MainWindow::fillTvShowForm(int id)
+{
+    ShowInfo show = dbmanager->getShowTVShowByID(id);
+    this->NameShowLoaded = show.nameShow;
+    QPixmap posterPixmap(show.poster);
+
+    if(QFile::exists (show.poster)){
+        posterPixmap.load (show.poster);
+    }else{
+        posterPixmap.load ("/opt/MediaFinder/poster.png");
+    }
+
+    QPixmap scaledPixmap = posterPixmap.scaled(200, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    ui->posterTVShowLabel->setPixmap(scaledPixmap);
+    ui->posterTVShowLabel->setWindowTitle(show.nameShow);
+    if(show.nameShow.size()>0){
+        ui->nameTVShow->setText(show.nameShow);
+    }else{
+        ui->nameTVShow->setText("-");
+    }
+    if(show.originalNameShow.size()>0){
+        ui->originalNameShowText->setText(show.originalNameShow);
+    }else{
+        ui->originalNameShowText->setText("-");
+    }
+    if(show.overview.size()>0){
+        ui->overviewTVShowText->setText(show.overview);
+    }else{
+        ui->overviewTVShowText->setText("-");
+    }
+    // ui->overviewTVShowText->setWordWrapMode(true);
+    ui->overviewTVShowText->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    if(show.idShow>0){
+        ui->TMDBTVshowIDText->setText(QString::number(show.idShow));
+    }else{
+        ui->TMDBTVshowIDText->setText("-");
+    }
+    if(show.status.size()>0){
+        ui->statusTVShowText->setText(show.status);
+    }else{
+        ui->statusTVShowText->setText("-");
+    }
+    ui->infoCountSText->setText(QString::number(show.numberOfSeasons));
+    ui->infoCountEText->setText(QString::number(show.numberOfEpisodes));
+}
+
+void MainWindow::fillTvShowEpisodeForm(int id, int seasonsNumber, int episodeNumber)
+{
+    ShowInfo show = dbmanager->getShowTVShowByID(id);
+    if(this->NameShowLoaded!=show.nameShow){
+        this->fillTvShowForm(id);
+    }
+    EpisodeInfo episode = show.getEpisode(seasonsNumber, episodeNumber);
+
+    if(episode.episodeTitle.size()>0){
+        ui->nameEpisodeText->setText(episode.episodeTitle);
+    }else{
+        ui->nameEpisodeText->setText("-");
+    }
+    if(episode.overview.size()>0){
+        ui->overviewEpisodeText->setText(episode.overview);
+    }else{
+        ui->overviewEpisodeText->setText("-");
+    }
+
+    QPixmap posterPixmap;
+
+    if(QFile::exists (episode.still_path)){
+        posterPixmap.load (episode.still_path);
+    }else{
+        posterPixmap.load ("/opt/MediaFinder/poster.png");
+    }
+
+    QPixmap scaledPixmap = posterPixmap.scaled(200, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+    ui->posterEpisode->setPixmap(scaledPixmap);
+    ui->posterEpisode->setWindowTitle(episode.episodeTitle);
+}
+
+
+
+
+
+// void MainWindow::switchLayoutTVShow(int index)
+// {
+//     switch (index) {
+//     case 1: {
+//         // Удаляем EpisodeLayout из текущего родителя, если он есть
+//         if (EpisodeLayout->parentWidget()) {
+//             EpisodeLayout->parentWidget()->layout()->removeItem(EpisodeLayout);
+//         }
+//         this->setLayoutVisibility(ui->ShowInfoLayout, false);
+//         this->setLayoutVisibility(ui->EpisodeInfoLayout, true);
+//         // Удаляем TvShowLayout из TVShowInfoLayout, если он там есть
+//         ui->TVShowInfoLayout->removeItem(TvShowLayout);
+
+//         // Добавляем TvShowLayout в TVShowInfoLayout
+//         ui->TVShowInfoLayout->addLayout(TvShowLayout);
+//         break;
+//     }
+//     case 2: {
+//         // Удаляем TvShowLayout из текущего родителя, если он есть
+//         if (TvShowLayout->parentWidget()) {
+//             TvShowLayout->parentWidget()->layout()->removeItem(TvShowLayout);
+//         }
+//         this->setLayoutVisibility(ui->ShowInfoLayout, true);
+//         this->setLayoutVisibility(ui->EpisodeInfoLayout, false);
+//         // Удаляем EpisodeLayout из TVShowInfoLayout, если он там есть
+//         ui->TVShowInfoLayout->removeItem(EpisodeLayout);
+
+//         // Добавляем EpisodeLayout в TVShowInfoLayout
+//         ui->TVShowInfoLayout->addLayout(EpisodeLayout);
+//         break;
+//     }
+//     }
+// }
+
 void MainWindow::slotUptateProgressBar(const QString &str)
 {
     ui->PBRefreshLibrary->setFormat(str);
@@ -310,10 +553,16 @@ void MainWindow::slotUpdateListLibraries()
 
 void MainWindow::slotChangetSelection()
 {
+    qDebug() << "Выделение снято";
     auto treeWidget = qobject_cast<QTreeWidget*>(sender());
     if (treeWidget->selectedItems().isEmpty()) {
+        if(treeWidget->objectName()=="listMovieLibrary"){
+            this->setLayoutVisibility(ui->mainDetailsLayout, false);
+        }else if(treeWidget->objectName()=="listTVLibrary"){
+            this->setLayoutVisibility(ui->wrapTVShowLayout, false);
+        }
+
         // Код, который нужно выполнить при снятии выделения
-        qDebug() << "Выделение снято";
         ui->loadMediaButton->setDisabled(true);
     }
 }

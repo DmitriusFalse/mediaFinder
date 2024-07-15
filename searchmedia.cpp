@@ -333,23 +333,24 @@ void SearchMedia::getImageTVShow()
         this->showTv->poster = namePoster;
 
     }
-    if(this->showTv->logoPath.startsWith("/")){
-        showProgres->updateProgres();
-        countSendRequest++;
-        QFileInfo logoPathFile(this->showTv->logoPath);
-        QString nameLogo = "production-compaines."+logoPathFile.suffix();
-        QUrl imageUrl("https://image.tmdb.org/t/p/original"+this->showTv->logoPath);
-        QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-        connect(manager, &QNetworkAccessManager::finished, this,
-                [this, nameLogo,nameShow](QNetworkReply *reply) {
-                    this->slotSavePosterFile(reply, nameLogo,nameShow);
-                });
+    //Надо обработку доделать, чтобы несколько лого загружало
+    // if(this->showTv->logoPath.startsWith("/")){
+    //     showProgres->updateProgres();
+    //     countSendRequest++;
+    //     QFileInfo logoPathFile(this->showTv->logoPath);
+    //     QString nameLogo = "production-compaines."+logoPathFile.suffix();
+    //     QUrl imageUrl("https://image.tmdb.org/t/p/original"+this->showTv->logoPath);
+    //     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    //     connect(manager, &QNetworkAccessManager::finished, this,
+    //             [this, nameLogo, nameShow](QNetworkReply *reply) {
+    //                 this->slotSavePosterFile(reply, nameLogo, nameShow);
+    //             });
 
-        QUrl url(imageUrl);
-        QNetworkRequest request(url);
-        manager->get(request);
-        this->showTv->logoPath = nameLogo;
-    }
+    //     QUrl url(imageUrl);
+    //     QNetworkRequest request(url);
+    //     manager->get(request);
+    //     this->showTv->logoPath = nameLogo;
+    // }
 
 
     foreach (const uint seasonNumber, this->showTv->Episodes.keys()) {
@@ -559,10 +560,10 @@ void SearchMedia::slotFinishRequestChooseMediaEpisodes(QNetworkReply *reply)
             episode->air_date = itemEpisodes.value ("air_date").toString ();
             episode->still_path = itemEpisodes.value ("still_path").toString ();
             showProgres->setTextProgres("Ответ на Сезон "+QString::number(episode->seasonsNumber)+" Эпизод "+QString::number(episode->episodeNumber));
-            if(episode->episodeNumber>0 && episode->seasonsNumber>0){
-               this->showTv->addEpisodes(*episode);
-            }
-            delete episode;
+            this->showTv->addEpisodes(*episode);
+            // if(episode->episodeNumber>0 && episode->seasonsNumber>0){
+            // }
+            // delete episode;
         }
     } else {
         qDebug() << "4Ошибка запроса:" << reply->errorString();
