@@ -335,6 +335,31 @@ void DBManager::updateMovie(MovieInfo movie, int id)
 
 }
 
+void DBManager::saveSettings(QString name, QString value)
+{
+    QSqlQuery query(this->m_database);
+    query.prepare("INSERT INTO settings (name, value) VALUES (:name, :value)");
+    query.bindValue(":name", name);
+    query.bindValue(":value", value);
+
+    if(!query.exec()){
+        qDebug() << "Error update Settings: " << query.lastError().text();
+    }
+}
+
+Settings* DBManager::getAllSettings()
+{
+    Settings *settings = new Settings;
+    QSqlQuery query(this->m_database);
+    query.prepare("SELECT * FROM settings");
+    if(query.exec()){
+        while (query.next()) {
+            settings->addSettings(query.value("name").toString(),query.value("value").toString());
+        }
+    }
+    return settings;
+}
+
 
 QString DBManager::getPathToShowTV(QString nameShow)
 {

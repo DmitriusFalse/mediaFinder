@@ -25,18 +25,13 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     qRegisterMetaType<EpisodeInfo>("EpisodeInfo");
     ui->setupUi(this);
     this->dbmanager = new DBManager(this);
+    this->settings = dbmanager->getAllSettings();
     this->settingsData = new SettingsData(this->dbmanager);
     this->mediaLibrary = new MediaLibrary(this, this->dbmanager, settingsData);
     this->progressBar = new DialogShowProgress;
+    this->dialogSettingsApp = new SettingsApp(this,dbmanager, settingsData, this->settings);
 
 
-    this->dialogSettingsApp = new SettingsApp(this,dbmanager, settingsData);
-
-    // this->TvShowLayout = ui->ShowInfoLayout;
-    // this->EpisodeLayout = ui->EpisodeInfoLayout;
-
-    ui->TVShowInfoLayout->removeItem(this->TvShowLayout);
-    ui->TVShowInfoLayout->removeItem(this->EpisodeLayout);
 
     ui->PBRefreshLibrary->hide();
     ui->listMovieLibrary->setStyleSheet("QTreeWidget::item { height: 128px; }");
@@ -48,6 +43,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
 
     QScrollBar *verticalScrollBar = ui->listMovieLibrary->verticalScrollBar ();
     verticalScrollBar->setStyleSheet("width: 30px;");
+
+
+
     //Соединяем клик в QTreeWidget listMovieLibrary с функцией onTreeWidgetItemSelected
     connect(ui->listMovieLibrary, &QTreeWidget::itemSelectionChanged, this, &MainWindow::clickTreeWidgetMovie);
     connect(ui->listTVLibrary, &QTreeWidget::itemSelectionChanged, this, &MainWindow::clickTreeWidgetTV);
@@ -102,6 +100,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::onDialogClosed()
 {
+    this->reloadSettings();
     // Включаем главное окно после закрытия диалогового окна
     setDisabled(false);
 }
@@ -482,6 +481,12 @@ void MainWindow::fillTvShowEpisodeForm(int id, int seasonsNumber, int episodeNum
 
     ui->posterEpisode->setPixmap(scaledPixmap);
     ui->posterEpisode->setWindowTitle(episode.episodeTitle);
+}
+
+void MainWindow::reloadSettings()
+{
+    delete this->settings; // Освобождаем память от старых настроек
+    this->settings = dbmanager->getAllSettings(); // Получаем новые настройки из базы данных
 }
 
 

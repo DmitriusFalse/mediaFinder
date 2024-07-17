@@ -16,16 +16,25 @@
 /// \brief SettingsApp::SettingsApp
 /// \param parent
 //////////////////////////////////////////////////////////////////////////
-SettingsApp::SettingsApp(QWidget *parent, DBManager *dbManager, SettingsData *settings)
+SettingsApp::SettingsApp(QWidget *parent, DBManager *dbManager, SettingsData *settings, Settings *param)
     : QMainWindow(parent)
     , ui(new Ui::SettingsApp)
     , m_settings(settings)
     , m_dbManager(dbManager)
+    , parametrs(param)
 {
     ui->setupUi(this);
     setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
     SettingsApp::addPathToListLibrary();
     changeSettings = false;
+    QString defLang = param->getSettings("language");
+    if(defLang=="en-EN"){
+        ui->defLangComboBox->setCurrentIndex(0);
+    }else if(defLang=="ru-RU"){
+        ui->defLangComboBox->setCurrentIndex(1);
+    }else{
+        ui->defLangComboBox->setCurrentIndex(0);
+    }
 }
 
 SettingsApp::~SettingsApp()
@@ -45,6 +54,25 @@ void SettingsApp::saveLibraryFolder(bool update){
     if(update){
         emit signalUpdateListCollection();
     }
+}
+
+void SettingsApp::saveLangApp()
+{
+//settings
+
+    switch (ui->defLangComboBox->currentIndex()) {
+    case 0:{
+        m_dbManager->saveSettings("language","en-EN");
+    }
+    break;
+    case 1:{
+        m_dbManager->saveSettings("language","ru-RU");
+    }
+    break;
+default:
+    break;
+}
+
 }
 
 void SettingsApp::closeEvent(QCloseEvent *event)
@@ -71,7 +99,9 @@ void SettingsApp::closeEvent(QCloseEvent *event)
 
 void SettingsApp::on_saveButton_clicked()
 {
+    qDebug() << "Save settings";
     changeSettings = false;
+    this->saveLangApp();
     SettingsApp::saveLibraryFolder(true);
     close();
 }
@@ -79,6 +109,7 @@ void SettingsApp::on_saveButton_clicked()
 void SettingsApp::on_applySaveSettings_clicked()
 {
     // changeSettings = true;
+    this->saveLangApp();
     SettingsApp::saveLibraryFolder(false);
 }
 

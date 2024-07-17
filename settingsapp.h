@@ -15,7 +15,7 @@ class SettingsApp : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit SettingsApp(QWidget *parent, DBManager *dbManager, SettingsData *settings);
+    explicit SettingsApp(QWidget *parent, DBManager *dbManager, SettingsData *settings, Settings *param);
     ~SettingsApp();
 
 private slots:
@@ -28,9 +28,11 @@ private:
     Ui::SettingsApp *ui;
     void addPathToListLibrary();
     void saveLibraryFolder(bool update);
+    void saveLangApp();
     bool changeSettings;
     SettingsData *m_settings;
     DBManager *m_dbManager;
+    Settings *parametrs;
 signals:
     void signalUpdateListCollection();
     void signalWindowClosed();

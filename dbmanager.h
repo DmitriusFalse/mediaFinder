@@ -1,5 +1,6 @@
 #ifndef DBMANAGER_H
 #define DBMANAGER_H
+#include "Settings.h"
 #include "movieCollections.h"
 #include <QSqlDatabase>
 #include <QSqlQuery>
@@ -40,6 +41,9 @@ public:
     void extracted(ShowInfo &show);
     void updateTvShow(ShowInfo show, int id);
     void updateMovie(MovieInfo movie, int id);
+    void saveSettings(QString name, QString value);
+    void getSetting(QString name, QString value);
+    Settings* getAllSettings();
     QString getPathToShowTV(QString nameShow);
     QString getPathToMovie(QString name);
 private:

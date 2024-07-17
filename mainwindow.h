@@ -3,8 +3,8 @@
 
 #include <QMainWindow>
 #include <QVBoxLayout>
+#include "Settings.h"
 #include "dialogshowprogress.h"
-#include <QLabel>;
 #include "searchmedia.h"
 #include "settingsapp.h"
 #include "medialibrary.h"
@@ -29,6 +29,11 @@ private:
   void clickTreeWidgetTV();
   void updateCollections(QString type);
   void updateCollectionsByID(QString type, int id);
+  void setLayoutVisibility(QLayout *layout, bool visible);
+  void fillTvShowForm(int id);
+  void fillTvShowEpisodeForm(int id, int seasonsNumber, int episodeNumber);
+  void reloadSettings();
+
   Ui::MainWindow *ui;
   DBManager *dbmanager;
   MediaLibrary *mediaLibrary;
@@ -36,13 +41,9 @@ private:
   SettingsApp *dialogSettingsApp;
   SearchMedia *searchMedia;
   DialogShowProgress *progressBar;
+  Settings *settings;
 
-  QVBoxLayout *TvShowLayout;
-  QVBoxLayout *EpisodeLayout;
-  void setLayoutVisibility(QLayout *layout, bool visible);
   QString NameShowLoaded="";
-  void fillTvShowForm(int id);
-  void fillTvShowEpisodeForm(int id, int seasonsNumber, int episodeNumber);
 
 private slots:
     void onDialogClosed();
