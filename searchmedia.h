@@ -37,6 +37,12 @@ public:
     int getIdMovieDB() const;
     void setIdMovieDB(int newIdMovieDB);
 
+    QString getLangSearch() const;
+    void setLangSearch(const QString &newLangSearch);
+
+    bool getTranslated() const;
+    void setTranslated(bool newGetTranslated);
+
 private:
     Ui::SearchMedia *uiSearch;
     QString nameSearch;
@@ -50,6 +56,8 @@ private:
 
     short countSendRequest;
     QString selectType;
+    QString langSearch;
+    bool translated;
 
     // QNetworkAccessManager *managerNetwork;
     MediaLibrary *mediaLibrary;
@@ -59,17 +67,23 @@ private:
     MovieInfo *movie;
     MovieInfo oldMovie;
     DialogShowProgress *showProgres;
+
+    void setLangSearchMedia();
+
     void sendRequestTMDBSearch(QString Name, QString type);
     void sendRequestTMDBSearchGetImage();
-    void sendRequestTMDBGetInformation();
-    void sendRequestTMDBGetInformationEpisodes(int count);
+    void sendRequestTMDBGetInformation(QString lang="en-EN");
+    void sendRequestTMDBGetInformationEpisodes(int count, QString lang="en-EN");
     void sendRequestTMDBGetImage();
 
     void getImageMovie();
     void getImageTVShow();
+
+    QString updateField(QString oldString, QString newString);
 signals:
     void windowClosed();
     void selectMedia();
+    void endSearch();
 private slots:
 
     void on_searchButton_clicked();
@@ -84,8 +98,8 @@ private slots:
     void processResponseTV(QJsonObject jsonObject);
     void processResponseMovie(QJsonObject jsonObject);
     void endSelectMedia();
-    void on_okButton_clicked();
 
+    void on_selectFindMediaButton_clicked();
 };
 
 #endif // SEARCHMEDIA_H

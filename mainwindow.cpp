@@ -551,6 +551,39 @@ void MainWindow::slotUpdateListLibraries()
     this->updateCollections("TV");
 }
 
+void MainWindow::slotEndSearch()
+{
+
+    switch (ui->tabMainWindow->currentIndex ()) {
+    case 0:{ //Movie
+        this->updateCollections("Movie");
+        // ui->listMovieLibrary->clearSelection();
+        // QTreeWidgetItem *itemMovie = ui->listMovieLibrary->topLevelItem(0); // Первый элемент в дереве
+        // if (itemMovie) {
+        //     qDebug() << "Selecting Item 1";
+        //     itemMovie->setSelected(false); // Снимаем выделение
+        //     itemMovie->setSelected(true);  // Снова выделяем элемент
+        //     ui->listMovieLibrary->scrollToItem(itemMovie); // Прокручиваем к выбранному элементу
+        // }
+        }
+        break;
+    case 1:{ //TV
+            this->updateCollections("TV");
+            // ui->listTVLibrary->clearSelection();
+
+            // QTreeWidgetItem *itemTV = ui->listTVLibrary->topLevelItem(0); // Первый элемент в дереве
+            // if (itemTV) {
+            //     qDebug() << "Selecting Item 1";
+            //     itemTV->setSelected(false); // Снимаем выделение
+            //     itemTV->setSelected(true);  // Снова выделяем элемент
+            //     ui->listTVLibrary->scrollToItem(itemTV); // Прокручиваем к выбранному элементу
+            // }
+        }
+        break;
+    }
+
+}
+
 void MainWindow::slotChangetSelection()
 {
     qDebug() << "Выделение снято";
@@ -587,6 +620,7 @@ void MainWindow::on_loadMediaButton_clicked()
     //Открытие окна поиска
     this->searchMedia = new SearchMedia(this, this->mediaLibrary,this->dbmanager,progressBar);
     connect(this->searchMedia, &SearchMedia::windowClosed, this, &MainWindow::onDialogClosed);
+    connect(this->searchMedia, &SearchMedia::endSearch, this,  &MainWindow::slotEndSearch);
     MainWindow::setDisabled (true);
     this->searchMedia->setDisabled (false);
     // this->searchWindow->setAttribute(Qt::WA_DeleteOnClose);

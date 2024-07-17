@@ -58,5 +58,6 @@ public slots:
     void slotUpdateListLibrary(QString type);
     void slotUpdateListLibraryByID(QString type, int id);
     void slotUpdateListLibraries();
+    void slotEndSearch();
 };
 #endif // MAINWINDOW_H

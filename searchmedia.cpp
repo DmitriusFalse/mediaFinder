@@ -30,7 +30,7 @@ SearchMedia::SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db, Dia
     uiSearch->viewSearchTree->setColumnWidth(2,96);
     uiSearch->viewSearchTree->setColumnWidth(3,128);
 
-    connect(uiSearch->okButton, &QPushButton::clicked, this, &SearchMedia::endSelectMedia);
+    connect(uiSearch->selectFindMediaButton, &QPushButton::clicked, this, &SearchMedia::endSelectMedia);
     connect(uiSearch->viewSearchTree, &QTreeWidget::itemSelectionChanged, this, &SearchMedia::slotChangetSelection);
 
     this->setIdSelectMedia (0);
@@ -39,7 +39,7 @@ SearchMedia::SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db, Dia
 
 SearchMedia::~SearchMedia()
 {
-    disconnect(uiSearch->okButton, &QPushButton::clicked, this, &SearchMedia::endSelectMedia);
+    disconnect(uiSearch->selectFindMediaButton, &QPushButton::clicked, this, &SearchMedia::endSelectMedia);
     disconnect(uiSearch->viewSearchTree, &QTreeWidget::itemSelectionChanged, this, &SearchMedia::slotChangetSelection);
     delete this->showTv;
     delete genres;
@@ -49,7 +49,7 @@ void SearchMedia::on_searchButton_clicked()
 {
     if(uiSearch->searchWordEdit->text ()!=""){
         this->setSearchWord (uiSearch->searchWordEdit->text ());
-
+        this->setLangSearchMedia();
         switch (uiSearch->typeMedia->currentIndex ()) {
         case 0:{this->setTypeMediaSearch ("multi"); break;}
         case 1:{this->setTypeMediaSearch ("movie"); break;}
@@ -85,6 +85,48 @@ void SearchMedia::closeEvent(QCloseEvent *event)
 {
     emit windowClosed();
     QWidget::closeEvent(event);
+}
+
+bool SearchMedia::getTranslated() const
+{
+    return translated;
+}
+
+void SearchMedia::setTranslated(bool newGetTranslated)
+{
+    translated = newGetTranslated;
+}
+
+QString SearchMedia::getLangSearch() const
+{
+    return langSearch;
+}
+
+void SearchMedia::setLangSearch(const QString &newLangSearch)
+{
+    langSearch = newLangSearch;
+}
+
+void SearchMedia::setLangSearchMedia()
+{
+    switch(uiSearch->mediaSource->currentIndex()){
+        case 0:{
+            this->setTranslated(false);
+            switch(uiSearch->langSearchComboBox->currentIndex()){
+                case 0:{
+                    this->setLangSearch("en-EN");
+                }break;
+                case 1:{
+                    this->setTranslated(true);
+                    this->setLangSearch("ru-RU");
+                }break;
+                default: {
+                    this->setLangSearch("en-EN");
+                }
+            }
+        }
+        break;
+    }
 }
 
 int SearchMedia::getIdMovieDB() const
@@ -134,7 +176,7 @@ void SearchMedia::sendRequestTMDBSearch(QString Name, QString type)
 
     QUrlQuery query;
     query.addQueryItem("query", Name);
-    query.addQueryItem("language", "ru-RU");
+    query.addQueryItem("language", getLangSearch());
     url.setQuery (query);
     QNetworkRequest request(url);
 
@@ -180,7 +222,7 @@ void SearchMedia::sendRequestTMDBSearchGetImage()
 }
 
 
-void SearchMedia::sendRequestTMDBGetInformation()
+void SearchMedia::sendRequestTMDBGetInformation(QString lang)
 {
     qDebug() << "Получаем информацию о выбранном Фильме/Сериале";
     showProgres->updateProgres();
@@ -193,7 +235,7 @@ void SearchMedia::sendRequestTMDBGetInformation()
     // query.addQueryItem("language", "ru-RU");
 
     query.addQueryItem("append_to_response", "reviews%2Ccredits%2Cimages%2Cvideos%2Ctranslations");
-    query.addQueryItem("language", "en-EN");
+    query.addQueryItem("language", lang);
     url.setQuery (query);
     QNetworkRequest request(url);
 
@@ -209,7 +251,7 @@ void SearchMedia::sendRequestTMDBGetInformation()
 
 }
 
-void SearchMedia::sendRequestTMDBGetInformationEpisodes(int count)
+void SearchMedia::sendRequestTMDBGetInformationEpisodes(int count, QString lang)
 {
     qDebug() << "Получаем информацию о епизодах Сериале";
     countSendRequest = 0;
@@ -219,7 +261,6 @@ void SearchMedia::sendRequestTMDBGetInformationEpisodes(int count)
         showProgres->updateProgres();
         showProgres->setTextProgres("Запрос на Сезон "+QString::number(index));
         countSendRequest++;
-        qDebug() << countSendRequest;
         QString urlString = QString("https://api.themoviedb.org/3/%1/%2/season/%3")
                                 .arg(getSelectType())
                                 .arg(QString::number(getIdSelectMedia()))
@@ -228,7 +269,7 @@ void SearchMedia::sendRequestTMDBGetInformationEpisodes(int count)
         QUrlQuery query;
         // // query.addQueryItem("query", Name);
         // query.addQueryItem("language", "ru-RU");
-        query.addQueryItem("language", "en-EN");
+        query.addQueryItem("language", lang);
         url.setQuery (query);
         QNetworkRequest request(url);
 
@@ -377,6 +418,19 @@ void SearchMedia::getImageTVShow()
     }
 }
 
+QString SearchMedia::updateField( QString  oldString, QString newString)
+{
+    QString tmp = newString;
+
+    if(newString!=""){
+        return newString;
+    }else if(oldString !=""){
+        return oldString;
+    }else{
+        return "-";
+    }
+}
+
 void SearchMedia::slotViewOverviewMedia()
 {
     QTreeWidgetItem *selectedItem = uiSearch->viewSearchTree->currentItem();
@@ -501,10 +555,10 @@ void SearchMedia::slotChangetSelection()
 {
     auto treeWidget = qobject_cast<QTreeWidget*>(sender());
     if (treeWidget->selectedItems().isEmpty()) {
-        uiSearch->okButton->setEnabled (false);
+        uiSearch->selectFindMediaButton->setEnabled (false);
         uiSearch->overviewMedia->setPlainText ("");
     }else{
-        uiSearch->okButton->setEnabled (true);
+        uiSearch->selectFindMediaButton->setEnabled (true);
         treeWidget->currentItem ();
         QTreeWidgetItem *selectedItem = treeWidget->currentItem();
         int id = selectedItem->data(2, Qt::UserRole).toInt ();
@@ -555,10 +609,12 @@ void SearchMedia::slotFinishRequestChooseMediaEpisodes(QNetworkReply *reply)
             episode->ID = itemEpisodes.value ("id").toInt ();
             episode->episodeNumber = itemEpisodes.value ("episode_number").toInt ();
             episode->seasonsNumber = itemEpisodes.value ("season_number").toInt ();
-            episode->overview = itemEpisodes.value ("overview").toString ();
-            episode->episodeTitle = itemEpisodes.value ("name").toString ();
             episode->air_date = itemEpisodes.value ("air_date").toString ();
             episode->still_path = itemEpisodes.value ("still_path").toString ();
+
+            episode->overview = itemEpisodes.value ("overview").toString ();
+            episode->episodeTitle = itemEpisodes.value ("name").toString ();
+
             showProgres->setTextProgres("Ответ на Сезон "+QString::number(episode->seasonsNumber)+" Эпизод "+QString::number(episode->episodeNumber));
             this->showTv->addEpisodes(*episode);
             // if(episode->episodeNumber>0 && episode->seasonsNumber>0){
@@ -571,8 +627,16 @@ void SearchMedia::slotFinishRequestChooseMediaEpisodes(QNetworkReply *reply)
     showProgres->setTextProgres("");
     qDebug() << "Обновляем базу-1";
     if(countSendRequest==1){
+
         qDebug() << "Обновляем базу-2";
-        this->sendRequestTMDBGetImage();
+        if(this->getTranslated()){
+            this->setTranslated(false);
+            this->sendRequestTMDBGetInformation(getLangSearch());
+        }else{
+            this->sendRequestTMDBGetImage();
+        }
+
+        // this->sendRequestTMDBGetImage();
 
         // dbManager->updateTvShow (*this->showTv, getIdTVDB());
     }
@@ -608,6 +672,7 @@ void SearchMedia::slotSavePosterFile(QNetworkReply *reply, QString pathFile, QSt
         showProgres->setTextProgres("");
         showProgres->setMainLineMessage("Завершено");
         showProgres->closeProgres();
+        emit endSearch();
     }
     countSendRequest--;
 
@@ -623,11 +688,13 @@ void SearchMedia::processResponseTV(QJsonObject jsonObject)
 
     this->showTv->idShow = jsonObject.value ("id").toInt ();
     this->showTv->poster = jsonObject.value ("poster_path").toString ();
-    this->showTv->nameShow = jsonObject.value ("name").toString ();
-    this->showTv->originalNameShow = jsonObject.value ("original_name").toString ();
+
+    this->showTv->nameShow = updateField(this->showTv->nameShow,jsonObject.value ("name").toString ());
+
+    this->showTv->originalNameShow = updateField(this->showTv->originalNameShow,jsonObject.value ("original_name").toString ());
     this->showTv->numberOfEpisodes = jsonObject.value ("number_of_episodes").toInt ();
     this->showTv->numberOfSeasons = jsonObject.value ("number_of_seasons").toInt ();
-    this->showTv->overview = jsonObject.value ("overview").toString ();
+    this->showTv->overview = updateField(this->showTv->overview,jsonObject.value ("overview").toString ());
     this->showTv->status = jsonObject.value ("status").toString ();
 
     QJsonObject videos = jsonObject.value ("videos").toObject().value("results").toObject();
@@ -637,7 +704,7 @@ void SearchMedia::processResponseTV(QJsonObject jsonObject)
         QString site = itemVideo.value("site").toString();
         if(site == "YouTube") {
             QString key = itemVideo.value("key").toString();
-            this->showTv->addVideos(key);
+            this->showTv->addVideos(key, this->showTv->idShow);
         }
     }
     QJsonObject jsonReviews = jsonObject.value ("reviews").toObject();
@@ -653,6 +720,7 @@ void SearchMedia::processResponseTV(QJsonObject jsonObject)
             review.author = reviewAuthor;
             review.content = reviewContent;
             review.nameShow = this->showTv->nameShow;
+            review.idShow = this->showTv->idShow;
             this->showTv->addReviews(review);
         }
     }
@@ -663,7 +731,7 @@ void SearchMedia::processResponseTV(QJsonObject jsonObject)
         QJsonObject itemGenre = srcGenre.toObject();
         GenreList.append (itemGenre.value ("name").toString ());
     }
-    this->showTv->genres = GenreList.join (",");
+    this->showTv->genres = updateField(this->showTv->genres,GenreList.join (","));
     QJsonArray production_companies = jsonObject.value ("production_companies").toArray ();
     QStringList productionCompanies,logoPath;
     for (const QJsonValue& srcProduction_companies : production_companies) {
@@ -676,7 +744,13 @@ void SearchMedia::processResponseTV(QJsonObject jsonObject)
     this->showTv->logoPath = logoPath.join (",");
     qDebug() << "Данные о сериале получены";
     showProgres->setTextProgres("");
-    sendRequestTMDBGetInformationEpisodes(this->showTv->numberOfSeasons);
+    // Первый раз получаем информацию на английском
+    // Второй раз на языке локализации выбраной
+    if(this->getTranslated()){
+        sendRequestTMDBGetInformationEpisodes(this->showTv->numberOfSeasons);
+    }else{
+        sendRequestTMDBGetInformationEpisodes(this->showTv->numberOfSeasons, getLangSearch());
+    }
 }
 
 void SearchMedia::processResponseMovie(QJsonObject jsonObject)
@@ -688,13 +762,15 @@ void SearchMedia::processResponseMovie(QJsonObject jsonObject)
 
     movie->IDMovie = jsonObject.value("id").toInt();
     movie->imdbID = jsonObject.value("imdb_id").toInt();
-    movie->overview = jsonObject.value("overview").toString();
-    movie->originalName = jsonObject.value("original_title").toString();
-    movie->name = jsonObject.value("title").toString();
-    movie->originalLang = jsonObject.value("original_language").toString();
-    movie->poster = jsonObject.value("poster_path").toString();
-    movie->release_date = jsonObject.value("release_date").toString();
-    movie->Status = jsonObject.value("status").toString();
+
+    movie->overview = this->updateField(movie->overview, jsonObject.value("overview").toString());
+    movie->originalName = this->updateField(movie->originalName, jsonObject.value("original_title").toString());
+    movie->name = this->updateField(movie->name, jsonObject.value("title").toString());
+
+    movie->originalLang = this->updateField(movie->originalLang,jsonObject.value("original_language").toString());
+    movie->poster = this->updateField(movie->poster,jsonObject.value("poster_path").toString());
+    movie->release_date = this->updateField(movie->release_date,jsonObject.value("release_date").toString());
+    movie->Status = this->updateField(movie->Status,jsonObject.value("status").toString());
 
     QStringList GenreList;
     QJsonArray genres = jsonObject.value ("genres").toArray ();
@@ -703,7 +779,7 @@ void SearchMedia::processResponseMovie(QJsonObject jsonObject)
         QJsonObject itemGenre = srcGenre.toObject();
         GenreList.append (itemGenre.value ("name").toString ());
     }
-    movie->genre = GenreList.join(",");
+    movie->genre = this->updateField(movie->genre, GenreList.join(","));
 
     QJsonArray production_companies = jsonObject.value ("production_companies").toArray ();
     QStringList productionCompanies,logoPath;
@@ -729,10 +805,16 @@ void SearchMedia::processResponseMovie(QJsonObject jsonObject)
             review.author = reviewAuthor;
             review.content = reviewContent;
             review.nameShow = this->movie->originalName;
+            review.idShow = movie->IDMovie;
             this->movie->addReviews(review);
         }
     }
-    this->sendRequestTMDBGetImage();
+    if(this->getTranslated()){
+        this->setTranslated(false);
+        this->sendRequestTMDBGetInformation(getLangSearch());
+    }else{
+        this->sendRequestTMDBGetImage();
+    }
 
 }
 
@@ -744,8 +826,10 @@ void SearchMedia::endSelectMedia()
     this->sendRequestTMDBGetInformation();
 }
 
-void SearchMedia::on_okButton_clicked()
+
+void SearchMedia::on_selectFindMediaButton_clicked()
 {
     this->close ();
     emit selectMedia();
 }
+

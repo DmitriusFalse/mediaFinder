@@ -112,6 +112,31 @@
          </layout>
         </item>
         <item>
+         <layout class="QHBoxLayout" name="langSearchLayout">
+          <item>
+           <widget class="QLabel" name="langSearchLabel">
+            <property name="text">
+             <string>Язык:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="langSearchComboBox">
+            <item>
+             <property name="text">
+              <string>Английский</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Русский</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
            <widget class="QLabel" name="labelSearchWord">
@@ -156,7 +181,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="okButton">
+         <widget class="QPushButton" name="selectFindMediaButton">
           <property name="enabled">
            <bool>false</bool>
           </property>

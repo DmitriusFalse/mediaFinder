@@ -42,6 +42,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="renameButton">
+        <property name="text">
+         <string>Переименовать</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Orientation::Horizontal</enum>
@@ -470,7 +477,7 @@
                         <item>
                          <layout class="QHBoxLayout" name="infoCountSLayout">
                           <item>
-                           <widget class="QLabel" name="infoCountSText">
+                           <widget class="QLabel" name="infoCountSLabel">
                             <property name="minimumSize">
                              <size>
                               <width>75</width>
@@ -489,7 +496,7 @@
                            </widget>
                           </item>
                           <item>
-                           <widget class="QLabel" name="infoCountSLabel">
+                           <widget class="QLabel" name="infoCountSText">
                             <property name="minimumSize">
                              <size>
                               <width>125</width>
@@ -512,7 +519,7 @@
                         <item>
                          <layout class="QHBoxLayout" name="infoCountELayout">
                           <item>
-                           <widget class="QLabel" name="infoCountEText">
+                           <widget class="QLabel" name="infoCountELabel">
                             <property name="minimumSize">
                              <size>
                               <width>75</width>
@@ -531,7 +538,7 @@
                            </widget>
                           </item>
                           <item>
-                           <widget class="QLabel" name="infoCountELabel">
+                           <widget class="QLabel" name="infoCountEText">
                             <property name="minimumSize">
                              <size>
                               <width>125</width>
@@ -817,10 +824,10 @@
                         <item>
                          <layout class="QHBoxLayout" name="airDateLayout">
                           <item>
-                           <widget class="QLabel" name="airDateText">
+                           <widget class="QLabel" name="airDateLabel">
                             <property name="minimumSize">
                              <size>
-                              <width>75</width>
+                              <width>100</width>
                               <height>25</height>
                              </size>
                             </property>
@@ -836,10 +843,10 @@
                            </widget>
                           </item>
                           <item>
-                           <widget class="QLabel" name="airDateLabel">
+                           <widget class="QLabel" name="airDateText">
                             <property name="minimumSize">
                              <size>
-                              <width>125</width>
+                              <width>100</width>
                               <height>25</height>
                              </size>
                             </property>
@@ -859,10 +866,10 @@
                         <item>
                          <layout class="QHBoxLayout" name="TMDBEpisodeLayout">
                           <item>
-                           <widget class="QLabel" name="TMDBIdEpisodeLabel">
+                           <widget class="QLabel" name="TMDBIdEpisodeText">
                             <property name="minimumSize">
                              <size>
-                              <width>75</width>
+                              <width>100</width>
                               <height>25</height>
                              </size>
                             </property>
@@ -878,10 +885,10 @@
                            </widget>
                           </item>
                           <item>
-                           <widget class="QLabel" name="TMDBIdEpisodeText">
+                           <widget class="QLabel" name="TMDBIdEpisodeLabel">
                             <property name="minimumSize">
                              <size>
-                              <width>125</width>
+                              <width>100</width>
                               <height>25</height>
                              </size>
                             </property>

@@ -71,21 +71,22 @@ void DBManager::createStructureDB(QString nameTables) {
     query.finish();
 }
 
-void DBManager::updateReviewsTV(QList<Reviews> reviews, QString NameShow)
+void DBManager::updateReviewsTV(QList<Reviews> reviews, QString NameShow, int id)
 {
     QSqlQuery query(this->m_database);
     //Удаляем старые обзоры перед обновлением
-    query.prepare("DELETE FROM ReviewsTV WHERE nameShow = :nameShow");
-    query.bindValue(":nameShow", NameShow);
+    query.prepare("DELETE FROM ReviewsTV WHERE idShow = :id");
+    query.bindValue(":id", id);
     query.exec();
 
     for (const auto& review : reviews) {
         query.clear();
         // QString q = "INSERT INTO ReviewsTV (nameShow, author, content) VALUE ("+review.nameShow+", "+review.nameShow+", "+review.nameShow+"")";
-        query.prepare("INSERT INTO ReviewsTV (nameShow, author, content) VALUES (:name, :a, :c)");
+        query.prepare("INSERT INTO ReviewsTV (nameShow, author, content, idShow) VALUES (:name, :a, :c, :id)");
         query.bindValue(":name", review.nameShow);
         query.bindValue(":a", review.author);
         query.bindValue(":c", review.content);
+        query.bindValue(":id", review.idShow);
         if(!query.exec()){
             qDebug() << "1-1 Ошибка выполнения запроса:" << query.lastError().text();
         }
@@ -126,18 +127,19 @@ void DBManager::updateTvShowEpisode(ShowInfo show)
     }
 }
 
-void DBManager::updateVideosTV(QList<Videos> videos, QString NameShow)
+void DBManager::updateVideosTV(QList<Videos> videos,QString nameShow, int id)
 {
     QSqlQuery query(this->m_database);
     //Удаляем старые видео перед обновлением
-    query.prepare("DELETE FROM VideosTV WHERE nameShow = :nameShow");
-    query.bindValue(":nameShow", NameShow);
+    query.prepare("DELETE FROM VideosTV WHERE idShow = :id");
+    query.bindValue(":id", id);
     query.exec();
 
     for (const Videos& video : videos) {
-        query.prepare("INSERT INTO VideosTV (nameShow, key) VALUES (:nameShow, :key)");
-        query.bindValue("nameShow",NameShow);
-        query.bindValue("key",video.key);
+        query.prepare("INSERT INTO VideosTV (nameShow, key, idShow) VALUES (:nameShow, :key, :id)");
+        query.bindValue(":nameShow",nameShow);
+        query.bindValue(":key",video.key);
+        query.bindValue(":id",video.idShow);
         if(!query.exec()){
             qDebug() << "3Ошибка выполнения запроса:" << query.lastError().text();
         }
@@ -277,9 +279,9 @@ void DBManager::updateTvShow(ShowInfo show, int id)
                 //Обновляем информацию о Эпизодах
                 this->updateTvShowEpisode(show);
                 // Вносим обзоры в базу
-                this->updateReviewsTV(show.reviews, show.nameShow);
+                this->updateReviewsTV(show.reviews, show.nameShow, show.idShow);
                 // Обновляем видео ролики
-                this->updateVideosTV(show.videos, show.nameShow);
+                this->updateVideosTV(show.videos, show.nameShow, show.idShow);
 
                 // Отправляем сигнал об обновлении главного окна
                 emit signalUpdateMainWindowByID("TV", id);
@@ -318,13 +320,13 @@ void DBManager::updateMovie(MovieInfo movie, int id)
     query.bindValue(":idimdb",movie.imdbID);
     query.bindValue(":releasedate",movie.release_date);
     query.bindValue(":originalname",movie.originalName);
-    query.bindValue(":status,",movie.Status);
+    query.bindValue(":status",movie.Status);
     query.bindValue(":id",id);
 
     if(query.exec()){
-        this->updateReviewsTV(movie.reviews, movie.name);
+        this->updateReviewsTV(movie.reviews, movie.name, movie.IDMovie);
         // Обновляем видео ролики
-        this->updateVideosTV(movie.videos, movie.name);
+        this->updateVideosTV(movie.videos, movie.name, movie.IDMovie);
         // Отправляем сигнал об обновлении главного окна
         emit signalUpdateMainWindowByID("Movie", id);
     }else{
@@ -666,35 +668,37 @@ QStringList DBManager::loadGenre()
     return genres;
 }
 
-QList<Videos> DBManager::getVideos(QString name)
+QList<Videos> DBManager::getVideos(int idShow)
 {
     QList<Videos> videos;
     QSqlQuery query(this->m_database);
-    query.prepare("SELECT * FROM VideosTV WHERE NameShow=:name");
-    query.bindValue(":name", name);
+    query.prepare("SELECT * FROM VideosTV WHERE idShow=:id");
+    query.bindValue(":id", idShow);
 
     if(query.exec()){
         while (query.next()) {
             Videos video;
             video.key = query.value("key").toString();
+            video.idShow = query.value("idShow").toInt();
             videos.append(video);
         }
     }
     return videos;
 }
 
-QList<Reviews> DBManager::getReviews(QString name)
+QList<Reviews> DBManager::getReviews(int idShow)
 {
     QList<Reviews> reviews;
     QSqlQuery query(this->m_database);
-    query.prepare("SELECT * FROM ReviewsTV WHERE NameShow=:name");
-    query.bindValue(":name", name);
+    query.prepare("SELECT * FROM ReviewsTV WHERE idShow=:id");
+    query.bindValue(":id", idShow);
     if(query.exec()){
         while (query.next()) {
             Reviews review;
             review.author = query.value("author").toString();
             review.content = query.value("content").toString();
             review.nameShow = query.value("nameShow").toString();
+            review.idShow = query.value("idShow").toInt();
             reviews.append(review);
         }
     }
@@ -885,8 +889,8 @@ MovieCollections DBManager::getMovieCollection()
             movie.production_companies = query.value("Description").toString();
             movie.logoCompanies = query.value("Description").toString();
             movie.Status = query.value("Status").toString();
-            movie.reviews = this->getReviews(movie.name);
-            movie.videos = this->getVideos(movie.name);
+            movie.reviews = this->getReviews(movie.IDMovie);
+            movie.videos = this->getVideos(movie.IDMovie);
             movCol.addMovie(movie);
             }
         }
@@ -1023,8 +1027,8 @@ MovieInfo DBManager::getMovieByID(int id)
         movie.production_companies = query.value("Description").toString();
         movie.logoCompanies = query.value("Description").toString();
         movie.Status = query.value("Status").toString();
-        movie.reviews = this->getReviews(movie.name);
-        movie.videos = this->getVideos(movie.name);
+        movie.reviews = this->getReviews(movie.IDMovie);
+        movie.videos = this->getVideos(movie.IDMovie);
     }else{
         qDebug() << "getMovieByID: " << query.lastError().text();
     }

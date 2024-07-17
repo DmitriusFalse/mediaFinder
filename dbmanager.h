@@ -26,8 +26,8 @@ public:
     void removeMovieCollectionsLibrary(QString libraryPath);
     void removeOldRecordInBD(QString type);
     QStringList loadGenre();
-    QList<Videos> getVideos(QString name);
-    QList<Reviews> getReviews(QString name);
+    QList<Videos> getVideos(int idShow);
+    QList<Reviews> getReviews(int idShow);
     QStringList readMovieCollection(QString detailLevel);
     QStringList readTVCollection(QString detailLevel);
     TVCollection getTVCollection();
@@ -47,9 +47,9 @@ private:
     void closeConnection();
     void checkDB();
     void createStructureDB(QString nameTables);
-    void updateReviewsTV(QList<Reviews> reviews, QString NameShow);
+    void updateReviewsTV(QList<Reviews> reviews, QString NameShow, int id);
     void updateTvShowEpisode(ShowInfo show);
-    void updateVideosTV(QList<Videos> videos, QString NameShow);
+    void updateVideosTV(QList<Videos> videos, QString nameShow, int id);
     QString removeLeadingZeros(const QString& input);
     static QRegularExpression re;
 signals:

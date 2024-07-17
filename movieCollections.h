@@ -7,8 +7,10 @@ struct Reviews {
     QString nameShow;
     QString author;
     QString content;
+    int idShow;
 };
 struct Videos {
+    int idShow;
     QString key;
     QString getYouTubeEmbed(){
         return "https://www.youtube.com/embed/" + this->key;
@@ -83,7 +85,36 @@ struct ShowInfo {
     QList<Videos> videos;
     QMap<uint, QMap<uint,EpisodeInfo>> Episodes;
     void addEpisodes(EpisodeInfo episode){
-        this->Episodes[episode.seasonsNumber][episode.episodeNumber] = episode;
+        if (Episodes.contains(episode.seasonsNumber) && Episodes[episode.seasonsNumber].contains(episode.episodeNumber)) {
+            EpisodeInfo& existingEpisode = Episodes[episode.seasonsNumber][episode.episodeNumber];
+
+            // Обновление полей при наличии данных
+            if (!episode.episodeTitle.isEmpty()) {
+                existingEpisode.episodeTitle = episode.episodeTitle;
+            }
+            if (!episode.filePath.isEmpty()) {
+                existingEpisode.filePath = episode.filePath;
+            }
+            if (!episode.air_date.isEmpty()) {
+                existingEpisode.air_date = episode.air_date;
+            }
+            if (!episode.still_path.isEmpty()) {
+                existingEpisode.still_path = episode.still_path;
+            }
+            if (!episode.overview.isEmpty()) {
+                existingEpisode.overview = episode.overview;
+            }
+            if (!episode.pathToSerial.isEmpty()) {
+                existingEpisode.pathToSerial = episode.pathToSerial;
+            }
+            if (!episode.libraryPath.isEmpty()) {
+                existingEpisode.libraryPath = episode.libraryPath;
+            }
+            // ID предполагается уникальным и не изменяемым, поэтому не проверяем его.
+        } else {
+            // Добавление нового эпизода
+            Episodes[episode.seasonsNumber][episode.episodeNumber] = episode;
+        }
     }
     EpisodeInfo getEpisode(uint season, uint episode) {
         return Episodes[season][episode];
@@ -94,8 +125,11 @@ struct ShowInfo {
     void addVideos(Videos video){
         this->videos.append(video);
     }
-    void addVideos(QString key){
-        this->addVideos(Videos{.key = key});
+    void addVideos(QString key, int idShow){
+        Videos video;
+        video.idShow = idShow;
+        video.key= key;
+        this->addVideos(video);
     }
 };
 
