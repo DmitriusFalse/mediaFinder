@@ -9,6 +9,7 @@ CONFIG += c++17
 
 SOURCES += \
     dbmanager.cpp \
+    dialogrenamerfiles.cpp \
     dialogshowprogress.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -23,6 +24,7 @@ HEADERS += \
     LibraryItem.h \
     Settings.h \
     dbmanager.h \
+    dialogrenamerfiles.h \
     dialogshowprogress.h \
     mainwindow.h \
     medialibrary.h \
@@ -33,6 +35,7 @@ HEADERS += \
     workrefreshmovie.h
 
 FORMS += \
+    dialogrenamerfiles.ui \
     dialogshowprogress.ui \
     mainwindow.ui \
     searchmedia.ui \

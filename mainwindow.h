@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QVBoxLayout>
 #include "Settings.h"
+#include "dialogrenamerfiles.h"
 #include "dialogshowprogress.h"
 #include "searchmedia.h"
 #include "settingsapp.h"
@@ -42,6 +43,7 @@ private:
   SearchMedia *searchMedia;
   DialogShowProgress *progressBar;
   Settings *settings;
+  DialogRenamerFiles *renameFiles;
 
   QString NameShowLoaded="";
 
@@ -51,6 +53,8 @@ private slots:
     void on_openSettings_clicked();
     void slotChangetSelection();
     void on_loadMediaButton_clicked();
+
+    void on_renameButton_clicked();
 
 public slots:
     // void slotUptateProgressBar(const int &i);

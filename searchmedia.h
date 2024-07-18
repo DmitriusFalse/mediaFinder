@@ -19,7 +19,7 @@ class SearchMedia : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db, DialogShowProgress *sp);
+    explicit SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db, DialogShowProgress *sp, Settings *param);
     ~SearchMedia();
     void fillFields(QString type);
     void setSearchWord(const QString &newNameSearch);
@@ -48,6 +48,7 @@ private:
     QString nameSearch;
     QString typeMediaSearch;
     GenreList *genres;
+    Settings *parametrs;
     void closeEvent(QCloseEvent *event) override;
 
     int idSelectMedia;

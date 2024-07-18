@@ -623,7 +623,7 @@ void MainWindow::on_openSettings_clicked()
 void MainWindow::on_loadMediaButton_clicked()
 {
     //Открытие окна поиска
-    this->searchMedia = new SearchMedia(this, this->mediaLibrary,this->dbmanager,progressBar);
+    this->searchMedia = new SearchMedia(this, this->mediaLibrary,this->dbmanager,progressBar, this->settings);
     connect(this->searchMedia, &SearchMedia::windowClosed, this, &MainWindow::onDialogClosed);
     connect(this->searchMedia, &SearchMedia::endSearch, this,  &MainWindow::slotEndSearch);
     MainWindow::setDisabled (true);
@@ -667,5 +667,22 @@ void MainWindow::on_loadMediaButton_clicked()
 
 
     this->searchMedia->show();
+}
+
+
+void MainWindow::on_renameButton_clicked()
+{
+
+    if(this->renameFiles==nullptr){
+        delete this->renameFiles;
+    }
+    QTreeWidgetItem *selectedItem;
+    selectedItem = ui->listMovieLibrary->currentItem();
+    int idMediaDB = selectedItem->data(0, Qt::UserRole).toInt();
+    qDebug() << idMediaDB;
+    MovieInfo movie = dbmanager->getMovieByID(idMediaDB);
+
+    this->renameFiles = new DialogRenamerFiles(this, dbmanager, &movie);
+    renameFiles->show();
 }
 

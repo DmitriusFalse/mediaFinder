@@ -10,9 +10,10 @@
 #include <QJsonArray>
 #include <QFileInfo>
 
-SearchMedia::SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db, DialogShowProgress *sp)
+SearchMedia::SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db, DialogShowProgress *sp, Settings *param)
     : QMainWindow(parent)
     , uiSearch(new  Ui::SearchMedia)
+    , parametrs(param)
     , mediaLibrary(mLib)
     , dbManager(db)
     , showProgres(sp)
@@ -34,6 +35,15 @@ SearchMedia::SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db, Dia
     connect(uiSearch->viewSearchTree, &QTreeWidget::itemSelectionChanged, this, &SearchMedia::slotChangetSelection);
 
     this->setIdSelectMedia (0);
+
+    QString defLang = param->getSettings("language");
+    if(defLang=="en-EN"){
+        uiSearch->langSearchComboBox->setCurrentIndex(0);
+    }else if(defLang=="ru-RU"){
+        uiSearch->langSearchComboBox->setCurrentIndex(1);
+    }else{
+        uiSearch->langSearchComboBox->setCurrentIndex(0);
+    }
 
 }
 
