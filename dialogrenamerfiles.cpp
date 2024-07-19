@@ -5,23 +5,50 @@
 #include <QRegularExpression>
 
 
-DialogRenamerFiles::DialogRenamerFiles(QWidget *parent, DBManager *db, MovieInfo *m)
+DialogRenamerFiles::DialogRenamerFiles(QWidget *parent, DBManager *db)
     : QDialog(parent)
     , ui(new Ui::DialogRenamerFiles)
     , dbmanager(db)
-    , movie(m)
 {
     ui->setupUi(this);
 // oldListMovie
-    this->replacePlaceholders = new Placeholders(*movie);
-    QFileInfo fileinfo(movie->path);
+
+}
+
+DialogRenamerFiles::~DialogRenamerFiles()
+{
+    delete ui;
+}
+
+void DialogRenamerFiles::setTypeMedia(int index)
+{
+    ui->tabRenamer->setCurrentIndex(index);
+    switch (index) {
+    case 0:{
+        ui->tabRenamer->setTabEnabled(1, false);
+        ui->tabRenamer->setTabEnabled(0, true);
+    }break;
+    case 1:{
+        ui->tabRenamer->setTabEnabled(0, false);
+        ui->tabRenamer->setTabEnabled(1, true);
+    }break;
+    }
+}
+
+void DialogRenamerFiles::setMediaData(MovieInfo mov)
+{
+    this->movie = mov;
+    this->replacePlaceholders = new Placeholders(this->movie);
+    QFileInfo fileinfo(this->movie.path);
     QTreeWidgetItem *newItem = new QTreeWidgetItem(ui->oldListMovie);
-    newItem->setText(0, fileinfo.fileName());
-    ui->patternMovieEdit->setText(fileinfo.fileName());
+    QString nameMovie = fileinfo.completeBaseName();
+    newItem->setText(0, nameMovie);
+    ui->patternMovieEdit->setText(nameMovie);
 
     this->oldIitem = new QTreeWidgetItem(ui->newListMovie);
-    QString description = "<table>";
 
+    QStringList description;
+    description.append("<table>");
     while (this->replacePlaceholders->next()) {
         QString key = this->replacePlaceholders->currentKey();
         QString desc = this->replacePlaceholders->getFieldDescription(key);
@@ -29,22 +56,31 @@ DialogRenamerFiles::DialogRenamerFiles(QWidget *parent, DBManager *db, MovieInfo
 
         // Формируем строку для каждого элемента таблицы
         QString row = "<tr>"
-                      "<td><b>Описание:</b> " + desc + "</td>"
-                               "<td><b>Подстановочное слово:</b> " + key + "</td>"
-                              "<td><b>Пример:</b> " + value + "</td>"
-                                "</tr>";
-
+                          "<td><b>Описание:</b> " + desc + "</td>"
+                          "<td><b>Подстановочное слово:</b> " + key + "</td>"
+                          "<td><b>Данные:</b> " + value + "</td>"
+                      "</tr>";
         // Добавляем сформированную строку в общий текст таблицы
-        description += row;
+        description.append(row);
     }
-
     description += "</table>";
-    ui->patternDescription->setHtml(description);
+    ui->patternMovieDescription->setHtml(description.join(""));
+
+    QSize sizeText = ui->patternMovieDescription->size();
+    int countRow = description.size()-2;
+    if(countRow>=2){
+        sizeText.setHeight(countRow*25);
+    }else if(countRow==1){
+        sizeText.setHeight(25);
+    }
+    ui->patternMovieDescription->setMinimumHeight(sizeText.height());
+    ui->patternMovieDescription->setMaximumHeight(sizeText.height());
+
 }
 
-DialogRenamerFiles::~DialogRenamerFiles()
+void DialogRenamerFiles::setMediaData(ShowInfo sh)
 {
-    delete ui;
+
 }
 
 void DialogRenamerFiles::on_patternMovieEdit_textChanged(const QString &arg1)
@@ -96,5 +132,43 @@ QString DialogRenamerFiles::replacePattern(const QString &input)
     }
 
     return result;
+}
+
+QString DialogRenamerFiles::renameFile(const QString &filePath, const QString &newName)
+{
+    QFileInfo fileInfo(filePath);
+    QString extension = fileInfo.suffix();
+
+    QFileInfo newFileInfo(newFileName);
+    QString newFileNameWithExtension = newFileName;
+
+    // Проверяем, есть ли у нового имени файла расширение
+    if (newFileInfo.suffix().isEmpty()) {
+        newFileNameWithExtension += "." + extension;
+    }
+
+    QString newFilePath = fileInfo.absolutePath() + "/" + newFileNameWithExtension;
+
+    QFile file(filePath);
+    if (file.rename(newFilePath)) {
+        return newFilePath; // Возвращаем полный путь к новому файлу при успехе
+    } else {
+        qDebug() << "Не удалось переименовать файл:" << file.errorString();
+        return filePath; // Возвращаем полный путь к старому файлу при провале
+    }
+}
+
+
+void DialogRenamerFiles::on_renameMovieButton_clicked()
+{
+    QString oldPath = movie.path;
+    QString oldPoster = movie.poster;
+    qDebug() << newFileName;
+    QString newFilePath = this->renameFile(oldPath, newFileName);
+    QString newFilePoster = this->renameFile(oldPoster, newFileName);
+    dbmanager->updateMovieColumn("path", newFilePath, movie.id);
+    dbmanager->updateMovieColumn("poster", newFilePoster, movie.id);
+    this->close();
+    emit signalFinishRename("Movie", movie.id);
 }
 

@@ -43,6 +43,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="renameButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Переименовать</string>
         </property>

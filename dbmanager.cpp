@@ -392,6 +392,24 @@ QString DBManager::getPathToMovie(QString name)
     return fileinfo.path();
 }
 
+bool DBManager::updateMovieColumn(const QString &columnName, const QVariant &newValue, int rowId)
+{
+    QSqlQuery query(this->m_database);
+    QString queryString = QString("UPDATE Movie SET %1 = :newValue WHERE id = :rowId").arg(columnName);
+
+    query.prepare(queryString);
+    query.bindValue(":newValue", newValue);
+    query.bindValue(":rowId", rowId);
+
+    if (query.exec()) {
+        qDebug() << "Запрос выполнен успешно.";
+        return true;
+    } else {
+        qDebug() << "Ошибка выполнения запроса:" << query.lastError().text();
+        return false;
+    }
+}
+
 
 bool DBManager::checkConnectingDB()
 {

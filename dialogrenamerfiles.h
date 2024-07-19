@@ -104,22 +104,31 @@ class DialogRenamerFiles : public QDialog
     Q_OBJECT
 
 public:
-    explicit DialogRenamerFiles(QWidget *parent, DBManager *db, MovieInfo *m);
+    explicit DialogRenamerFiles(QWidget *parent, DBManager *db);
     ~DialogRenamerFiles();
+    void setTypeMedia(int index);
+    void setMediaData(MovieInfo mov);
+    void setMediaData(ShowInfo sh);
 
 private slots:
     void on_patternMovieEdit_textChanged(const QString &arg1);
 
+    void on_renameMovieButton_clicked();
+
+
 private:
     Ui::DialogRenamerFiles *ui;
     DBManager *dbmanager;
-    MovieInfo *movie;
+    MovieInfo movie;
     Placeholders *replacePlaceholders;
     QString newFileName;
     QTreeWidgetItem *oldIitem;
 
     void changeName(QString pattern);
     QString replacePattern(const QString& input);
+    QString renameFile(const QString& filePath, const QString& newName);
+signals:
+    void signalFinishRename(QString type, int id);
 };
 
 #endif // DIALOGRENAMERFILES_H

@@ -134,6 +134,7 @@ void MainWindow::clickTreeWidgetMovie()
     qDebug() << "Click Movie";
     this->setLayoutVisibility(ui->mainDetailsLayout, true);
     ui->loadMediaButton->setDisabled(false);
+    ui->renameButton->setDisabled(false);
     QTreeWidgetItem *selectedItem = ui->listMovieLibrary->currentItem();
 
     int id = selectedItem->data(0, Qt::UserRole).toInt();
@@ -600,6 +601,7 @@ void MainWindow::slotChangetSelection()
             this->setLayoutVisibility(ui->wrapTVShowLayout, false);
         }
 
+        ui->renameButton->setDisabled(true);
         // Код, который нужно выполнить при снятии выделения
         ui->loadMediaButton->setDisabled(true);
     }
@@ -673,16 +675,48 @@ void MainWindow::on_loadMediaButton_clicked()
 void MainWindow::on_renameButton_clicked()
 {
 
-    if(this->renameFiles==nullptr){
+
+
+    if(this->renameFiles!=nullptr){
+        disconnect(this->renameFiles,
+                &DialogRenamerFiles::signalFinishRename,
+                this,
+                &MainWindow::slotUpdateListLibraryByID);
         delete this->renameFiles;
     }
-    QTreeWidgetItem *selectedItem;
-    selectedItem = ui->listMovieLibrary->currentItem();
-    int idMediaDB = selectedItem->data(0, Qt::UserRole).toInt();
-    qDebug() << idMediaDB;
-    MovieInfo movie = dbmanager->getMovieByID(idMediaDB);
+    this->renameFiles = new DialogRenamerFiles(this, dbmanager);
 
-    this->renameFiles = new DialogRenamerFiles(this, dbmanager, &movie);
-    renameFiles->show();
+    switch (ui->tabMainWindow->currentIndex()) {
+    case 0:{
+        QTreeWidgetItem *selectedItem;
+        selectedItem = ui->listMovieLibrary->currentItem();
+        int idMediaDB = selectedItem->data(0, Qt::UserRole).toInt();
+        qDebug() << idMediaDB;
+        MovieInfo movie = dbmanager->getMovieByID(idMediaDB);
+        this->renameFiles->setMediaData(movie);
+    }break;
+    case 1:{
+        QTreeWidgetItem *selectedItem;
+        selectedItem = ui->listTVLibrary->currentItem();
+        QTreeWidgetItem *parentItem = selectedItem->parent(); // Получение родительского элемента
+        int idMediaDB = 0;
+        QString searchText="";
+        if (parentItem != nullptr) {
+            idMediaDB = parentItem->data(0, Qt::UserRole).toInt();
+            searchText = parentItem->text(1);
+        } else {
+            idMediaDB = selectedItem->data(0, Qt::UserRole).toInt();
+            searchText = selectedItem->text(1);
+        }
+        ShowInfo show = dbmanager->getShowTVShowByID(idMediaDB);
+        this->renameFiles->setMediaData(show);
+    }break;
+    }
+    connect(this->renameFiles,
+            &DialogRenamerFiles::signalFinishRename,
+            this,
+            &MainWindow::slotUpdateListLibraryByID);
+    this->renameFiles->setTypeMedia(ui->tabMainWindow->currentIndex());
+    this->renameFiles->show();
 }
 
