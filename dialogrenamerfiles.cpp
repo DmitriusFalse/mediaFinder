@@ -38,21 +38,20 @@ void DialogRenamerFiles::setTypeMedia(int index)
 void DialogRenamerFiles::setMediaData(MovieInfo mov)
 {
     this->movie = mov;
-    this->replacePlaceholders = new Placeholders(this->movie);
+    this->replacePlaceholdersMovie = new PlaceholdersMovie(this->movie);
     QFileInfo fileinfo(this->movie.path);
     QTreeWidgetItem *newItem = new QTreeWidgetItem(ui->oldListMovie);
     QString nameMovie = fileinfo.completeBaseName();
     newItem->setText(0, nameMovie);
-    ui->patternMovieEdit->setText(nameMovie);
 
     this->oldIitem = new QTreeWidgetItem(ui->newListMovie);
 
     QStringList description;
     description.append("<table>");
-    while (this->replacePlaceholders->next()) {
-        QString key = this->replacePlaceholders->currentKey();
-        QString desc = this->replacePlaceholders->getFieldDescription(key);
-        QString value = this->replacePlaceholders->getValue(key);
+    while (this->replacePlaceholdersMovie->next()) {
+        QString key = this->replacePlaceholdersMovie->currentKey();
+        QString desc = this->replacePlaceholdersMovie->getFieldDescription(key);
+        QString value = this->replacePlaceholdersMovie->getValue(key);
 
         // Формируем строку для каждого элемента таблицы
         QString row = "<tr>"
@@ -76,22 +75,95 @@ void DialogRenamerFiles::setMediaData(MovieInfo mov)
     ui->patternMovieDescription->setMinimumHeight(sizeText.height());
     ui->patternMovieDescription->setMaximumHeight(sizeText.height());
 
+    ui->patternMovieEdit->setText(":name-:release_date");
 }
 
 void DialogRenamerFiles::setMediaData(ShowInfo sh)
 {
+    this->showTv = sh;
+    this->replacePlaceholdersTV = new PlaceholdersTV(this->showTv);
+    QTreeWidgetItem *mainItem = new QTreeWidgetItem(ui->oldListTV);
+    mainItem->setText(0, showTv.nameShow);
+    mainItem->setData(0, Qt::UserRole, showTv.ID);
+    uint countRow = 0;
+    foreach (const uint seasonNumber, showTv.Episodes.keys()) {
+        const QMap<uint, EpisodeInfo>& episodes = showTv.Episodes[seasonNumber];
+        foreach (const uint episodeNumber, episodes.keys()) {
+            const EpisodeInfo& episodeInfo = episodes[episodeNumber];
+            QTreeWidgetItem *subItem1 = new QTreeWidgetItem(mainItem);
+            subItem1->setText(0, episodeInfo.episodeTitle);
+            subItem1->setData(1,Qt::UserRole,episodeInfo.seasonsNumber);
+            subItem1->setData(2,Qt::UserRole,episodeInfo.episodeNumber);
+            countRow++;
+        }
+    }
+    mainItem->setExpanded(true);
+    QStringList description;
+    description.append("<table>");
 
+    // Добавляем заголовок таблицы
+    description.append("<tr><th>Описание</th><th>Подстановочное слово</th><th>Пример</th></tr>");
+
+    // Обходим все заполненные ключи
+    QSet<QString> processedKeys;
+    for (const auto& field : this->replacePlaceholdersTV->fieldDescriptions) {
+        qDebug ()<< "field:" << field;
+        QString keyText = this->replacePlaceholdersTV->fieldDescriptions.key(field);
+        QString desc = this->replacePlaceholdersTV->fieldDescriptions[keyText];
+        QString value = this->replacePlaceholdersTV->getValue(1,1,keyText);
+        QString row = "<tr>"
+                            "<td><b>Описание:</b> " + desc + "</td>"
+                            "<td><b>Подстановочное слово:</b> " + keyText + "</td>"
+                            "<td><b>Пример:</b> " + value + "</td>"
+                        "</tr>";
+        // Добавляем сформированную строку в общий текст таблицы
+        description.append(row);
+    }
+    description.append("</table>");
+    ui->patternTVDescription->setHtml(description.join(""));
+
+    ui->patternTVEdit->setText("S:seasonsNumberE:episodeNumber-:episodeTitle");
 }
 
 void DialogRenamerFiles::on_patternMovieEdit_textChanged(const QString &arg1)
 {
-    qDebug() << ui->patternMovieEdit->text();
-    this->changeName(ui->patternMovieEdit->text());
+    qDebug() << arg1;
+    this->changeNameMovie(arg1);
 }
 
-void DialogRenamerFiles::changeName(QString pattern)
+void DialogRenamerFiles::on_patternTVEdit_textChanged(const QString &arg1)
 {
-    newFileName = this->replacePattern(pattern);
+    qDebug() << arg1;
+    this->changeNameTv(arg1);
+}
+
+void DialogRenamerFiles::changeNameTv(QString pattern)
+{
+    ui->newListTV->clear();
+    QTreeWidgetItem *mainItem = new QTreeWidgetItem(ui->newListTV);
+    mainItem->setText(0, showTv.nameShow);
+    mainItem->setData(0, Qt::UserRole, showTv.ID);
+    uint countRow = 0;
+    foreach (const uint seasonNumber, showTv.Episodes.keys()) {
+        const QMap<uint, EpisodeInfo>& episodes = showTv.Episodes[seasonNumber];
+        foreach (const uint episodeNumber, episodes.keys()) {
+            const EpisodeInfo& episodeInfo = episodes[episodeNumber];
+            QTreeWidgetItem *subItem1 = new QTreeWidgetItem(mainItem);
+
+            subItem1->setText(0, this->replacePatternTV(pattern, seasonNumber, episodeNumber));
+
+            subItem1->setData(1,Qt::UserRole,episodeInfo.seasonsNumber);
+            subItem1->setData(2,Qt::UserRole,episodeInfo.episodeNumber);
+            countRow++;
+        }
+    }
+    mainItem->setExpanded(true);
+}
+
+
+void DialogRenamerFiles::changeNameMovie(QString pattern)
+{
+    newFileName = this->replacePatternMovie(pattern);
     ui->newListMovie->clear();
     // delete this->oldIitem;
     // Пересоздаем элемент oldIitem после очистки QTreeWidget
@@ -99,38 +171,26 @@ void DialogRenamerFiles::changeName(QString pattern)
     this->oldIitem->setText(0, newFileName);
 }
 
-QString DialogRenamerFiles::replacePattern(const QString &input)
+QString DialogRenamerFiles::replacePatternMovie(const QString &input)
 {
     QString result = input;
-    QRegularExpression placeholderPattern(":(\\w+)");
 
-    // Используем QRegularExpressionMatchIterator для итерации по всем совпадениям
-    QRegularExpressionMatchIterator matchIterator = placeholderPattern.globalMatch(result);
-
-    int offset = 0; // Смещение для корректной замены в исходной строке
-    while (matchIterator.hasNext()) {
-        QRegularExpressionMatch match = matchIterator.next();
-        QString placeholder = match.captured(0); // Захватываем имя placeholder
-
-        QString value = replacePlaceholders->getValue(placeholder);
-        qDebug() << "placeholder " << placeholder;
-        if (value.isEmpty()) {
-            // Если значение пустое, оставляем метку на месте
-            continue;
-        }
-
-        // Находим позицию, где начинается совпадение в исходной строке
-        int matchStart = match.capturedStart(0);
-        // Находим длину совпадения
-        int matchLength = match.capturedLength(0);
-
-        // Заменяем метку на значение
-        result.replace(matchStart + offset, matchLength, value);
-
-        // Обновляем смещение для корректной работы с исходной строкой
-        offset += value.length() - matchLength;
+    for (const auto& field : this->replacePlaceholdersMovie->fieldDescriptions) {
+        QString keyText = this->replacePlaceholdersMovie->fieldDescriptions.key(field);
+        QString value = this->replacePlaceholdersMovie->getValue(keyText);
+        result = result.replace(keyText, value);
     }
+    return result;
+}
 
+QString DialogRenamerFiles::replacePatternTV(const QString &input, int Season, int Episode)
+{
+    QString result = input;
+    for (const auto& field : this->replacePlaceholdersTV->fieldDescriptions) {
+        QString keyText = this->replacePlaceholdersTV->fieldDescriptions.key(field);
+        QString value = this->replacePlaceholdersTV->getValue(Season,Episode,keyText);
+        result = result.replace(keyText, value);
+    }
     return result;
 }
 

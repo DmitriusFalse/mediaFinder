@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1285</width>
-    <height>583</height>
+    <height>756</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <enum>QTabWidget::TabPosition::West</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tabMovie">
       <attribute name="title">
@@ -44,7 +44,7 @@
             </size>
            </property>
            <property name="text">
-            <string>Поля для подстановки</string>
+            <string>Поля для подстановки:</string>
            </property>
           </widget>
          </item>
@@ -190,9 +190,44 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <property name="sizeConstraint">
+          <enum>QLayout::SizeConstraint::SetMinimumSize</enum>
+         </property>
          <item>
-          <widget class="QPlainTextEdit" name="patternTVDescription"/>
+          <widget class="QLabel" name="label_4">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>25</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>25</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Поля для подстановки:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QTextEdit" name="patternTVDescription">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>200</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>200</height>
+            </size>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
@@ -213,7 +248,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
-          <widget class="QTreeWidget" name="newListTV">
+          <widget class="QTreeWidget" name="oldListTV">
            <column>
             <property name="text">
              <string>Оригинальные названия</string>
@@ -238,7 +273,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QTreeWidget" name="oldListTV">
+          <widget class="QTreeWidget" name="newListTV">
            <column>
             <property name="text">
              <string>Новое название</string>

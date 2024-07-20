@@ -232,6 +232,7 @@ void MainWindow::clickTreeWidgetTV()
 
 
     ui->loadMediaButton->setDisabled(false);
+    ui->renameButton->setDisabled(false);
 
 }
 
@@ -677,15 +678,20 @@ void MainWindow::on_renameButton_clicked()
 
 
 
-    if(this->renameFiles!=nullptr){
+    if(this->renameFiles!=nullptr){ // Проверяем существование инициализированного DialogRenamerFiles
+        // отключаем соединения
         disconnect(this->renameFiles,
                 &DialogRenamerFiles::signalFinishRename,
                 this,
                 &MainWindow::slotUpdateListLibraryByID);
+        // и удаляем
         delete this->renameFiles;
     }
+
     this->renameFiles = new DialogRenamerFiles(this, dbmanager);
 
+    // 0 - Movie
+    // 1 - Show TV
     switch (ui->tabMainWindow->currentIndex()) {
     case 0:{
         QTreeWidgetItem *selectedItem;

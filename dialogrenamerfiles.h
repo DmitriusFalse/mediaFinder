@@ -10,14 +10,14 @@ namespace Ui {
 class DialogRenamerFiles;
 }
 
-struct Placeholders
+struct PlaceholdersMovie
 {
     QMap<QString, QString> placeholders;
     QMap<QString, QString> fieldDescriptions; // Новый QMap для хранения описаний полей
     QStringList keysList; // Список ключей для удобства итерации
     int currentIndex=-1; // Текущий индекс для метода next()
 
-    Placeholders(const MovieInfo& movie) {
+    PlaceholdersMovie(const MovieInfo& movie) {
         updateData(movie);
     }
 
@@ -89,16 +89,52 @@ struct Placeholders
         return QString();
     }
 };
+struct PlaceholdersTV {
+    QMap<uint, QMap<uint, QMap<QString, QString>>> data;
+    QMap<QString, QString> fieldDescriptions;
+    QList<QString> keys;
+    int currentIndex = -1;
 
-// QString name
-// QString originalName
-// int idMovie
-// int imdbID
-// QString originalLang
-// QString release_date
-// QString Status
+    PlaceholdersTV(ShowInfo &showInfo) {
+        updateData(showInfo);
+        initializeFieldDescriptions();
+    }
 
+    void updateData(ShowInfo &showInfo) {
+        for (auto season : showInfo.Episodes.keys()) {
+            for (auto episode : showInfo.Episodes[season].keys()) {
+                EpisodeInfo episodeInfo = showInfo.getEpisode(season, episode);
+                data[season][episode][":nameShow"] = showInfo.nameShow;
+                data[season][episode][":originalNameShow"] = showInfo.originalNameShow;
+                data[season][episode][":status"] = showInfo.status;
+                data[season][episode][":idShow"] = QString::number(showInfo.idShow);
+                data[season][episode][":episodeNumber"] = QString::number(episodeInfo.episodeNumber);
+                data[season][episode][":seasonsNumber"] = QString::number(episodeInfo.seasonsNumber);
+                data[season][episode][":episodeTitle"] = episodeInfo.episodeTitle;
+                data[season][episode][":air_date"] = episodeInfo.air_date;
+            }
+        }
+    }
 
+    void initializeFieldDescriptions() {
+        fieldDescriptions[":nameShow"] = "Название шоу";
+        fieldDescriptions[":originalNameShow"] = "Оригинальное название шоу";
+        fieldDescriptions[":status"] = "Статус шоу";
+        fieldDescriptions[":idShow"] = "ID шоу";
+        fieldDescriptions[":episodeNumber"] = "Номер серии";
+        fieldDescriptions[":seasonsNumber"] = "Номер сезона";
+        fieldDescriptions[":episodeTitle"] = "Название серии";
+        fieldDescriptions[":air_date"] = "Дата выхода серии";
+    }
+
+    QString getValue(uint season, uint episode, const QString &key) const {
+        if (data.contains(season) && data[season].contains(episode) && data[season][episode].contains(key)) {
+            return data[season][episode][key];
+        } else {
+            return QString();
+        }
+    }
+};
 class DialogRenamerFiles : public QDialog
 {
     Q_OBJECT
@@ -116,16 +152,22 @@ private slots:
     void on_renameMovieButton_clicked();
 
 
+    void on_patternTVEdit_textChanged(const QString &arg1);
+
 private:
     Ui::DialogRenamerFiles *ui;
     DBManager *dbmanager;
     MovieInfo movie;
-    Placeholders *replacePlaceholders;
+    ShowInfo showTv;
+    PlaceholdersMovie *replacePlaceholdersMovie;
+    PlaceholdersTV *replacePlaceholdersTV;
     QString newFileName;
     QTreeWidgetItem *oldIitem;
 
-    void changeName(QString pattern);
-    QString replacePattern(const QString& input);
+    void changeNameTv(QString pattern);
+    void changeNameMovie(QString pattern);
+    QString replacePatternMovie(const QString& input);
+    QString replacePatternTV(const QString& input, int Season, int Episode);
     QString renameFile(const QString& filePath, const QString& newName);
 signals:
     void signalFinishRename(QString type, int id);
