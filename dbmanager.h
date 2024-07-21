@@ -47,6 +47,7 @@ public:
     QString getPathToShowTV(QString nameShow);
     QString getPathToMovie(QString name);
     bool updateMovieColumn(const QString &columnName, const QVariant &newValue, int rowId);
+    bool updateEpisodeColumn(const QString &columnName, const QVariant &newValue, int rowId);
 private:
     bool openConnection();
     void closeConnection();

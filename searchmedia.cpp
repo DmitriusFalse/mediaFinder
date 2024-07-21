@@ -44,7 +44,8 @@ SearchMedia::SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db, Dia
     }else{
         uiSearch->langSearchComboBox->setCurrentIndex(0);
     }
-
+    this->progresSearchValue = 0;
+    this->progresSearchShow();
 }
 
 SearchMedia::~SearchMedia()
@@ -58,6 +59,8 @@ SearchMedia::~SearchMedia()
 void SearchMedia::on_searchButton_clicked()
 {
     if(uiSearch->searchWordEdit->text ()!=""){
+        this->progresSearchShow();
+        this->progresSearchAdd();
         this->setSearchWord (uiSearch->searchWordEdit->text ());
         this->setLangSearchMedia();
         switch (uiSearch->typeMedia->currentIndex ()) {
@@ -65,7 +68,7 @@ void SearchMedia::on_searchButton_clicked()
         case 1:{this->setTypeMediaSearch ("movie"); break;}
         case 2:{this->setTypeMediaSearch ("tv"); break;}
         }
-
+        this->progresSearchAdd();
         this->sendRequestTMDBSearch(nameSearch,typeMediaSearch);
     }
 }
@@ -182,6 +185,7 @@ void SearchMedia::setIdSelectMedia(int newIdSelectMedia)
 void SearchMedia::sendRequestTMDBSearch(QString Name, QString type)
 {
     qDebug() << "Ищем фильмы... сериалы...";
+    this->progresSearchAdd();
     QUrl url(QString("https://api.themoviedb.org/3/search/multi"));
 
     QUrlQuery query;
@@ -209,8 +213,9 @@ void SearchMedia::sendRequestTMDBSearchGetImage()
 
     //https://image.tmdb.org/t/p/original
     //https://image.tmdb.org/t/p/w500/
-
+    this->progresSearchAdd();
     for (int index = 0; index < uiSearch->viewSearchTree->topLevelItemCount(); ++index) {
+        this->progresSearchAdd();
         showProgres->updateProgres();
         QTreeWidgetItem *item = uiSearch->viewSearchTree->topLevelItem(index);
         QString posterUrl = item->data(0, Qt::UserRole).toString();
@@ -441,8 +446,28 @@ QString SearchMedia::updateField( QString  oldString, QString newString)
     }
 }
 
+void SearchMedia::progresSearchAdd()
+{
+    if(progresSearchValue>=100){
+        this->progresSearchValue=0;
+    }else{
+        this->progresSearchValue+=10;
+    }
+    uiSearch->progressSearch->setValue(progresSearchValue);
+}
+
+void SearchMedia::progresSearchShow()
+{
+    if(uiSearch->progressSearch->isHidden()){
+        uiSearch->progressSearch->show();
+    }else{
+        uiSearch->progressSearch->hide();
+    }
+}
+
 void SearchMedia::slotViewOverviewMedia()
 {
+    this->progresSearchAdd();
     QTreeWidgetItem *selectedItem = uiSearch->viewSearchTree->currentItem();
     QString hiddenData = selectedItem->data(1, Qt::UserRole).toString();
     uiSearch->overviewMedia->setPlainText (hiddenData);
@@ -451,6 +476,7 @@ void SearchMedia::slotViewOverviewMedia()
 void SearchMedia::slotFinishRequestFindMedia(QNetworkReply *reply, QString media_type)
 {
     if (reply->error() == QNetworkReply::NoError) {
+        this->progresSearchAdd();
         QStringList srcListGenres = dbManager->loadGenre ();
         for (auto& src : srcListGenres) {
             QStringList paraData = src.split (":");
@@ -468,6 +494,7 @@ void SearchMedia::slotFinishRequestFindMedia(QNetworkReply *reply, QString media
         uiSearch->viewSearchTree->clear ();
 
         for (const QJsonValue& resultsValue : resultsArray) {
+            this->progresSearchAdd();
             QStringList listGenre;
             QJsonObject itemObject = resultsValue.toObject();
             int id = itemObject.value("id").toInt();
@@ -501,6 +528,7 @@ void SearchMedia::slotFinishRequestFindMedia(QNetworkReply *reply, QString media
             //Получаем список жанров и переводим их в нормальные названия
             QJsonArray genreIdsArray = itemObject.value("genre_ids").toArray();
             for (const QJsonValue& genreIdValue : genreIdsArray) {
+                this->progresSearchAdd();
                 if (genreIdValue.isDouble()) { // Проверяем, что значение является числом
                     uint idGenre = genreIdValue.toInt();
                     listGenre.append (genres->getGenre (idGenre));
@@ -544,6 +572,7 @@ void SearchMedia::slotFinishRequestFindMedia(QNetworkReply *reply, QString media
 void SearchMedia::slotUpdateImagesInTree(QNetworkReply *reply, int index)
 {
     if (reply->error() == QNetworkReply::NoError) {
+        this->progresSearchAdd();
         showProgres->updateProgres();
         QByteArray imageData = reply->readAll();
         QImage image;
@@ -558,6 +587,7 @@ void SearchMedia::slotUpdateImagesInTree(QNetworkReply *reply, int index)
     } else {
         qDebug() << "2Ошибка запроса:" << reply->errorString();
     }
+    this->progresSearchShow();
     reply->deleteLater();
 }
 

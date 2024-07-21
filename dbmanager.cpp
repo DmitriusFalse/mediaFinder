@@ -402,7 +402,23 @@ bool DBManager::updateMovieColumn(const QString &columnName, const QVariant &new
     query.bindValue(":rowId", rowId);
 
     if (query.exec()) {
-        qDebug() << "Запрос выполнен успешно.";
+        return true;
+    } else {
+        qDebug() << "Ошибка выполнения запроса:" << query.lastError().text();
+        return false;
+    }
+}
+
+bool DBManager::updateEpisodeColumn(const QString &columnName, const QVariant &newValue, int rowId)
+{
+
+    QSqlQuery query(this->m_database);
+    QString queryString = QString("UPDATE TVEpisodes SET %1 = :newValue WHERE ID = :rowId").arg(columnName);
+    query.prepare(queryString);
+    query.bindValue(":newValue", newValue);
+    query.bindValue(":rowId", rowId);
+
+    if (query.exec()) {
         return true;
     } else {
         qDebug() << "Ошибка выполнения запроса:" << query.lastError().text();

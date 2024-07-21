@@ -42,7 +42,7 @@ void DialogRenamerFiles::setMediaData(MovieInfo mov)
     QFileInfo fileinfo(this->movie.path);
     QTreeWidgetItem *newItem = new QTreeWidgetItem(ui->oldListMovie);
     QString nameMovie = fileinfo.completeBaseName();
-    newItem->setText(0, nameMovie);
+    newItem->setText(0, fileinfo.baseName());
 
     this->oldIitem = new QTreeWidgetItem(ui->newListMovie);
 
@@ -91,9 +91,11 @@ void DialogRenamerFiles::setMediaData(ShowInfo sh)
         foreach (const uint episodeNumber, episodes.keys()) {
             const EpisodeInfo& episodeInfo = episodes[episodeNumber];
             QTreeWidgetItem *subItem1 = new QTreeWidgetItem(mainItem);
-            subItem1->setText(0, episodeInfo.episodeTitle);
+            QFileInfo episodeFile(episodeInfo.filePath);
+            subItem1->setText(0, episodeFile.baseName());
             subItem1->setData(1,Qt::UserRole,episodeInfo.seasonsNumber);
             subItem1->setData(2,Qt::UserRole,episodeInfo.episodeNumber);
+            subItem1->setData(3,Qt::UserRole,episodeInfo.ID);
             countRow++;
         }
     }
@@ -107,7 +109,6 @@ void DialogRenamerFiles::setMediaData(ShowInfo sh)
     // Обходим все заполненные ключи
     QSet<QString> processedKeys;
     for (const auto& field : this->replacePlaceholdersTV->fieldDescriptions) {
-        qDebug ()<< "field:" << field;
         QString keyText = this->replacePlaceholdersTV->fieldDescriptions.key(field);
         QString desc = this->replacePlaceholdersTV->fieldDescriptions[keyText];
         QString value = this->replacePlaceholdersTV->getValue(1,1,keyText);
@@ -154,6 +155,7 @@ void DialogRenamerFiles::changeNameTv(QString pattern)
 
             subItem1->setData(1,Qt::UserRole,episodeInfo.seasonsNumber);
             subItem1->setData(2,Qt::UserRole,episodeInfo.episodeNumber);
+            subItem1->setData(3,Qt::UserRole,episodeInfo.ID);
             countRow++;
         }
     }
@@ -196,26 +198,23 @@ QString DialogRenamerFiles::replacePatternTV(const QString &input, int Season, i
 
 QString DialogRenamerFiles::renameFile(const QString &filePath, const QString &newName)
 {
-    QFileInfo fileInfo(filePath);
-    QString extension = fileInfo.suffix();
+    QFileInfo oldFilePath(filePath);
+    QString newFilePath = oldFilePath.canonicalPath()+"/"+newName+"."+oldFilePath.suffix();
 
-    QFileInfo newFileInfo(newFileName);
-    QString newFileNameWithExtension = newFileName;
-
-    // Проверяем, есть ли у нового имени файла расширение
-    if (newFileInfo.suffix().isEmpty()) {
-        newFileNameWithExtension += "." + extension;
+    if(filePath!=newFilePath){
+        QFile file(filePath);
+        if (file.rename(newFilePath)) {
+            return newFilePath; // Возвращаем полный путь к новому файлу при успехе
+        } else {
+            qDebug() << "Не удалось переименовать файл:" << file.errorString();
+            qDebug() << "Old File: " << filePath;
+            qDebug() << "New File: " << newFilePath;
+            return filePath; // Возвращаем полный путь к старому файлу при провале
+        }
+    }else{
+        return filePath;
     }
-
-    QString newFilePath = fileInfo.absolutePath() + "/" + newFileNameWithExtension;
-
-    QFile file(filePath);
-    if (file.rename(newFilePath)) {
-        return newFilePath; // Возвращаем полный путь к новому файлу при успехе
-    } else {
-        qDebug() << "Не удалось переименовать файл:" << file.errorString();
-        return filePath; // Возвращаем полный путь к старому файлу при провале
-    }
+    return QString();
 }
 
 
@@ -223,12 +222,42 @@ void DialogRenamerFiles::on_renameMovieButton_clicked()
 {
     QString oldPath = movie.path;
     QString oldPoster = movie.poster;
-    qDebug() << newFileName;
+
     QString newFilePath = this->renameFile(oldPath, newFileName);
     QString newFilePoster = this->renameFile(oldPoster, newFileName);
     dbmanager->updateMovieColumn("path", newFilePath, movie.id);
     dbmanager->updateMovieColumn("poster", newFilePoster, movie.id);
     this->close();
     emit signalFinishRename("Movie", movie.id);
+}
+
+
+void DialogRenamerFiles::on_renameTVButton_clicked()
+{
+
+    QTreeWidgetItem *topLevelItem = ui->newListTV->topLevelItem(0);
+
+    for (int i = 0; i < topLevelItem->childCount(); ++i) {
+        QTreeWidgetItem *childItem = topLevelItem->child(i);
+        QString newName = childItem->text(0);
+        uint season = childItem->data(1,Qt::UserRole).toUInt();
+        uint episode = childItem->data(2,Qt::UserRole).toUInt();
+        EpisodeInfo infoEpisode = this->showTv.getEpisode(season, episode);
+        QString oldPath = infoEpisode.filePath;
+        int  id = childItem->data(3,Qt::UserRole).toInt();
+
+
+        QString newFileName = this->renameFile(oldPath, newName);
+        dbmanager->updateEpisodeColumn("file", newFileName, id);
+
+        QString oldPoster = infoEpisode.still_path;
+        if(oldPoster!=""){
+            QString newFilePoster = this->renameFile(oldPoster, newName);
+            dbmanager->updateEpisodeColumn("Poster", newFilePoster, id);
+        }
+
+    }
+    this->close();
+    emit signalFinishRename("TV", this->showTv.ID);
 }
 

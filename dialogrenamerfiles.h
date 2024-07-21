@@ -154,6 +154,8 @@ private slots:
 
     void on_patternTVEdit_textChanged(const QString &arg1);
 
+    void on_renameTVButton_clicked();
+
 private:
     Ui::DialogRenamerFiles *ui;
     DBManager *dbmanager;

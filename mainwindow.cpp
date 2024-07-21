@@ -292,7 +292,8 @@ void MainWindow::updateCollections(QString type)
                     foreach (const uint episodeNumber, episodes.keys()) {
                         const EpisodeInfo& episodeInfo = episodes[episodeNumber];
                         QTreeWidgetItem *subItem1 = new QTreeWidgetItem(mainItem);
-                        subItem1->setText(1, episodeInfo.episodeTitle+" S"+QString::number (episodeInfo.seasonsNumber)+" E"+QString::number (episodeInfo.episodeNumber));
+                        subItem1->setText(0, "S" + QString::number(episodeInfo.seasonsNumber) + "E" + QString::number(episodeInfo.episodeNumber));
+                        subItem1->setText(1, episodeInfo.episodeTitle);
                         subItem1->setData(1,Qt::UserRole,episodeInfo.seasonsNumber);
                         subItem1->setData(2,Qt::UserRole,episodeInfo.episodeNumber);
                     }
@@ -334,8 +335,6 @@ void MainWindow::updateCollectionsByID(QString type, int id)
                     int ID = item->data(0, Qt::UserRole).toInt();
 
                     if (id == ID) {
-                        qDebug() << "Update ID:" << ID;
-
                         // Удаление существующих дочерних элементов
                         QList<QTreeWidgetItem*> children = item->takeChildren();
                         for (QTreeWidgetItem *child : children) {
@@ -364,7 +363,10 @@ void MainWindow::updateCollectionsByID(QString type, int id)
                             for (const uint episodeNumber : episodes.keys()) {
                                 const EpisodeInfo& episodeInfo = episodes[episodeNumber];
                                 QTreeWidgetItem *subItem = new QTreeWidgetItem(item);
-                                subItem->setText(1, episodeInfo.episodeTitle + " S" + QString::number(episodeInfo.seasonsNumber) + " E" + QString::number(episodeInfo.episodeNumber));
+                                subItem->setText(0, "S" + QString::number(episodeInfo.seasonsNumber) + "E" + QString::number(episodeInfo.episodeNumber));
+                                subItem->setText(1, episodeInfo.episodeTitle);
+                                subItem->setData(1,Qt::UserRole,episodeInfo.seasonsNumber);
+                                subItem->setData(2,Qt::UserRole,episodeInfo.episodeNumber);
                             }
                         }
 
@@ -454,11 +456,11 @@ void MainWindow::fillTvShowForm(int id)
 
 void MainWindow::fillTvShowEpisodeForm(int id, int seasonsNumber, int episodeNumber)
 {
-    ShowInfo show = dbmanager->getShowTVShowByID(id);
-    if(this->NameShowLoaded!=show.nameShow){
+    ShowInfo showTV = dbmanager->getShowTVShowByID(id);
+    if(this->NameShowLoaded!=showTV.nameShow){
         this->fillTvShowForm(id);
     }
-    EpisodeInfo episode = show.getEpisode(seasonsNumber, episodeNumber);
+    EpisodeInfo episode = showTV.getEpisode(seasonsNumber, episodeNumber);
 
     if(episode.episodeTitle.size()>0){
         ui->nameEpisodeText->setText(episode.episodeTitle);

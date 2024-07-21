@@ -81,6 +81,10 @@ private:
     void getImageTVShow();
 
     QString updateField(QString oldString, QString newString);
+
+    int progresSearchValue;
+    void progresSearchAdd();
+    void progresSearchShow();
 signals:
     void windowClosed();
     void selectMedia();
