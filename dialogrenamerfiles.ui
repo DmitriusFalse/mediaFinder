@@ -246,6 +246,27 @@
         </layout>
        </item>
        <item>
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_9">
+           <item>
+            <widget class="QCheckBox" name="folderSeasonsCheckBox">
+             <property name="text">
+              <string>Переместить в папки по сезонам</string>
+             </property>
+             <property name="icon">
+              <iconset theme="QIcon::ThemeIcon::FolderNew"/>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
           <widget class="QTreeWidget" name="oldListTV">

@@ -235,7 +235,7 @@ QStringList DBManager::readLibrary(QString type)
     return data;
 }
 
-void DBManager::updateTvShow(ShowInfo show, int id)
+void DBManager::updateTvShow(ShowInfo showTV, int id)
 {
     QSqlQuery query(this->m_database);
      // Получаем старое название сериала по ID
@@ -254,34 +254,41 @@ void DBManager::updateTvShow(ShowInfo show, int id)
                       "Number_of_seasons=:numberOfSeasons,"
                       "Status=:status,"
                       "Genres=:genres,"
+                      "IdShow=:idShow,"
                       "production_companies_name=:proName,"
                       "production_companies_logo_path=:logo,"
-                      "IdShow=:idShow WHERE id=:id");
-        query.bindValue (":nameShow",show.nameShow);
-        query.bindValue (":overview",show.overview);
-        query.bindValue (":poster",show.poster);
-        query.bindValue (":originalNameShow",show.originalNameShow);
-        query.bindValue (":numberOfEpisodes",show.numberOfEpisodes);
-        query.bindValue (":numberOfSeasons",show.numberOfSeasons);
-        query.bindValue (":status",show.status);
-        query.bindValue (":genres",show.genres);
-        query.bindValue (":IdShow",show.idShow);
-        query.bindValue (":proName",show.production_companies);
-        query.bindValue (":logo",show.logoPath);
+                      "first_air_date=:fdate,"
+                      "last_air_date=:ldate,"
+                      "imdb_id=:imdb "
+                      "WHERE id=:id");
+        query.bindValue (":nameShow",showTV.nameShow);
+        query.bindValue (":overview",showTV.overview);
+        query.bindValue (":poster",showTV.poster);
+        query.bindValue (":originalNameShow",showTV.originalNameShow);
+        query.bindValue (":numberOfEpisodes",showTV.numberOfEpisodes);
+        query.bindValue (":numberOfSeasons",showTV.numberOfSeasons);
+        query.bindValue (":status",showTV.status);
+        query.bindValue (":genres",showTV.genres);
+        query.bindValue (":idShow",showTV.idShow);
+        query.bindValue (":proName",showTV.production_companies);
+        query.bindValue (":logo",showTV.logoPath);
+        query.bindValue (":fdate",showTV.first_air_date);
+        query.bindValue (":ldate",showTV.last_air_date);
+        query.bindValue (":imdb",showTV.imdb_id);
         query.bindValue (":id",id);
 // show.reviews
         if(query.exec()){
             // Обновляем название сериала в таблице TVEpisodes
             query.prepare ("UPDATE TVEpisodes SET NameShow=:name WHERE NameShow=:oldName");
-            query.bindValue (":name", show.nameShow);
+            query.bindValue (":name", showTV.nameShow);
             query.bindValue (":oldName", oldName);
             if(query.exec()){
                 //Обновляем информацию о Эпизодах
-                this->updateTvShowEpisode(show);
+                this->updateTvShowEpisode(showTV);
                 // Вносим обзоры в базу
-                this->updateReviewsTV(show.reviews, show.nameShow, show.idShow);
+                this->updateReviewsTV(showTV.reviews, showTV.nameShow, showTV.idShow);
                 // Обновляем видео ролики
-                this->updateVideosTV(show.videos, show.nameShow, show.idShow);
+                this->updateVideosTV(showTV.videos, showTV.nameShow, showTV.idShow);
 
                 // Отправляем сигнал об обновлении главного окна
                 emit signalUpdateMainWindowByID("TV", id);
@@ -1035,6 +1042,8 @@ ShowInfo DBManager::getShowTVShowByID(int id)
             showTv.genres = queryTVShow.value ("Genres").toString();
             showTv.production_companies = queryTVShow.value ("production_companies_name").toString();
             showTv.logoPath = queryTVShow.value ("production_companies_logo_path").toString();
+            showTv.first_air_date = queryTVShow.value ("first_air_date").toString();
+            showTv.last_air_date = queryTVShow.value ("last_air_date").toString();
 
             QSqlQuery querySeries(this->m_database);
             querySeries.prepare ("SELECT * FROM TVEpisodes WHERE NameShow = :nameShow");
@@ -1045,6 +1054,7 @@ ShowInfo DBManager::getShowTVShowByID(int id)
                 while (querySeries.next ()){
                     EpisodeInfo episode;
                     episode.ID = querySeries.value("ID").toInt();
+                    episode.air_date = querySeries.value("air_date").toString();
                     episode.pathToSerial = querySeries.value("PathToSerial").toString();
                     episode.still_path = querySeries.value("Poster").toString();
                     episode.episodeNumber = querySeries.value("Episode").toInt();

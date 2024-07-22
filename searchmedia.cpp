@@ -249,8 +249,9 @@ void SearchMedia::sendRequestTMDBGetInformation(QString lang)
     // // query.addQueryItem("query", Name);
     // query.addQueryItem("language", "ru-RU");
 
-    query.addQueryItem("append_to_response", "reviews%2Ccredits%2Cimages%2Cvideos%2Ctranslations");
+    query.addQueryItem("append_to_response", "reviews%2Ccredits%2Cimages%2Cvideos%2Ctranslations%2Cexternal_ids");
     query.addQueryItem("language", lang);
+
     url.setQuery (query);
     QNetworkRequest request(url);
 
@@ -736,6 +737,10 @@ void SearchMedia::processResponseTV(QJsonObject jsonObject)
     this->showTv->numberOfSeasons = jsonObject.value ("number_of_seasons").toInt ();
     this->showTv->overview = updateField(this->showTv->overview,jsonObject.value ("overview").toString ());
     this->showTv->status = jsonObject.value ("status").toString ();
+    this->showTv->first_air_date = jsonObject.value ("first_air_date").toString ();
+    this->showTv->last_air_date = jsonObject.value ("last_air_date").toString ();
+
+    this->showTv->imdb_id = jsonObject.value ("external_ids").toObject().value("imdb_id").toString();
 
     QJsonObject videos = jsonObject.value ("videos").toObject().value("results").toObject();
     for (const QJsonValue& video : videos) {

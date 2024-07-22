@@ -3,6 +3,7 @@
 #include "ui_dialogrenamerfiles.h"
 #include <QFileInfo>
 #include <QRegularExpression>
+#include <QDir>
 
 
 DialogRenamerFiles::DialogRenamerFiles(QWidget *parent, DBManager *db)
@@ -12,6 +13,7 @@ DialogRenamerFiles::DialogRenamerFiles(QWidget *parent, DBManager *db)
 {
     ui->setupUi(this);
 // oldListMovie
+    this->checkNewFoldersEpisodes = true;
 
 }
 
@@ -129,11 +131,21 @@ void DialogRenamerFiles::setMediaData(ShowInfo sh)
 void DialogRenamerFiles::on_patternMovieEdit_textChanged(const QString &arg1)
 {
     qDebug() << arg1;
+    if(arg1==""){
+        ui->renameMovieButton->setDisabled(true);
+    }else{
+        ui->renameMovieButton->setDisabled(false);
+    }
     this->changeNameMovie(arg1);
 }
 
 void DialogRenamerFiles::on_patternTVEdit_textChanged(const QString &arg1)
 {
+    if(arg1==""){
+        ui->renameTVButton->setDisabled(true);
+    }else{
+        ui->renameTVButton->setDisabled(false);
+    }
     qDebug() << arg1;
     this->changeNameTv(arg1);
 }
@@ -198,8 +210,18 @@ QString DialogRenamerFiles::replacePatternTV(const QString &input, int Season, i
 
 QString DialogRenamerFiles::renameFile(const QString &filePath, const QString &newName)
 {
+    if(!QFile::exists(filePath)){
+        return QString();
+    }
     QFileInfo oldFilePath(filePath);
+
     QString newFilePath = oldFilePath.canonicalPath()+"/"+newName+"."+oldFilePath.suffix();
+    QFileInfo newFileInfo(newFilePath);
+    if(!QFile::exists(newFileInfo.absolutePath())){
+        QDir dir;
+        dir.mkpath(newFileInfo.absolutePath());
+    }
+
 
     if(filePath!=newFilePath){
         QFile file(filePath);
@@ -242,6 +264,11 @@ void DialogRenamerFiles::on_renameTVButton_clicked()
         QString newName = childItem->text(0);
         uint season = childItem->data(1,Qt::UserRole).toUInt();
         uint episode = childItem->data(2,Qt::UserRole).toUInt();
+
+        if(this->checkNewFoldersEpisodes){
+            newName = "Season-"+QString::number(season)+"/"+newName;
+        }
+
         EpisodeInfo infoEpisode = this->showTv.getEpisode(season, episode);
         QString oldPath = infoEpisode.filePath;
         int  id = childItem->data(3,Qt::UserRole).toInt();
@@ -259,5 +286,12 @@ void DialogRenamerFiles::on_renameTVButton_clicked()
     }
     this->close();
     emit signalFinishRename("TV", this->showTv.ID);
+}
+
+
+void DialogRenamerFiles::on_folderSeasonsCheckBox_checkStateChanged(const Qt::CheckState &arg1)
+{
+    this->checkNewFoldersEpisodes = (arg1 == Qt::Checked);
+    qDebug() << this->checkNewFoldersEpisodes;
 }
 

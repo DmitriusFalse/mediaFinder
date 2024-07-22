@@ -69,6 +69,7 @@ struct EpisodeInfo {
 };
 struct ShowInfo {
     int ID;
+    QString imdb_id;
     QString nameShow;
     QString originalNameShow;
     QString poster;
@@ -78,6 +79,8 @@ struct ShowInfo {
     QString libraryPath;
     QString production_companies;
     QString logoPath;
+    QString first_air_date;
+    QString last_air_date;
     int idShow;
     int numberOfSeasons; // количество сезонов
     int numberOfEpisodes; // количество серий всего

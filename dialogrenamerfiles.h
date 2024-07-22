@@ -156,6 +156,8 @@ private slots:
 
     void on_renameTVButton_clicked();
 
+    void on_folderSeasonsCheckBox_checkStateChanged(const Qt::CheckState &arg1);
+
 private:
     Ui::DialogRenamerFiles *ui;
     DBManager *dbmanager;
@@ -171,6 +173,7 @@ private:
     QString replacePatternMovie(const QString& input);
     QString replacePatternTV(const QString& input, int Season, int Episode);
     QString renameFile(const QString& filePath, const QString& newName);
+    bool checkNewFoldersEpisodes;
 signals:
     void signalFinishRename(QString type, int id);
 };
