@@ -56,6 +56,9 @@ private:
     void updateReviewsTV(QList<Reviews> reviews, QString NameShow, int id);
     void updateTvShowEpisode(ShowInfo show);
     void updateVideosTV(QList<Videos> videos, QString nameShow, int id);
+    // void createUpdateCrewEpisode(int idShow,int id,QString role, QString name,QString thumb);
+    void createUpdateCrewEpisode(ShowInfo tvshow);
+    void createUpdateCrewTVShow(ShowInfo tvshow);
     QString removeLeadingZeros(const QString& input);
     static QRegularExpression re;
 signals:

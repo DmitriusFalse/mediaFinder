@@ -54,6 +54,12 @@ struct MovieCollections {
         movies.append(item);
     }
 };
+struct Crew {
+    int id; //id
+    QString name; //name
+    QString role; //job
+    QString thumb; //profile_path
+};
 
 struct EpisodeInfo {
     int ID;
@@ -66,9 +72,46 @@ struct EpisodeInfo {
     QString overview;
     QString pathToSerial;
     QString libraryPath;
+
+    EpisodeInfo(): index(credits.constBegin()) {}
+    // Метод добавления Crew по отдельным параметрам
+    void addCrew(int id, const QString& name, const QString& role, const QString& thumb) {
+        credits[id] = Crew{id, name, role, thumb};
+        index = credits.constBegin();
+    }
+
+    // Метод добавления Crew по объекту
+    void addCrew(const Crew& credit) {
+        credits[credit.id] = credit;
+        index = credits.constBegin();
+    }
+    Crew getCreditByID(int id){
+        if(credits.contains(id)){
+            return credits[id];
+        }else{
+            return Crew{};
+        }
+    }
+    bool nextCrew(){
+        // Если текущий итератор не достиг конца
+        if (index != credits.constEnd()) {
+            return true;
+        }
+        index = credits.constBegin(); // Сброс итератора
+        return false;
+    }
+    Crew& getCrew(){
+        Crew& returnValue = const_cast<Crew&>(index.value());
+        index ++;
+        return returnValue;
+    }
+private:
+    QMap<int, Crew> credits;
+    QMap<int, Crew>::const_iterator index;
 };
 struct ShowInfo {
     int ID;
+
     QString imdb_id;
     QString nameShow;
     QString originalNameShow;
@@ -81,11 +124,18 @@ struct ShowInfo {
     QString logoPath;
     QString first_air_date;
     QString last_air_date;
+
     int idShow;
     int numberOfSeasons; // количество сезонов
     int numberOfEpisodes; // количество серий всего
+
     QList<Reviews> reviews;
+
     QList<Videos> videos;
+
+    QMap<int, Crew> credits;
+    QMap<int, Crew>::const_iterator index;
+
     QMap<uint, QMap<uint,EpisodeInfo>> Episodes;
     void addEpisodes(EpisodeInfo episode){
         if (Episodes.contains(episode.seasonsNumber) && Episodes[episode.seasonsNumber].contains(episode.episodeNumber)) {
@@ -133,6 +183,36 @@ struct ShowInfo {
         video.idShow = idShow;
         video.key= key;
         this->addVideos(video);
+    }
+    void addCrew(int id, const QString& name, const QString& role, const QString& thumb) {
+        credits[id] = Crew{id, name, role, thumb};
+        index = credits.constBegin();
+    }
+
+    // Метод добавления Crew по объекту
+    void addCrew(const Crew& credit) {
+        credits[credit.id] = credit;
+        index = credits.constBegin();
+    }
+    Crew getCreditByID(int id){
+        if(credits.contains(id)){
+            return credits[id];
+        }else{
+            return Crew{};
+        }
+    }
+    bool nextCrew(){
+        // Если текущий итератор не достиг конца
+        if (index != credits.constEnd()) {
+            return true;
+        }
+        index = credits.constBegin(); // Сброс итератора
+        return false;
+    }
+    Crew& getCrew(){
+        Crew& returnValue = const_cast<Crew&>(index.value());
+        index ++;
+        return returnValue;
     }
 };
 

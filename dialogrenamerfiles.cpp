@@ -266,7 +266,7 @@ void DialogRenamerFiles::on_renameTVButton_clicked()
         uint episode = childItem->data(2,Qt::UserRole).toUInt();
 
         if(this->checkNewFoldersEpisodes){
-            newName = "Season-"+QString::number(season)+"/"+newName;
+            newName = "Season "+QString::number(season)+"/"+newName;
         }
 
         EpisodeInfo infoEpisode = this->showTv.getEpisode(season, episode);

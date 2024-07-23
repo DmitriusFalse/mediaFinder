@@ -146,6 +146,48 @@ void DBManager::updateVideosTV(QList<Videos> videos,QString nameShow, int id)
     }
 }
 
+void DBManager::createUpdateCrewEpisode(ShowInfo tvshow)
+{
+    QSqlQuery query(this->m_database);
+    foreach (const uint seasonNumber, tvshow.Episodes.keys()) {
+        QMap<uint, EpisodeInfo>& episodes = tvshow.Episodes[seasonNumber];
+        foreach (const uint episodeNumber, episodes.keys()) {
+            EpisodeInfo& episode = episodes[episodeNumber];
+            while(episode.nextCrew()){
+                Crew& crewData = episode.getCrew();
+                //INSERT OR REPLACE INTO
+                query.prepare("INSERT OR REPLACE INTO crewEpisode (idShow,id,role,name,thumb) VALUES (:idShow,:id,:role,:name,:thumb)");
+                query.bindValue(":idShow", tvshow.idShow);
+                query.bindValue(":id", crewData.id);
+                query.bindValue(":role",crewData.role);
+                query.bindValue(":name",crewData.name);
+                query.bindValue(":thumb",crewData.thumb);
+                if(!query.exec()){
+                    qDebug() << "createUpdateCrewEpisode - Ошибка выполнения запроса:" << query.lastError().text();
+                }
+            }
+        }
+    }
+}
+
+void DBManager::createUpdateCrewTVShow(ShowInfo tvshow)
+{
+    QSqlQuery query(this->m_database);
+    while(tvshow.nextCrew()){
+        Crew& crewData = tvshow.getCrew();
+        //INSERT OR REPLACE INTO
+        query.prepare("INSERT OR REPLACE INTO crewShowTV (idShow,id,role,name,thumb) VALUES (:idShow,:id,:role,:name,:thumb)");
+        query.bindValue(":idShow", tvshow.idShow);
+        query.bindValue(":id", crewData.id);
+        query.bindValue(":role",crewData.role);
+        query.bindValue(":name",crewData.name);
+        query.bindValue(":thumb",crewData.thumb);
+        if(!query.exec()){
+            qDebug() << "createUpdateCrewTVShow - Ошибка выполнения запроса:" << query.lastError().text();
+        }
+    }
+}
+
 QString DBManager::removeLeadingZeros(const QString &input)
 {
     QString result = input;
@@ -289,12 +331,14 @@ void DBManager::updateTvShow(ShowInfo showTV, int id)
                 this->updateReviewsTV(showTV.reviews, showTV.nameShow, showTV.idShow);
                 // Обновляем видео ролики
                 this->updateVideosTV(showTV.videos, showTV.nameShow, showTV.idShow);
-
+                // Добавляем или обновляем Crew
+                this->createUpdateCrewEpisode(showTV);
                 // Отправляем сигнал об обновлении главного окна
                 emit signalUpdateMainWindowByID("TV", id);
             }else{
                 qDebug () << query.lastError ().text ();
             }
+
         }else{
             qDebug () << query.lastError ().text ();
         }

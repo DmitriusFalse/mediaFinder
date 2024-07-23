@@ -1,4 +1,5 @@
 #include "searchmedia.h"
+#include "qdir.h"
 #include "qurlquery.h"
 #include "ui_searchmedia.h"
 #include <QNetworkAccessManager>
@@ -249,7 +250,7 @@ void SearchMedia::sendRequestTMDBGetInformation(QString lang)
     // // query.addQueryItem("query", Name);
     // query.addQueryItem("language", "ru-RU");
 
-    query.addQueryItem("append_to_response", "reviews%2Ccredits%2Cimages%2Cvideos%2Ctranslations%2Cexternal_ids");
+    query.addQueryItem("append_to_response", "reviews,credits,images,videos,translations,external_ids");
     query.addQueryItem("language", lang);
 
     url.setQuery (query);
@@ -286,6 +287,9 @@ void SearchMedia::sendRequestTMDBGetInformationEpisodes(int count, QString lang)
         // // query.addQueryItem("query", Name);
         // query.addQueryItem("language", "ru-RU");
         query.addQueryItem("language", lang);
+        QStringList append_to_response;
+        append_to_response.append("credits");
+        query.addQueryItem("append_to_response", append_to_response.join(","));
         url.setQuery (query);
         QNetworkRequest request(url);
 
@@ -374,7 +378,7 @@ void SearchMedia::getImageTVShow()
 
 
         QString namePoster = this->showTv->nameShow;
-        namePoster = pathToShowTV+"/"+namePoster.replace(" ","-")+"."+posterFile.suffix();
+        namePoster = pathToShowTV+"/poster."+posterFile.suffix();
 
         QUrl imageUrl("https://image.tmdb.org/t/p/original"+this->showTv->poster);
 
@@ -416,8 +420,12 @@ void SearchMedia::getImageTVShow()
             showProgres->updateProgres();
             EpisodeInfo& episode = episodes[episodeNumber];
             QFileInfo posterEpisodeFile(episode.still_path);
-            QString namePosterEpisode = pathToShowTV+"/S"+QString::number(episode.seasonsNumber)+"E"+QString::number(episode.episodeNumber)+"-poster."+posterEpisodeFile.suffix();
-
+            QString namePosterEpisode = pathToShowTV+"/Season "+QString::number(seasonNumber)+"/S"+QString::number(episode.seasonsNumber)+"E"+QString::number(episode.episodeNumber)+"-poster."+posterEpisodeFile.suffix();
+            QFileInfo filePhotoActor(namePosterEpisode);
+            if(!QFile::exists(filePhotoActor.absolutePath())){
+                QDir dir(filePhotoActor.absolutePath());
+                dir.mkpath(filePhotoActor.absolutePath());
+            }
 
             QUrl imageUrl("https://image.tmdb.org/t/p/original"+episode.still_path);
             QNetworkAccessManager *manager = new QNetworkAccessManager(this);
@@ -430,6 +438,61 @@ void SearchMedia::getImageTVShow()
             countSendRequest++;
             manager->get(request);
             episode.still_path = namePosterEpisode;
+        }
+    }
+
+    while(this->showTv->nextCrew()){
+        Crew& crewData = this->showTv->getCrew();
+        if(crewData.thumb.startsWith("/")){
+            QFileInfo fileThumb(crewData.thumb);
+            QString namePhotoActor = pathToShowTV+"/actor/"+QString::number(crewData.id)+"."+fileThumb.suffix();
+            QFileInfo filePhotoActor(namePhotoActor);
+            if(!QFile::exists(filePhotoActor.absolutePath())){
+                QDir dir(filePhotoActor.absolutePath());
+                dir.mkpath(filePhotoActor.absolutePath());
+            }
+            QUrl imageUrl("https://image.tmdb.org/t/p/original"+crewData.thumb);
+            QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+            connect(manager, &QNetworkAccessManager::finished, this,
+                    [this, namePhotoActor,nameShow](QNetworkReply *reply) {
+                        this->slotSavePosterFile(reply, namePhotoActor,nameShow);
+                    });
+            QUrl url(imageUrl);
+            QNetworkRequest request(url);
+            countSendRequest++;
+            manager->get(request);
+            crewData.thumb = namePhotoActor;
+        }
+    }
+    foreach (const uint seasonNumber, this->showTv->Episodes.keys()) {
+        QMap<uint, EpisodeInfo>& episodes = this->showTv->Episodes[seasonNumber];
+        foreach (const uint episodeNumber, episodes.keys()) {
+            showProgres->updateProgres();
+            EpisodeInfo& episode = episodes[episodeNumber];
+            int seasonNumber = episode.seasonsNumber;
+            while(episode.nextCrew()){
+                Crew& crewData = episode.getCrew();
+                if(crewData.thumb.startsWith("/")){
+                    QFileInfo fileThumb(crewData.thumb);
+                    QString namePhotoActor = pathToShowTV+"/Season "+QString::number(seasonNumber)+"/actor/"+QString::number(crewData.id)+"."+fileThumb.suffix();
+                    QFileInfo filePhotoActor(namePhotoActor);
+                    if(!QFile::exists(filePhotoActor.absolutePath())){
+                        QDir dir(filePhotoActor.absolutePath());
+                        dir.mkpath(filePhotoActor.absolutePath());
+                    }
+                    QUrl imageUrl("https://image.tmdb.org/t/p/original"+crewData.thumb);
+                    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+                    connect(manager, &QNetworkAccessManager::finished, this,
+                            [this, namePhotoActor,nameShow](QNetworkReply *reply) {
+                                this->slotSavePosterFile(reply, namePhotoActor,nameShow);
+                            });
+                    QUrl url(imageUrl);
+                    QNetworkRequest request(url);
+                    countSendRequest++;
+                    manager->get(request);
+                    crewData.thumb = namePhotoActor;
+                }
+            }
         }
     }
 }
@@ -656,6 +719,17 @@ void SearchMedia::slotFinishRequestChooseMediaEpisodes(QNetworkReply *reply)
             episode->overview = itemEpisodes.value ("overview").toString ();
             episode->episodeTitle = itemEpisodes.value ("name").toString ();
 
+            QJsonArray crewArray = itemEpisodes.value ("crew").toArray();
+            for (const QJsonValue& crew : crewArray) {
+                QJsonObject crewObject = crew.toObject();
+                Crew rawCrew;
+                rawCrew.id = crewObject.value("id").toInt();
+                rawCrew.name = crewObject.value("name").toString();
+                rawCrew.role = crewObject.value("job").toString();
+                rawCrew.thumb = crewObject.value("profile_path").toString();
+                episode->addCrew(rawCrew);
+            }
+
             showProgres->setTextProgres("Ответ на Сезон "+QString::number(episode->seasonsNumber)+" Эпизод "+QString::number(episode->episodeNumber));
             this->showTv->addEpisodes(*episode);
             // if(episode->episodeNumber>0 && episode->seasonsNumber>0){
@@ -741,6 +815,28 @@ void SearchMedia::processResponseTV(QJsonObject jsonObject)
     this->showTv->last_air_date = jsonObject.value ("last_air_date").toString ();
 
     this->showTv->imdb_id = jsonObject.value ("external_ids").toObject().value("imdb_id").toString();
+    QJsonObject credits = jsonObject.value("credits").toObject();
+
+    QJsonArray crewShowTVArray = credits.value ("crew").toArray();
+    for (const QJsonValue& crew : crewShowTVArray) {
+        QJsonObject crewObject = crew.toObject();
+        Crew rawCrew;
+        rawCrew.id = crewObject.value("id").toInt();
+        rawCrew.name = crewObject.value("name").toString();
+        rawCrew.role = crewObject.value("job").toString();
+        rawCrew.thumb = crewObject.value("profile_path").toString();
+        this->showTv->addCrew(rawCrew);
+    }
+    QJsonArray castShowTVArray = credits.value ("cast").toArray();
+    for (const QJsonValue& crew : castShowTVArray) {
+        QJsonObject crewObject = crew.toObject();
+        Crew rawCrew;
+        rawCrew.id = crewObject.value("id").toInt();
+        rawCrew.name = crewObject.value("name").toString();
+        rawCrew.role = crewObject.value("job").toString();
+        rawCrew.thumb = crewObject.value("profile_path").toString();
+        this->showTv->addCrew(rawCrew);
+    }
 
     QJsonObject videos = jsonObject.value ("videos").toObject().value("results").toObject();
     for (const QJsonValue& video : videos) {
@@ -876,5 +972,8 @@ void SearchMedia::on_selectFindMediaButton_clicked()
 {
     this->close ();
     emit selectMedia();
+
+    //Кнопка только закрывает окно
+    //А загрузка данных происходит по событию Click и вызывает endSelectMedia();
 }
 
