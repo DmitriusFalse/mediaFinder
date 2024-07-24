@@ -239,6 +239,32 @@ QString DialogRenamerFiles::renameFile(const QString &filePath, const QString &n
     return QString();
 }
 
+QString DialogRenamerFiles::renameAndMoveFile(const QString &oldPath, const QString &newPath)
+{
+    if(!QFile::exists(oldPath)){
+        return QString();
+    }
+    QFileInfo inOld(oldPath);
+    QFileInfo toNew(newPath);
+    if(!QFile::exists(toNew.absolutePath())){
+        QDir dir;
+        dir.mkpath(toNew.absolutePath());
+    }
+    if(inOld.absoluteFilePath()==toNew.absoluteFilePath()){
+        return toNew.absoluteFilePath();
+    }
+    QFile file(oldPath);
+    if (file.rename(newPath)) {
+        return newPath; // Возвращаем полный путь к новому файлу при успехе
+    } else {
+        qDebug() << "Не удалось переименовать и переместить файл:" << file.errorString();
+        qDebug() << "Old File: " << oldPath;
+        qDebug() << "New File: " << newPath;
+        return oldPath; // Возвращаем полный путь к старому файлу при провале
+    }
+    return oldPath;
+}
+
 
 void DialogRenamerFiles::on_renameMovieButton_clicked()
 {
@@ -264,24 +290,38 @@ void DialogRenamerFiles::on_renameTVButton_clicked()
         QString newName = childItem->text(0);
         uint season = childItem->data(1,Qt::UserRole).toUInt();
         uint episode = childItem->data(2,Qt::UserRole).toUInt();
-
-        if(this->checkNewFoldersEpisodes){
-            newName = "Season "+QString::number(season)+"/"+newName;
-        }
-
-        EpisodeInfo infoEpisode = this->showTv.getEpisode(season, episode);
-        QString oldPath = infoEpisode.filePath;
         int  id = childItem->data(3,Qt::UserRole).toInt();
 
+        EpisodeInfo infoEpisode = this->showTv.getEpisode(season, episode);
 
-        QString newFileName = this->renameFile(oldPath, newName);
-        dbmanager->updateEpisodeColumn("file", newFileName, id);
-
+        QString oldPath = infoEpisode.filePath;
         QString oldPoster = infoEpisode.still_path;
-        if(oldPoster!=""){
-            QString newFilePoster = this->renameFile(oldPoster, newName);
-            dbmanager->updateEpisodeColumn("Poster", newFilePoster, id);
+
+        QFileInfo oldPathInfo(oldPath);
+        QFileInfo oldPosterInfo(oldPoster);
+        QString newFileName;
+        QString newFilePoster;
+        if(this->checkNewFoldersEpisodes){
+            QString rootPathShowTV = infoEpisode.libraryPath;
+            QString newPathToEpisodeShowTV = rootPathShowTV + "/Season "+QString::number(season)+"/"+newName+"."+oldPathInfo.suffix();
+            newFileName = this->renameAndMoveFile(oldPath,newPathToEpisodeShowTV);
+            if(oldPoster!=""){
+                QString newPathToPosterEpisodeShowTV = rootPathShowTV + "/Season "+QString::number(season)+"/S"+QString::number(season)+"E"+QString::number(episode)+"-poster."+oldPosterInfo.suffix();
+                newFilePoster = this->renameAndMoveFile(oldPoster, newPathToPosterEpisodeShowTV);
+            }
+        }else{
+            newFileName = this->renameFile(oldPath, newName);
+            if(oldPoster!=""){
+                newFilePoster = this->renameFile(oldPoster, newName);
+            }
         }
+
+
+        dbmanager->updateEpisodeColumn("file", newFileName, id);
+        dbmanager->updateEpisodeColumn("Poster", newFilePoster, id);
+
+
+
 
     }
     this->close();

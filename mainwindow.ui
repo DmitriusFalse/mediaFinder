@@ -19,15 +19,62 @@
      <layout class="QHBoxLayout" name="horizontalLayout_5">
       <item>
        <widget class="QPushButton" name="openSettings">
-        <property name="text">
+        <property name="toolTip">
          <string>Настройки</string>
+        </property>
+        <property name="toolTipDuration">
+         <number>0</number>
+        </property>
+        <property name="statusTip">
+         <string>Настройки</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="data.qrc">
+          <normaloff>:/icons/settings</normaloff>:/icons/settings</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>48</width>
+          <height>48</height>
+         </size>
+        </property>
+        <property name="autoDefault">
+         <bool>true</bool>
+        </property>
+        <property name="default">
+         <bool>false</bool>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="refreshLibrary">
-        <property name="text">
+        <property name="toolTip">
          <string>Обновить</string>
+        </property>
+        <property name="statusTip">
+         <string>Обновить</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="data.qrc">
+          <normaloff>:/icons/refresh</normaloff>:/icons/refresh</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>48</width>
+          <height>48</height>
+         </size>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -36,8 +83,27 @@
         <property name="enabled">
          <bool>false</bool>
         </property>
-        <property name="text">
+        <property name="toolTip">
          <string>Загрузить</string>
+        </property>
+        <property name="statusTip">
+         <string>Загрузить</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="data.qrc">
+          <normaloff>:/icons/search</normaloff>:/icons/search</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>48</width>
+          <height>48</height>
+         </size>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -46,8 +112,30 @@
         <property name="enabled">
          <bool>false</bool>
         </property>
-        <property name="text">
+        <property name="toolTip">
          <string>Переименовать</string>
+        </property>
+        <property name="statusTip">
+         <string>Переименовать</string>
+        </property>
+        <property name="inputMethodHints">
+         <set>Qt::InputMethodHint::ImhNone</set>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="data.qrc">
+          <normaloff>:/icons/rename</normaloff>:/icons/rename</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>48</width>
+          <height>48</height>
+         </size>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -63,6 +151,32 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="exitButton">
+        <property name="toolTip">
+         <string>Выход</string>
+        </property>
+        <property name="statusTip">
+         <string>Выход</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="data.qrc">
+          <normaloff>:/icons/exit</normaloff>:/icons/exit</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>48</width>
+          <height>48</height>
+         </size>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -384,7 +498,7 @@
                        <x>0</x>
                        <y>0</y>
                        <width>555</width>
-                       <height>399</height>
+                       <height>371</height>
                       </rect>
                      </property>
                     </widget>
@@ -1077,6 +1191,8 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <resources/>
+ <resources>
+  <include location="data.qrc"/>
+ </resources>
  <connections/>
 </ui>

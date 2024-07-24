@@ -173,6 +173,7 @@ private:
     QString replacePatternMovie(const QString& input);
     QString replacePatternTV(const QString& input, int Season, int Episode);
     QString renameFile(const QString& filePath, const QString& newName);
+    QString renameAndMoveFile(const QString& oldPath, const QString& newPath);
     bool checkNewFoldersEpisodes;
 signals:
     void signalFinishRename(QString type, int id);

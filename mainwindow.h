@@ -11,6 +11,13 @@
 #include "medialibrary.h"
 #include "dbmanager.h"
 
+struct Connection {
+    bool isConnected;
+    QMetaObject::Connection connection;
+
+    Connection() : isConnected(false) {}
+};
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -36,16 +43,18 @@ private:
   void reloadSettings();
 
   Ui::MainWindow *ui;
-  DBManager *dbmanager;
-  MediaLibrary *mediaLibrary;
-  SettingsData *settingsData;
-  SettingsApp *dialogSettingsApp;
-  SearchMedia *searchMedia;
-  DialogShowProgress *progressBar;
+  DBManager *dbmanager = nullptr;
+  MediaLibrary *mediaLibrary = nullptr;
+  SettingsData *settingsData = nullptr;
+  SettingsApp *dialogSettingsApp = nullptr;
+  SearchMedia *searchMedia = nullptr;
+  DialogShowProgress *progressBar = nullptr;
   Settings *settings;
-  DialogRenamerFiles *renameFiles;
+  DialogRenamerFiles *renameFiles = nullptr;
 
   QString NameShowLoaded="";
+
+  Connection renameConnection;
 
 private slots:
     void onDialogClosed();
@@ -55,6 +64,8 @@ private slots:
     void on_loadMediaButton_clicked();
 
     void on_renameButton_clicked();
+
+    void on_exitButton_clicked();
 
 public slots:
     // void slotUptateProgressBar(const int &i);

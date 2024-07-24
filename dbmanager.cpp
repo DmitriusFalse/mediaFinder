@@ -455,7 +455,7 @@ bool DBManager::updateMovieColumn(const QString &columnName, const QVariant &new
     if (query.exec()) {
         return true;
     } else {
-        qDebug() << "Ошибка выполнения запроса:" << query.lastError().text();
+        qDebug() << "updateMovieColumn - Ошибка выполнения запроса:" << query.lastError().text();
         return false;
     }
 }
@@ -472,7 +472,8 @@ bool DBManager::updateEpisodeColumn(const QString &columnName, const QVariant &n
     if (query.exec()) {
         return true;
     } else {
-        qDebug() << "Ошибка выполнения запроса:" << query.lastError().text();
+        qDebug() << "columnName: " << columnName << "newValue: " << newValue << "rowId: " <<rowId;
+        qDebug() << "updateEpisodeColumn - Ошибка выполнения запроса:" << query.lastError().text();
         return false;
     }
 }
@@ -928,46 +929,46 @@ TVCollection DBManager::getTVCollection()
         //Обрабатываем каждый сериал отдельно
         while (queryTVShow.next()) {
 
-            ShowInfo tvShow;
-            tvShow.ID = queryTVShow.value ("id").toInt();
-            tvShow.idShow = queryTVShow.value ("idShow").toInt();
-            tvShow.nameShow = queryTVShow.value ("NameShow").toString ();
-            tvShow.poster = queryTVShow.value ("Poster").toString ();
-            tvShow.overview = queryTVShow.value ("Overview").toString ();
-            tvShow.originalNameShow = queryTVShow.value ("Original_nameShow").toString ();
-            tvShow.numberOfEpisodes = queryTVShow.value ("Number_of_episodes").toInt();
-            tvShow.numberOfSeasons = queryTVShow.value ("Number_of_seasons").toInt();
-            tvShow.status = queryTVShow.value ("Status").toString();
-            tvShow.genres = queryTVShow.value ("Genres").toString();
-            tvShow.production_companies = queryTVShow.value ("production_companies_name").toString();
-            tvShow.logoPath = queryTVShow.value ("production_companies_logo_path").toString();
+            ShowInfo showTv;
+            showTv.ID = queryTVShow.value ("id").toInt();
+            showTv.idShow = queryTVShow.value ("idShow").toInt();
+            showTv.nameShow = queryTVShow.value ("NameShow").toString ();
+            showTv.poster = queryTVShow.value ("Poster").toString ();
+            showTv.overview = queryTVShow.value ("Overview").toString ();
+            showTv.originalNameShow = queryTVShow.value ("Original_nameShow").toString ();
+            showTv.numberOfEpisodes = queryTVShow.value ("Number_of_episodes").toInt();
+            showTv.numberOfSeasons = queryTVShow.value ("Number_of_seasons").toInt();
+            showTv.status = queryTVShow.value ("Status").toString();
+            showTv.genres = queryTVShow.value ("Genres").toString();
+            showTv.production_companies = queryTVShow.value ("production_companies_name").toString();
+            showTv.logoPath = queryTVShow.value ("production_companies_logo_path").toString();
+            showTv.first_air_date = queryTVShow.value ("first_air_date").toString();
+            showTv.last_air_date = queryTVShow.value ("last_air_date").toString();
 
             // Получаем информацию о сериях сериала!
             QSqlQuery querySeries(this->m_database);
             querySeries.prepare ("SELECT * FROM TVEpisodes WHERE NameShow = :nameShow");
-            querySeries.bindValue (":nameShow", tvShow.nameShow);
+            querySeries.bindValue (":nameShow", showTv.nameShow);
 
             if(querySeries.exec ()){
                 while (querySeries.next ()){
                     EpisodeInfo episode;
-
                     episode.ID = querySeries.value("ID").toInt();
-
+                    episode.air_date = querySeries.value("air_date").toString();
                     episode.pathToSerial = querySeries.value("PathToSerial").toString();
                     episode.still_path = querySeries.value("Poster").toString();
                     episode.episodeNumber = querySeries.value("Episode").toInt();
                     episode.seasonsNumber = querySeries.value("Season").toInt();
                     episode.filePath = querySeries.value("File").toString();
                     episode.episodeTitle = querySeries.value("NameEpisode").toString();
-                    episode.libraryPath = querySeries.value("LibraryPath").toString();
+                    episode.libraryPath = querySeries.value("PathToSerial").toString();
                     episode.overview = querySeries.value("overview").toString();
-
-                    tvShow.addEpisodes(episode);
+                    showTv.addEpisodes(episode);
                 }
             }else{
                 qDebug() << querySeries.lastError ().text ();
             }
-            tvcol.addShow(tvShow);
+            tvcol.addShow(showTv);
         }
     }else{
         qDebug() << queryTVShow.lastError ().text ();
@@ -1105,7 +1106,7 @@ ShowInfo DBManager::getShowTVShowByID(int id)
                     episode.seasonsNumber = querySeries.value("Season").toInt();
                     episode.filePath = querySeries.value("File").toString();
                     episode.episodeTitle = querySeries.value("NameEpisode").toString();
-                    episode.libraryPath = querySeries.value("LibraryPath").toString();
+                    episode.libraryPath = querySeries.value("PathToSerial").toString();
                     episode.overview = querySeries.value("overview").toString();
                     showTv.addEpisodes(episode);
                 }

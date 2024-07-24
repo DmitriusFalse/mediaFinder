@@ -682,10 +682,10 @@ void MainWindow::on_renameButton_clicked()
 
     if(this->renameFiles!=nullptr){ // Проверяем существование инициализированного DialogRenamerFiles
         // отключаем соединения
-        disconnect(this->renameFiles,
-                &DialogRenamerFiles::signalFinishRename,
-                this,
-                &MainWindow::slotUpdateListLibraryByID);
+        if(renameConnection.isConnected){
+            disconnect(renameConnection.connection);
+        }
+
         // и удаляем
         delete this->renameFiles;
     }
@@ -720,11 +720,18 @@ void MainWindow::on_renameButton_clicked()
         this->renameFiles->setMediaData(show);
     }break;
     }
-    connect(this->renameFiles,
+    renameConnection.connection = connect(this->renameFiles,
             &DialogRenamerFiles::signalFinishRename,
             this,
             &MainWindow::slotUpdateListLibraryByID);
+    renameConnection.isConnected = true;
     this->renameFiles->setTypeMedia(ui->tabMainWindow->currentIndex());
     this->renameFiles->show();
+}
+
+
+void MainWindow::on_exitButton_clicked()
+{
+    this->close();
 }
 
