@@ -6,5 +6,6 @@
         <file alias="refresh">icons/refresh.png</file>
         <file alias="settings">icons/gear.png</file>
         <file alias="exit">icons/exit.png</file>
+        <file alias="save">icons/diskette.png</file>
     </qresource>
 </RCC>

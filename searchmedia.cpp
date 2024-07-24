@@ -268,20 +268,21 @@ void SearchMedia::sendRequestTMDBGetInformation(QString lang)
 
 }
 
-void SearchMedia::sendRequestTMDBGetInformationEpisodes(int count, QString lang)
+void SearchMedia::sendRequestTMDBGetInformationEpisodes(QString lang)
 {
     qDebug() << "Получаем информацию о епизодах Сериале";
     countSendRequest = 0;
     showProgres->setMainLineMessage("Получаем подробную информацию о эпизодах Шоу");
     showProgres->updateProgres();
-    for (int index = 1; index <= count; ++index) {
+    QList<int> seasons = dbManager->getListNumberSeason(this->idTVDB);
+    for (const int& numSeason : seasons) {
         showProgres->updateProgres();
-        showProgres->setTextProgres("Запрос на Сезон "+QString::number(index));
+        showProgres->setTextProgres("Запрос на Сезон "+QString::number(numSeason));
         countSendRequest++;
         QString urlString = QString("https://api.themoviedb.org/3/%1/%2/season/%3")
                                 .arg(getSelectType())
                                 .arg(QString::number(getIdSelectMedia()))
-                                .arg(QString::number(index));
+                                .arg(QString::number(numSeason));
         QUrl url(urlString);
         QUrlQuery query;
         // // query.addQueryItem("query", Name);
@@ -303,8 +304,6 @@ void SearchMedia::sendRequestTMDBGetInformationEpisodes(int count, QString lang)
 
         manager->get(request);
     }
-
-
 }
 
 void SearchMedia::sendRequestTMDBGetImage()
@@ -709,10 +708,12 @@ void SearchMedia::slotFinishRequestChooseMediaEpisodes(QNetworkReply *reply)
         for (const QJsonValue& episodes : episodesArray) {
             QJsonObject itemEpisodes = episodes.toObject();
             EpisodeInfo *episode = new EpisodeInfo;
-
             episode->ID = itemEpisodes.value ("id").toInt ();
             episode->episodeNumber = itemEpisodes.value ("episode_number").toInt ();
             episode->seasonsNumber = itemEpisodes.value ("season_number").toInt ();
+            if(!this->dbManager->checkSeasonEpisodeExist(episode->seasonsNumber, episode->episodeNumber)){
+                continue;
+            }
             episode->air_date = itemEpisodes.value ("air_date").toString ();
             episode->still_path = itemEpisodes.value ("still_path").toString ();
 
@@ -888,9 +889,9 @@ void SearchMedia::processResponseTV(QJsonObject jsonObject)
     // Первый раз получаем информацию на английском
     // Второй раз на языке локализации выбраной
     if(this->getTranslated()){
-        sendRequestTMDBGetInformationEpisodes(this->showTv->numberOfSeasons);
+        sendRequestTMDBGetInformationEpisodes();
     }else{
-        sendRequestTMDBGetInformationEpisodes(this->showTv->numberOfSeasons, getLangSearch());
+        sendRequestTMDBGetInformationEpisodes(getLangSearch());
     }
 }
 
@@ -964,6 +965,7 @@ void SearchMedia::endSelectMedia()
     showProgres->updateProgres();
     showProgres->show();
     qDebug() << "Close end search and select media!";
+    // Отправляем запрос для загрузки информации о фильме/сериале
     this->sendRequestTMDBGetInformation();
 }
 

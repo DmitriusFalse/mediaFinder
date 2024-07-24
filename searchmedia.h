@@ -74,7 +74,7 @@ private:
     void sendRequestTMDBSearch(QString Name, QString type);
     void sendRequestTMDBSearchGetImage();
     void sendRequestTMDBGetInformation(QString lang="en-EN");
-    void sendRequestTMDBGetInformationEpisodes(int count, QString lang="en-EN");
+    void sendRequestTMDBGetInformationEpisodes(QString lang="en-EN");
     void sendRequestTMDBGetImage();
 
     void getImageMovie();

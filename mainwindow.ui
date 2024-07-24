@@ -556,7 +556,7 @@
               <item>
                <widget class="QTabWidget" name="TVShowInfoTab">
                 <property name="currentIndex">
-                 <number>0</number>
+                 <number>1</number>
                 </property>
                 <property name="tabsClosable">
                  <bool>false</bool>
@@ -983,7 +983,7 @@
                         <item>
                          <layout class="QHBoxLayout" name="TMDBEpisodeLayout">
                           <item>
-                           <widget class="QLabel" name="TMDBIdEpisodeText">
+                           <widget class="QLabel" name="TMDBIdEpisodeLabel">
                             <property name="minimumSize">
                              <size>
                               <width>100</width>
@@ -1002,7 +1002,7 @@
                            </widget>
                           </item>
                           <item>
-                           <widget class="QLabel" name="TMDBIdEpisodeLabel">
+                           <widget class="QLabel" name="TMDBIdEpisodeText">
                             <property name="minimumSize">
                              <size>
                               <width>100</width>
@@ -1078,6 +1078,141 @@
                              <string>-</string>
                             </property>
                            </widget>
+                          </item>
+                         </layout>
+                        </item>
+                        <item>
+                         <layout class="QHBoxLayout" name="horizontalLayout_3">
+                          <item>
+                           <spacer name="verticalSpacer_3">
+                            <property name="orientation">
+                             <enum>Qt::Orientation::Vertical</enum>
+                            </property>
+                            <property name="sizeType">
+                             <enum>QSizePolicy::Policy::Fixed</enum>
+                            </property>
+                            <property name="sizeHint" stdset="0">
+                             <size>
+                              <width>20</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                           </spacer>
+                          </item>
+                          <item>
+                           <widget class="QLabel" name="seasonLabel">
+                            <property name="minimumSize">
+                             <size>
+                              <width>60</width>
+                              <height>0</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>60</width>
+                              <height>16777215</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>Сезон:</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QLineEdit" name="seasonEdit">
+                            <property name="minimumSize">
+                             <size>
+                              <width>50</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>50</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="inputMask">
+                             <string>9999</string>
+                            </property>
+                            <property name="text">
+                             <string/>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QLabel" name="episodeLabel">
+                            <property name="minimumSize">
+                             <size>
+                              <width>60</width>
+                              <height>0</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>60</width>
+                              <height>16777215</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string>Серия:</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QLineEdit" name="episodeEdit">
+                            <property name="minimumSize">
+                             <size>
+                              <width>50</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>50</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="inputMask">
+                             <string>9999</string>
+                            </property>
+                            <property name="text">
+                             <string/>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QPushButton" name="saveSeasonEpisodeNum">
+                            <property name="text">
+                             <string/>
+                            </property>
+                            <property name="icon">
+                             <iconset resource="data.qrc">
+                              <normaloff>:/icons/save</normaloff>:/icons/save</iconset>
+                            </property>
+                            <property name="iconSize">
+                             <size>
+                              <width>24</width>
+                              <height>24</height>
+                             </size>
+                            </property>
+                            <property name="flat">
+                             <bool>true</bool>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <spacer name="horizontalSpacer_8">
+                            <property name="orientation">
+                             <enum>Qt::Orientation::Horizontal</enum>
+                            </property>
+                            <property name="sizeHint" stdset="0">
+                             <size>
+                              <width>40</width>
+                              <height>20</height>
+                             </size>
+                            </property>
+                           </spacer>
                           </item>
                          </layout>
                         </item>

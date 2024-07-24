@@ -207,21 +207,31 @@ void MainWindow::clickTreeWidgetTV()
     qDebug() << "Click TV";
 
     QTreeWidgetItem *selectedItem = ui->listTVLibrary->currentItem();
+
     QTreeWidgetItem *parentItem = selectedItem->parent(); // Получение родительского элемента
     this->setLayoutVisibility(ui->wrapTVShowLayout, true);
 
-    if (parentItem != nullptr) {
+    if (parentItem != nullptr) { //Дочерний элемент
         //Episode select
         qDebug() << "1";
         ui->TVShowInfoTab->setTabEnabled(1, true);
         ui->TVShowInfoTab->setCurrentIndex(1);
-        int seasonsNumber = selectedItem->data(1, Qt::UserRole).toInt();
-        int episodeNumber = selectedItem->data(2, Qt::UserRole).toInt();
-        int srcID = parentItem->data(0, Qt::UserRole).toInt();
+        this->numSeason = selectedItem->data(1, Qt::UserRole).toInt();
+        this->numEpisode = selectedItem->data(2, Qt::UserRole).toInt();
+        this->idShow = parentItem->data(0, Qt::UserRole).toInt();
 
-        this->fillTvShowEpisodeForm(srcID, seasonsNumber, episodeNumber);
+        this->fillTvShowEpisodeForm(this->idShow, this->numSeason, this->numEpisode);
 
-    } else {
+    } else { // Родительский элемент
+        for (int i = 0; i < ui->listTVLibrary->topLevelItemCount(); ++i) {
+            QTreeWidgetItem *item = ui->listTVLibrary->topLevelItem(i);
+            if(item->parent()==nullptr){
+                item->setExpanded(false);
+            }
+        }
+        if(selectedItem->parent()==nullptr){
+            selectedItem->setExpanded(true);
+        }
         ui->TVShowInfoTab->setCurrentIndex(0);
         ui->TVShowInfoTab->setTabEnabled(1, false);
 
@@ -461,7 +471,7 @@ void MainWindow::fillTvShowEpisodeForm(int id, int seasonsNumber, int episodeNum
         this->fillTvShowForm(id);
     }
     EpisodeInfo episode = showTV.getEpisode(seasonsNumber, episodeNumber);
-
+    this->episodeID = episode.ID;
     if(episode.episodeTitle.size()>0){
         ui->nameEpisodeText->setText(episode.episodeTitle);
     }else{
@@ -472,7 +482,27 @@ void MainWindow::fillTvShowEpisodeForm(int id, int seasonsNumber, int episodeNum
     }else{
         ui->overviewEpisodeText->setText("-");
     }
-
+    // airDateText TMDBIdEpisodeText
+    if(episode.air_date!=""){
+        ui->airDateText->setText(episode.air_date);
+    }else{
+        ui->airDateText->setText("-");
+    }
+    if(episode.episodeID){
+        ui->TMDBIdEpisodeText->setText(QString::number(episode.episodeID));
+    }else{
+        ui->TMDBIdEpisodeText->setText("-");
+    }
+    if(episode.seasonsNumber){
+        ui->seasonEdit->setText(QString::number(episode.seasonsNumber));
+    }else{
+        ui->seasonEdit->setText("-");
+    }
+    if(episode.episodeNumber){
+        ui->episodeEdit->setText(QString::number(episode.episodeNumber));
+    }else{
+        ui->episodeEdit->setText("-");
+    }
     QPixmap posterPixmap;
 
     if(QFile::exists (episode.still_path)){
@@ -735,3 +765,33 @@ void MainWindow::on_exitButton_clicked()
     this->close();
 }
 
+void MainWindow::on_seasonEdit_textEdited(const QString &arg1)
+{
+    this->numSeason = arg1.toInt();
+}
+
+void MainWindow::on_episodeEdit_textEdited(const QString &arg1)
+{
+    this->numEpisode = arg1.toInt();
+}
+
+
+void MainWindow::on_saveSeasonEpisodeNum_clicked()
+{
+    if(this->episodeID>0){
+        if(this->numSeason>=0){
+            this->dbmanager->updateEpisodeColumn("Season", this->numSeason, this->episodeID);
+        }
+        if(this->numEpisode>=0){
+            this->dbmanager->updateEpisodeColumn("Episode", this->numEpisode, this->episodeID);
+        }
+
+        QTreeWidgetItem *selectedItem = ui->listTVLibrary->currentItem();
+        selectedItem->setText(0, "S" + QString::number(this->numSeason) + "E" + QString::number(this->numEpisode));
+
+        selectedItem->setData(1,Qt::UserRole,this->numSeason);
+        selectedItem->setData(2,Qt::UserRole,this->numEpisode);
+
+        this->fillTvShowEpisodeForm(this->idShow, this->numSeason, this->numEpisode);
+    }
+}

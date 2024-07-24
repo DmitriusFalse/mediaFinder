@@ -65,6 +65,7 @@ struct EpisodeInfo {
     int ID;
     int episodeNumber;
     int seasonsNumber;
+    int episodeID;
     QString episodeTitle;
     QString filePath;
     QString air_date;

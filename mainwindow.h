@@ -55,6 +55,7 @@ private:
   QString NameShowLoaded="";
 
   Connection renameConnection;
+      int numSeason, numEpisode, idShow, episodeID;
 
 private slots:
     void onDialogClosed();
@@ -62,10 +63,11 @@ private slots:
     void on_openSettings_clicked();
     void slotChangetSelection();
     void on_loadMediaButton_clicked();
-
     void on_renameButton_clicked();
-
     void on_exitButton_clicked();
+    void on_seasonEdit_textEdited(const QString &arg1);
+    void on_saveSeasonEpisodeNum_clicked();
+    void on_episodeEdit_textEdited(const QString &arg1);
 
 public slots:
     // void slotUptateProgressBar(const int &i);

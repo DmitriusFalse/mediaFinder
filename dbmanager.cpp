@@ -443,6 +443,38 @@ QString DBManager::getPathToMovie(QString name)
     return fileinfo.path();
 }
 
+QList<int> DBManager::getListNumberSeason(int idDBTVShow)
+{
+    QSqlQuery query(this->m_database);
+    query.prepare("SELECT DISTINCT TVEpisodes.Season FROM TVShow INNER JOIN TVEpisodes ON TVShow.NameShow = TVEpisodes.NameShow WHERE TVShow.ID = :id");
+    query.bindValue(":id", idDBTVShow);
+
+    QList<int> list;
+    if(query.exec()){
+        while(query.next()){
+            list.append(query.value("Season").toInt());
+        }
+    }else{
+        qDebug() << query.lastError().text();
+    }
+    return list;
+}
+
+bool DBManager::checkSeasonEpisodeExist(const int &season, const int &episode)
+{
+    QSqlQuery query(this->m_database);
+    query.prepare("SELECT 1 FROM TVEpisodes WHERE Season = :season AND Episode = :episode");
+    query.bindValue(":season", season);
+    query.bindValue(":episode", episode);
+
+    if (!query.exec()) {
+        qDebug() << "Query execution error:" << query.lastError().text();
+        return false;
+    }
+
+    return query.next();
+}
+
 bool DBManager::updateMovieColumn(const QString &columnName, const QVariant &newValue, int rowId)
 {
     QSqlQuery query(this->m_database);
@@ -1108,6 +1140,7 @@ ShowInfo DBManager::getShowTVShowByID(int id)
                     episode.episodeTitle = querySeries.value("NameEpisode").toString();
                     episode.libraryPath = querySeries.value("PathToSerial").toString();
                     episode.overview = querySeries.value("overview").toString();
+                    episode.episodeID = querySeries.value("idShow").toInt();
                     showTv.addEpisodes(episode);
                 }
             }else{
