@@ -10,6 +10,7 @@
 #include "settingsapp.h"
 #include "medialibrary.h"
 #include "dbmanager.h"
+#include "showimagefile.h"
 
 struct Connection {
     bool isConnected;
@@ -51,6 +52,7 @@ private:
   DialogShowProgress *progressBar = nullptr;
   Settings *settings;
   DialogRenamerFiles *renameFiles = nullptr;
+  ShowImageFile *showImageFile = nullptr;
 
   QString NameShowLoaded="";
 
@@ -68,6 +70,10 @@ private slots:
     void on_seasonEdit_textEdited(const QString &arg1);
     void on_saveSeasonEpisodeNum_clicked();
     void on_episodeEdit_textEdited(const QString &arg1);
+
+    void on_zoomImage_clicked();
+
+    void on_tabMainWindow_currentChanged(int index);
 
 public slots:
     // void slotUptateProgressBar(const int &i);

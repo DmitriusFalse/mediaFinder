@@ -20,7 +20,7 @@
       <enum>QTabWidget::TabPosition::West</enum>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tabMovie">
       <attribute name="title">
@@ -114,6 +114,30 @@
             <string/>
            </property>
            <property name="clearButtonEnabled">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QCheckBox" name="createMovieNFOcheckBox">
+           <property name="text">
+            <string>Создать NFO</string>
+           </property>
+           <property name="icon">
+            <iconset resource="data.qrc">
+             <normaloff>:/icons/nfo</normaloff>:/icons/nfo</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+           <property name="checked">
             <bool>true</bool>
            </property>
           </widget>
@@ -255,7 +279,34 @@
               <string>Переместить в папки по сезонам</string>
              </property>
              <property name="icon">
-              <iconset theme="QIcon::ThemeIcon::FolderNew"/>
+              <iconset resource="data.qrc">
+               <normaloff>:/icons/dir</normaloff>:/icons/dir</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>24</width>
+               <height>24</height>
+              </size>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="createTVShowNFOcheckBox">
+             <property name="text">
+              <string>Создать NFO</string>
+             </property>
+             <property name="icon">
+              <iconset resource="data.qrc">
+               <normaloff>:/icons/nfo</normaloff>:/icons/nfo</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>24</width>
+               <height>24</height>
+              </size>
              </property>
              <property name="checked">
               <bool>true</bool>
@@ -334,6 +385,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="data.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -61,6 +61,7 @@ private:
     // void createUpdateCrewEpisode(int idShow,int id,QString role, QString name,QString thumb);
     void createUpdateCrewEpisode(ShowInfo tvshow);
     void createUpdateCrewTVShow(ShowInfo tvshow);
+    void createUpdateCrewMovie(MovieInfo movie);
     QString removeLeadingZeros(const QString& input);
     static QRegularExpression re;
 signals:

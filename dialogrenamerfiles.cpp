@@ -40,6 +40,7 @@ void DialogRenamerFiles::setTypeMedia(int index)
 void DialogRenamerFiles::setMediaData(MovieInfo mov)
 {
     this->movie = mov;
+    this->setWindowTitle(this->movie.name+" - Media Finder");
     this->replacePlaceholdersMovie = new PlaceholdersMovie(this->movie);
     QFileInfo fileinfo(this->movie.path);
     QTreeWidgetItem *newItem = new QTreeWidgetItem(ui->oldListMovie);
@@ -83,6 +84,7 @@ void DialogRenamerFiles::setMediaData(MovieInfo mov)
 void DialogRenamerFiles::setMediaData(ShowInfo sh)
 {
     this->showTv = sh;
+    this->setWindowTitle(this->showTv.nameShow+" - Media Finder");
     this->replacePlaceholdersTV = new PlaceholdersTV(this->showTv);
     QTreeWidgetItem *mainItem = new QTreeWidgetItem(ui->oldListTV);
     mainItem->setText(0, showTv.nameShow);
@@ -272,9 +274,9 @@ void DialogRenamerFiles::on_renameMovieButton_clicked()
     QString oldPoster = movie.poster;
 
     QString newFilePath = this->renameFile(oldPath, newFileName);
-    QString newFilePoster = this->renameFile(oldPoster, newFileName);
+    // QString newFilePoster = this->renameFile(oldPoster, newFileName);
     dbmanager->updateMovieColumn("path", newFilePath, movie.id);
-    dbmanager->updateMovieColumn("poster", newFilePoster, movie.id);
+    // dbmanager->updateMovieColumn("poster", newFilePoster, movie.id);
     this->close();
     emit signalFinishRename("Movie", movie.id);
 }

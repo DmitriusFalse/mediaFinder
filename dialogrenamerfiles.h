@@ -41,8 +41,8 @@ struct PlaceholdersMovie
             fieldDescriptions[":idMovie"] = "ID фильма";
             keysList.append(":idMovie");
         }
-        if (movie.imdbID != 0) {
-            placeholders[":imdbID"] = QString::number(movie.imdbID);
+        if (movie.imdbID != "") {
+            placeholders[":imdbID"] = movie.imdbID;
             fieldDescriptions[":imdbID"] = "IMDB ID";
             keysList.append(":imdbID");
         }

@@ -17,10 +17,16 @@ struct Videos {
     }
 };
 
+struct Crew {
+    int id; //id
+    QString name; //name
+    QString role; //job
+    QString thumb; //profile_path
+};
 struct MovieInfo{
     int id;
     int IDMovie;
-    int imdbID;
+    QString imdbID;
     QString genre;
     QString path;
     QString poster;
@@ -35,6 +41,7 @@ struct MovieInfo{
     QString Status;
     QList<Reviews> reviews;
     QList<Videos> videos;
+    MovieInfo() : index(credits.constBegin()){}
     void addReviews(Reviews review){
         this->reviews.append(review);
     }
@@ -47,18 +54,45 @@ struct MovieInfo{
     void addVideos(QString key){
         this->addVideos(Videos{.key = key});
     }
+    void addCrew(int id, const QString& name, const QString& role, const QString& thumb) {
+        credits[id] = Crew{id, name, role, thumb};
+        index = credits.constBegin();
+    }
+
+    // Метод добавления Crew по объекту
+    void addCrew(const Crew& credit) {
+        credits[credit.id] = credit;
+        index = credits.constBegin();
+    }
+    Crew getCreditByID(int id){
+        if(credits.contains(id)){
+            return credits[id];
+        }else{
+            return Crew{};
+        }
+    }
+    bool nextCrew(){
+        // Если текущий итератор не достиг конца
+        if (index != credits.constEnd()) {
+            return true;
+        }
+        index = credits.constBegin(); // Сброс итератора
+        return false;
+    }
+    Crew& getCrew(){
+        Crew& returnValue = const_cast<Crew&>(index.value());
+        index ++;
+        return returnValue;
+    }
+private:
+    QMap<int, Crew> credits;
+    QMap<int, Crew>::const_iterator index;
 };
 struct MovieCollections {
     QList<MovieInfo> movies;
     void addMovie(const MovieInfo &item) {
         movies.append(item);
     }
-};
-struct Crew {
-    int id; //id
-    QString name; //name
-    QString role; //job
-    QString thumb; //profile_path
 };
 
 struct EpisodeInfo {

@@ -7,5 +7,8 @@
         <file alias="settings">icons/gear.png</file>
         <file alias="exit">icons/exit.png</file>
         <file alias="save">icons/diskette.png</file>
+        <file alias="zoom">icons/zoom-in.png</file>
+        <file alias="nfo">icons/test.png</file>
+        <file alias="dir">icons/directory.png</file>
     </qresource>
 </RCC>

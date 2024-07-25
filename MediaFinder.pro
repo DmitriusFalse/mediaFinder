@@ -17,6 +17,7 @@ SOURCES += \
     searchmedia.cpp \
     settingsapp.cpp \
     settingsdata.cpp \
+    showimagefile.cpp \
     workrefreshmovie.cpp
 
 HEADERS += \
@@ -32,6 +33,7 @@ HEADERS += \
     searchmedia.h \
     settingsapp.h \
     settingsdata.h \
+    showimagefile.h \
     workrefreshmovie.h
 
 FORMS += \
@@ -39,7 +41,8 @@ FORMS += \
     dialogshowprogress.ui \
     mainwindow.ui \
     searchmedia.ui \
-    settingsapp.ui
+    settingsapp.ui \
+    showimagefile.ui
 
 TRANSLATIONS += \
     MediaFinder_ru_RU.ts

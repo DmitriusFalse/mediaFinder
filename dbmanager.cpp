@@ -188,6 +188,22 @@ void DBManager::createUpdateCrewTVShow(ShowInfo tvshow)
     }
 }
 
+void DBManager::createUpdateCrewMovie(MovieInfo movie)
+{
+    QSqlQuery query(this->m_database);
+    while(movie.nextCrew()){
+        Crew& crewData = movie.getCrew();
+        query.prepare("INSERT OR REPLACE INTO crewMovie (idMovie,role,name,thumb) VALUES (:idMovie,:role,:name,:thumb)");
+        query.bindValue(":idMovie", movie.IDMovie);
+        query.bindValue(":role",crewData.role);
+        query.bindValue(":name",crewData.name);
+        query.bindValue(":thumb",crewData.thumb);
+        if(!query.exec()){
+            qDebug() << "createUpdateCrewMovie - Ошибка выполнения запроса:" << query.lastError().text();
+        }
+    }
+}
+
 QString DBManager::removeLeadingZeros(const QString &input)
 {
     QString result = input;
@@ -378,6 +394,8 @@ void DBManager::updateMovie(MovieInfo movie, int id)
         this->updateReviewsTV(movie.reviews, movie.name, movie.IDMovie);
         // Обновляем видео ролики
         this->updateVideosTV(movie.videos, movie.name, movie.IDMovie);
+        // Добавляем или обновляем Crew
+        this->createUpdateCrewMovie(movie);
         // Отправляем сигнал об обновлении главного окна
         emit signalUpdateMainWindowByID("Movie", id);
     }else{
@@ -1025,7 +1043,7 @@ MovieCollections DBManager::getMovieCollection()
             movie.library_path = query.value("Library_path").toString();
             movie.overview = query.value("Description").toString();
             movie.IDMovie = query.value("idMovie").toInt();
-            movie.imdbID = query.value("imdbID").toInt();
+            movie.imdbID = query.value("imdbID").toString();
             movie.originalName = query.value("originalName").toString();
             movie.originalLang = query.value("originalLang").toString();
             movie.release_date = query.value("release_date").toString();
@@ -1167,7 +1185,7 @@ MovieInfo DBManager::getMovieByID(int id)
         movie.library_path = query.value("Library_path").toString();
         movie.overview = query.value("Description").toString();
         movie.IDMovie = query.value("idMovie").toInt();
-        movie.imdbID = query.value("imdbID").toInt();
+        movie.imdbID = query.value("imdbID").toString();
         movie.originalName = query.value("originalName").toString();
         movie.originalLang = query.value("originalLang").toString();
         movie.release_date = query.value("release_date").toString();

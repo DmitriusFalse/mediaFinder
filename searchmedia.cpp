@@ -345,7 +345,7 @@ void SearchMedia::getImageMovie()
 
         QFileInfo posterFile(this->movie->poster);
         QString namePoster = this->movie->name;
-        namePoster = path+"/"+namePoster.replace(" ","-")+"."+posterFile.suffix();
+        namePoster = path+"/poster."+posterFile.suffix();
         QUrl imageUrl("https://image.tmdb.org/t/p/original"+this->movie->poster);
 
         QNetworkAccessManager *manager = new QNetworkAccessManager(this);
@@ -360,6 +360,52 @@ void SearchMedia::getImageMovie()
         this->movie->poster = namePoster;
 
     }
+    while(this->movie->nextCrew()){
+        Crew& crewData = this->movie->getCrew();
+        if(crewData.thumb.startsWith("/")){
+            QFileInfo fileThumb(crewData.thumb);
+            QString namePhotoActor = path+"/actor/"+QString::number(crewData.id)+"."+fileThumb.suffix();
+            QFileInfo filePhotoActor(namePhotoActor);
+            if(!QFile::exists(filePhotoActor.absolutePath())){
+                QDir dir(filePhotoActor.absolutePath());
+                dir.mkpath(filePhotoActor.absolutePath());
+            }
+            QUrl imageUrl("https://image.tmdb.org/t/p/original"+crewData.thumb);
+            QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+            connect(manager, &QNetworkAccessManager::finished, this,
+                    [this, namePhotoActor,name](QNetworkReply *reply) {
+                        this->slotSavePosterFile(reply, namePhotoActor,name);
+                    });
+            QUrl url(imageUrl);
+            QNetworkRequest request(url);
+            countSendRequest++;
+            manager->get(request);
+            crewData.thumb = namePhotoActor;
+        }
+    }
+    // while(episode.nextCrew()){
+    //     Crew& crewData = episode.getCrew();
+    //     if(crewData.thumb.startsWith("/")){
+    //         QFileInfo fileThumb(crewData.thumb);
+    //         QString namePhotoActor = pathToShowTV+"/Season "+QString::number(seasonNumber)+"/actor/"+QString::number(crewData.id)+"."+fileThumb.suffix();
+    //         QFileInfo filePhotoActor(namePhotoActor);
+    //         if(!QFile::exists(filePhotoActor.absolutePath())){
+    //             QDir dir(filePhotoActor.absolutePath());
+    //             dir.mkpath(filePhotoActor.absolutePath());
+    //         }
+    //         QUrl imageUrl("https://image.tmdb.org/t/p/original"+crewData.thumb);
+    //         QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    //         connect(manager, &QNetworkAccessManager::finished, this,
+    //                 [this, namePhotoActor,nameShow](QNetworkReply *reply) {
+    //                     this->slotSavePosterFile(reply, namePhotoActor,nameShow);
+    //                 });
+    //         QUrl url(imageUrl);
+    //         QNetworkRequest request(url);
+    //         countSendRequest++;
+    //         manager->get(request);
+    //         crewData.thumb = namePhotoActor;
+    //     }
+    // }
 
 }
 
@@ -765,7 +811,7 @@ void SearchMedia::slotSavePosterFile(QNetworkReply *reply, QString pathFile, QSt
     if (reply->error() == QNetworkReply::NoError) {
         showProgres->updateProgres();
         QByteArray imageData = reply->readAll();
-        QImage image;
+        // QImage image;
         QFile file(pathFile);
         if (!file.open(QIODevice::WriteOnly)) {
             qDebug() << "Failed to open file for writing:" << file.errorString();
@@ -903,7 +949,7 @@ void SearchMedia::processResponseMovie(QJsonObject jsonObject)
 
 
     movie->IDMovie = jsonObject.value("id").toInt();
-    movie->imdbID = jsonObject.value("imdb_id").toInt();
+    movie->imdbID = jsonObject.value ("external_ids").toObject().value("imdb_id").toString();
 
     movie->overview = this->updateField(movie->overview, jsonObject.value("overview").toString());
     movie->originalName = this->updateField(movie->originalName, jsonObject.value("original_title").toString());
@@ -913,6 +959,29 @@ void SearchMedia::processResponseMovie(QJsonObject jsonObject)
     movie->poster = this->updateField(movie->poster,jsonObject.value("poster_path").toString());
     movie->release_date = this->updateField(movie->release_date,jsonObject.value("release_date").toString());
     movie->Status = this->updateField(movie->Status,jsonObject.value("status").toString());
+
+    QJsonObject credits = jsonObject.value("credits").toObject();
+
+    QJsonArray crewMovieArray = credits.value ("crew").toArray();
+    for (const QJsonValue& crew : crewMovieArray) {
+        QJsonObject crewObject = crew.toObject();
+        Crew rawCrew;
+        rawCrew.id = crewObject.value("id").toInt();
+        rawCrew.name = crewObject.value("name").toString();
+        rawCrew.role = crewObject.value("job").toString();
+        rawCrew.thumb = crewObject.value("profile_path").toString();
+        this->movie->addCrew(rawCrew);
+    }
+    QJsonArray castMovieArray = credits.value ("cast").toArray();
+    for (const QJsonValue& crew : castMovieArray) {
+        QJsonObject crewObject = crew.toObject();
+        Crew rawCrew;
+        rawCrew.id = crewObject.value("id").toInt();
+        rawCrew.name = crewObject.value("name").toString();
+        rawCrew.role = crewObject.value("job").toString();
+        rawCrew.thumb = crewObject.value("profile_path").toString();
+        this->movie->addCrew(rawCrew);
+    }
 
     QStringList GenreList;
     QJsonArray genres = jsonObject.value ("genres").toArray ();

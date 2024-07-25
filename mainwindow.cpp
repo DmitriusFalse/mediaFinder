@@ -11,6 +11,7 @@
 #include <QPainter>
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
+#include <QStyleFactory>
 
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow)
@@ -31,7 +32,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     this->progressBar = new DialogShowProgress;
     this->dialogSettingsApp = new SettingsApp(this,dbmanager, settingsData, this->settings);
 
-
+    this->showImageFile = new ShowImageFile;
 
     ui->PBRefreshLibrary->hide();
     ui->listMovieLibrary->setStyleSheet("QTreeWidget::item { height: 128px; }");
@@ -78,6 +79,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     connect(this->dialogSettingsApp, &SettingsApp::signalWindowClosed, this, &MainWindow::onDialogClosed);
 
     ui->listMovieLibrary->setAlternatingRowColors(true);
+    ui->listTVLibrary->setAlternatingRowColors(true);
     this->updateCollections("Movie");
     this->updateCollections("TV");
 
@@ -85,6 +87,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     this->setLayoutVisibility(ui->wrapTVShowLayout, false);
     ui->TVShowInfoTab->setCurrentIndex(0);
     ui->TVShowInfoTab->setTabEnabled(1, false);
+
+
+
 }
 
 MainWindow::~MainWindow()
@@ -160,8 +165,8 @@ void MainWindow::clickTreeWidgetMovie()
     if(movie.overview.size()>0){
         ui->overviewEdit->setPlainText(movie.overview);
     }
-    if(movie.imdbID>0){
-        ui->imdbText->setText(QString::number(movie.imdbID));
+    if(movie.imdbID != ""){
+        ui->imdbText->setText(movie.imdbID);
     }else{
         ui->imdbText->setText("-");
     }
@@ -205,6 +210,8 @@ void MainWindow::clickTreeWidgetMovie()
 void MainWindow::clickTreeWidgetTV()
 {
     qDebug() << "Click TV";
+
+    ui->saveSeasonEpisodeNum->hide();
 
     QTreeWidgetItem *selectedItem = ui->listTVLibrary->currentItem();
 
@@ -507,8 +514,13 @@ void MainWindow::fillTvShowEpisodeForm(int id, int seasonsNumber, int episodeNum
 
     if(QFile::exists (episode.still_path)){
         posterPixmap.load (episode.still_path);
+        ui->zoomImage->show();
+        ui->zoomImage->setProperty("image", QVariant::fromValue(episode.still_path));
+        ui->zoomImage->setProperty("title", QVariant::fromValue(showTV.nameShow+"-"+episode.episodeTitle+"S"+QString::number(episode.seasonsNumber)+"E"+QString::number(episode.episodeNumber)));
     }else{
         posterPixmap.load ("/opt/MediaFinder/poster.png");
+        ui->zoomImage->hide();
+
     }
 
     QPixmap scaledPixmap = posterPixmap.scaled(200, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation);
@@ -650,7 +662,7 @@ void MainWindow::on_openSettings_clicked()
             this,
             &MainWindow::slotUpdateListLibraries);
     // dialogSettingsApp->setAttribute(Qt::WA_DeleteOnClose);
-    dialogSettingsApp->setWindowTitle("Settings - MediaFinder");
+    dialogSettingsApp->setWindowTitle("Настройки - MediaFinder");
     // Показываем диалоговое окно при нажатии на кнопку
     dialogSettingsApp->show();
 }
@@ -664,7 +676,7 @@ void MainWindow::on_loadMediaButton_clicked()
     MainWindow::setDisabled (true);
     this->searchMedia->setDisabled (false);
     // this->searchWindow->setAttribute(Qt::WA_DeleteOnClose);
-    this->searchMedia->setWindowTitle("Search media - MediaFinder");
+    this->searchMedia->setWindowTitle("Обновление метаданных - MediaFinder");
     QTreeWidgetItem *selectedItem;
     switch (ui->tabMainWindow->currentIndex ()) {
     case 0:{ //Movie
@@ -767,11 +779,13 @@ void MainWindow::on_exitButton_clicked()
 
 void MainWindow::on_seasonEdit_textEdited(const QString &arg1)
 {
+    ui->saveSeasonEpisodeNum->show();
     this->numSeason = arg1.toInt();
 }
 
 void MainWindow::on_episodeEdit_textEdited(const QString &arg1)
 {
+    ui->saveSeasonEpisodeNum->show();
     this->numEpisode = arg1.toInt();
 }
 
@@ -794,4 +808,31 @@ void MainWindow::on_saveSeasonEpisodeNum_clicked()
 
         this->fillTvShowEpisodeForm(this->idShow, this->numSeason, this->numEpisode);
     }
+    ui->saveSeasonEpisodeNum->hide();
 }
+
+void MainWindow::on_zoomImage_clicked()
+{
+    QString image = ui->zoomImage->property("image").toString();
+    QString title = ui->zoomImage->property("title").toString();
+    this->showImageFile->setImage(image,title);
+    this->showImageFile->show();
+
+}
+
+
+void MainWindow::on_tabMainWindow_currentChanged(int index)
+{
+    ui->renameButton->setEnabled(false);
+    switch (index) {
+        case 0:{
+            ui->listTVLibrary->clearSelection();
+        }
+        break;
+        case 1:{
+            ui->listMovieLibrary->clearSelection();
+        }
+        break;
+    }
+}
+
