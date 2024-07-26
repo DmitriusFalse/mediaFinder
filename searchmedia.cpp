@@ -772,7 +772,7 @@ void SearchMedia::slotFinishRequestChooseMediaEpisodes(QNetworkReply *reply)
                 Crew rawCrew;
                 rawCrew.id = crewObject.value("id").toInt();
                 rawCrew.name = crewObject.value("name").toString();
-                rawCrew.role = crewObject.value("job").toString();
+                rawCrew.addRole(crewObject.value("job").toString());
                 rawCrew.thumb = crewObject.value("profile_path").toString();
                 episode->addCrew(rawCrew);
             }
@@ -870,7 +870,7 @@ void SearchMedia::processResponseTV(QJsonObject jsonObject)
         Crew rawCrew;
         rawCrew.id = crewObject.value("id").toInt();
         rawCrew.name = crewObject.value("name").toString();
-        rawCrew.role = crewObject.value("job").toString();
+        rawCrew.addRole(crewObject.value("job").toString());
         rawCrew.thumb = crewObject.value("profile_path").toString();
         this->showTv->addCrew(rawCrew);
     }
@@ -880,7 +880,7 @@ void SearchMedia::processResponseTV(QJsonObject jsonObject)
         Crew rawCrew;
         rawCrew.id = crewObject.value("id").toInt();
         rawCrew.name = crewObject.value("name").toString();
-        rawCrew.role = crewObject.value("job").toString();
+        rawCrew.addRole(crewObject.value("known_for_department").toString());
         rawCrew.thumb = crewObject.value("profile_path").toString();
         this->showTv->addCrew(rawCrew);
     }
@@ -960,27 +960,29 @@ void SearchMedia::processResponseMovie(QJsonObject jsonObject)
     movie->release_date = this->updateField(movie->release_date,jsonObject.value("release_date").toString());
     movie->Status = this->updateField(movie->Status,jsonObject.value("status").toString());
 
-    QJsonObject credits = jsonObject.value("credits").toObject();
+    if(this->movie->getSizeCredits()==0){
+        QJsonObject credits = jsonObject.value("credits").toObject();
 
-    QJsonArray crewMovieArray = credits.value ("crew").toArray();
-    for (const QJsonValue& crew : crewMovieArray) {
-        QJsonObject crewObject = crew.toObject();
-        Crew rawCrew;
-        rawCrew.id = crewObject.value("id").toInt();
-        rawCrew.name = crewObject.value("name").toString();
-        rawCrew.role = crewObject.value("job").toString();
-        rawCrew.thumb = crewObject.value("profile_path").toString();
-        this->movie->addCrew(rawCrew);
-    }
-    QJsonArray castMovieArray = credits.value ("cast").toArray();
-    for (const QJsonValue& crew : castMovieArray) {
-        QJsonObject crewObject = crew.toObject();
-        Crew rawCrew;
-        rawCrew.id = crewObject.value("id").toInt();
-        rawCrew.name = crewObject.value("name").toString();
-        rawCrew.role = crewObject.value("job").toString();
-        rawCrew.thumb = crewObject.value("profile_path").toString();
-        this->movie->addCrew(rawCrew);
+        QJsonArray crewMovieArray = credits.value ("crew").toArray();
+        for (const QJsonValue& crew : crewMovieArray) {
+            QJsonObject crewObject = crew.toObject();
+            Crew rawCrew;
+            rawCrew.id = crewObject.value("id").toInt();
+            rawCrew.name = crewObject.value("name").toString();
+            rawCrew.addRole(crewObject.value("job").toString());
+            rawCrew.thumb = crewObject.value("profile_path").toString();
+            this->movie->addCrew(rawCrew);
+        }
+        QJsonArray castMovieArray = credits.value ("cast").toArray();
+        for (const QJsonValue& crew : castMovieArray) {
+            QJsonObject crewObject = crew.toObject();
+            Crew rawCrew;
+            rawCrew.id = crewObject.value("id").toInt();
+            rawCrew.name = crewObject.value("name").toString();
+            rawCrew.addRole(crewObject.value("known_for_department").toString());
+            rawCrew.thumb = crewObject.value("profile_path").toString();
+            this->movie->addCrew(rawCrew);
+        }
     }
 
     QStringList GenreList;

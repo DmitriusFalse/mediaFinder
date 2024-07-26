@@ -1,5 +1,6 @@
 #include "dialogrenamerfiles.h"
 #include "dbmanager.h"
+#include "qxmlstream.h"
 #include "ui_dialogrenamerfiles.h"
 #include <QFileInfo>
 #include <QRegularExpression>
@@ -277,6 +278,92 @@ void DialogRenamerFiles::on_renameMovieButton_clicked()
     // QString newFilePoster = this->renameFile(oldPoster, newFileName);
     dbmanager->updateMovieColumn("path", newFilePath, movie.id);
     // dbmanager->updateMovieColumn("poster", newFilePoster, movie.id);
+    if(this->checkMovieNFO){
+        QFileInfo filepath(newFilePath);
+        QFile file(filepath.path()+"/"+newFileName+".nfo");
+        if (!file.open(QIODevice::WriteOnly)) {
+            qWarning() << "Failed to open file for writing:" << file.errorString();
+            return;
+        }
+        QXmlStreamWriter xmlWriter(&file);
+        xmlWriter.setAutoFormatting(true);
+        xmlWriter.writeStartDocument();
+
+        // Начало корневого элемента
+        xmlWriter.writeStartElement("movie");
+
+        // Запись данных
+        xmlWriter.writeStartElement("title");
+        xmlWriter.writeCharacters(movie.name);
+        xmlWriter.writeEndElement(); // Закрытие title
+
+        xmlWriter.writeStartElement("original_title");
+        xmlWriter.writeCharacters(movie.originalName);
+        xmlWriter.writeEndElement(); // Закрытие original_title
+
+        xmlWriter.writeStartElement("year");
+        xmlWriter.writeCharacters(movie.release_date);
+        xmlWriter.writeEndElement(); // Закрытие year
+
+        while(movie.nextCrew()){
+            Crew existCrew = movie.getCrew();
+            if(!existCrew.hasRole("Director")){
+                continue;
+            }
+            xmlWriter.writeStartElement("director");
+            xmlWriter.writeCharacters(existCrew.name);
+            xmlWriter.writeEndElement(); // Закрытие director
+        }
+        movie.resetIterator();
+        QStringList listGenre = movie.genre.split(",");
+        for (const QString &genre : listGenre) {
+            xmlWriter.writeStartElement("genre");
+            xmlWriter.writeCharacters(genre);
+            xmlWriter.writeEndElement(); // Закрытие director
+        }
+        while(movie.nextCrew()){
+            Crew existCrew = movie.getCrew();
+            if(!existCrew.hasRole("Writer")){
+                continue;
+            }
+            xmlWriter.writeStartElement("writer");
+            xmlWriter.writeCharacters(existCrew.name);
+            xmlWriter.writeEndElement(); // Закрытие writer
+        }
+        movie.resetIterator();
+
+        xmlWriter.writeStartElement("plot");
+        xmlWriter.writeCharacters(movie.overview);
+        xmlWriter.writeEndElement(); // Закрытие writer
+
+        xmlWriter.writeStartElement("crew");
+
+        while(movie.nextCrew()){
+            Crew existCrew = movie.getCrew();
+            for (const QString& roleName : existCrew.role) {
+                xmlWriter.writeStartElement("member");
+                xmlWriter.writeTextElement("name", existCrew.name);
+                xmlWriter.writeTextElement("role", roleName);
+                // xmlWriter.writeTextElement("department", "Writing");
+                xmlWriter.writeEndElement(); // Закрытие <member>
+            }
+
+        }
+        movie.resetIterator();
+        xmlWriter.writeEndElement();
+
+        xmlWriter.writeStartElement("release_date");
+        xmlWriter.writeCharacters(movie.release_date);
+        xmlWriter.writeEndElement(); // Закрытие release_date
+
+        xmlWriter.writeStartElement("poster");
+        xmlWriter.writeCharacters(movie.poster);
+        xmlWriter.writeEndElement(); // Закрытие poster
+
+        xmlWriter.writeEndDocument();
+
+        file.close();
+    }
     this->close();
     emit signalFinishRename("Movie", movie.id);
 }
@@ -319,6 +406,8 @@ void DialogRenamerFiles::on_renameTVButton_clicked()
         }
 
 
+
+
         dbmanager->updateEpisodeColumn("file", newFileName, id);
         dbmanager->updateEpisodeColumn("Poster", newFilePoster, id);
 
@@ -326,6 +415,92 @@ void DialogRenamerFiles::on_renameTVButton_clicked()
 
 
     }
+    QString pathtoTVShow = this->showTv.poster;
+    if(this->checkTVShowNFO){
+        QFileInfo filepath(pathtoTVShow);
+        QFile file(filepath.path()+"/"+this->showTv.nameShow+".nfo");
+        if (!file.open(QIODevice::WriteOnly)) {
+            qWarning() << "Failed to open file for writing:" << file.errorString();
+            return;
+        }
+        QXmlStreamWriter xmlWriter(&file);
+        xmlWriter.setAutoFormatting(true);
+        xmlWriter.writeStartDocument();
+
+        // Начало корневого элемента
+        xmlWriter.writeStartElement("tvshow");
+
+        xmlWriter.writeStartElement("title");
+        xmlWriter.writeCharacters(this->showTv.nameShow);
+        xmlWriter.writeEndElement();
+
+
+        xmlWriter.writeStartElement("originaltitle");
+        xmlWriter.writeCharacters(this->showTv.originalNameShow);
+        xmlWriter.writeEndElement();
+
+        xmlWriter.writeStartElement("year");
+        xmlWriter.writeCharacters(this->showTv.first_air_date);
+        xmlWriter.writeEndElement();
+
+        QStringList listGenre = this->showTv.genres.split(",");
+        for (const QString &genre : listGenre) {
+            xmlWriter.writeStartElement("genre");
+            xmlWriter.writeCharacters(genre);
+            xmlWriter.writeEndElement(); // Закрытие director
+        }
+
+            QStringList production_companies = this->showTv.production_companies.split(",");
+        for (const QString &comnpany : production_companies) {
+            xmlWriter.writeStartElement("studio");
+            xmlWriter.writeCharacters(comnpany);
+            xmlWriter.writeEndElement();
+        }
+
+        xmlWriter.writeStartElement("plot");
+        xmlWriter.writeCharacters(this->showTv.overview);
+        xmlWriter.writeEndElement();
+
+        xmlWriter.writeStartElement("crew");
+
+        while(this->showTv.nextCrew()){
+            Crew existCrew = this->showTv.getCrew();
+            for (const QString& roleName : existCrew.role) {
+                xmlWriter.writeStartElement("member");
+                xmlWriter.writeTextElement("name", existCrew.name);
+                xmlWriter.writeTextElement("role", roleName);
+                // xmlWriter.writeTextElement("department", "Writing");
+                xmlWriter.writeEndElement(); // Закрытие <member>
+            }
+
+        }
+        this->showTv.resetIterator();
+        xmlWriter.writeEndElement();
+
+        xmlWriter.writeEndDocument();
+    }
+
+    /*
+         * <>
+    <title>Название сериала</title>
+    <originaltitle>Оригинальное название сериала</originaltitle>
+    <year>2021</year>
+    <genre>Драма</genre>
+    <studio>Студия</studio>
+    <plot>Описание сериала...</plot>
+    <cast>
+        <actor>
+            <name>Имя Актера</name>
+            <role>Роль</role>
+        </actor>
+        <actor>
+            <name>Имя Актера</name>
+            <role>Роль</role>
+        </actor>
+    </cast>
+</tvshow>
+*/
+
     this->close();
     emit signalFinishRename("TV", this->showTv.ID);
 }
@@ -334,6 +509,17 @@ void DialogRenamerFiles::on_renameTVButton_clicked()
 void DialogRenamerFiles::on_folderSeasonsCheckBox_checkStateChanged(const Qt::CheckState &arg1)
 {
     this->checkNewFoldersEpisodes = (arg1 == Qt::Checked);
-    qDebug() << this->checkNewFoldersEpisodes;
+}
+
+
+void DialogRenamerFiles::on_createMovieNFOcheckBox_checkStateChanged(const Qt::CheckState &arg1)
+{
+    this->checkMovieNFO = (arg1==Qt::Checked);
+}
+
+
+void DialogRenamerFiles::on_createTVShowNFOcheckBox_checkStateChanged(const Qt::CheckState &arg1)
+{
+    this->checkTVShowNFO = (arg1==Qt::Checked);
 }
 

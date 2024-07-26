@@ -20,8 +20,15 @@ struct Videos {
 struct Crew {
     int id; //id
     QString name; //name
-    QString role; //job
+    // QString role; //job
     QString thumb; //profile_path
+    QSet<QString> role;
+    void addRole(QString data){
+        role.insert(data);
+    }
+    bool hasRole(const QString& targetRole) const {
+        return role.contains(targetRole);
+    }
 };
 struct MovieInfo{
     int id;
@@ -54,15 +61,22 @@ struct MovieInfo{
     void addVideos(QString key){
         this->addVideos(Videos{.key = key});
     }
-    void addCrew(int id, const QString& name, const QString& role, const QString& thumb) {
-        credits[id] = Crew{id, name, role, thumb};
-        index = credits.constBegin();
-    }
+    // void addCrew(int id, const QString& name, const QString& role, const QString& thumb) {
+    //     credits[id] = Crew{id, name, role, thumb};
+    //     index = credits.constBegin();
+    // }
 
     // Метод добавления Crew по объекту
     void addCrew(const Crew& credit) {
-        credits[credit.id] = credit;
-        index = credits.constBegin();
+        if (credits.contains(credit.id)) {
+            // Если Crew с таким ID уже существует, обновляем его
+            Crew& existingCrew = credits[credit.id];
+            existingCrew.role.unite(credit.role);  // Объединяем наборы ролей
+        } else {
+            // Если Crew с таким ID не существует, добавляем новый
+            credits[credit.id] = credit;
+        }
+        index = credits.constBegin();  // Сбрасываем итератор
     }
     Crew getCreditByID(int id){
         if(credits.contains(id)){
@@ -83,6 +97,12 @@ struct MovieInfo{
         Crew& returnValue = const_cast<Crew&>(index.value());
         index ++;
         return returnValue;
+    }
+    int getSizeCredits(){
+        return credits.size();
+    }
+    void resetIterator(){
+        index = credits.constBegin();  // Сбрасываем итератор
     }
 private:
     QMap<int, Crew> credits;
@@ -111,14 +131,24 @@ struct EpisodeInfo {
     EpisodeInfo(): index(credits.constBegin()) {}
     // Метод добавления Crew по отдельным параметрам
     void addCrew(int id, const QString& name, const QString& role, const QString& thumb) {
-        credits[id] = Crew{id, name, role, thumb};
-        index = credits.constBegin();
+        Crew existCrew;
+        existCrew.name = name;
+        existCrew.id = id;
+        existCrew.addRole(role);
+        existCrew.thumb = thumb;
+        this->addCrew(existCrew);
     }
-
     // Метод добавления Crew по объекту
     void addCrew(const Crew& credit) {
-        credits[credit.id] = credit;
-        index = credits.constBegin();
+        if (credits.contains(credit.id)) {
+            // Если Crew с таким ID уже существует, обновляем его
+            Crew& existingCrew = credits[credit.id];
+            existingCrew.role.unite(credit.role);  // Объединяем наборы ролей
+        } else {
+            // Если Crew с таким ID не существует, добавляем новый
+            credits[credit.id] = credit;
+        }
+        index = credits.constBegin();  // Сбрасываем итератор
     }
     Crew getCreditByID(int id){
         if(credits.contains(id)){
@@ -139,6 +169,9 @@ struct EpisodeInfo {
         Crew& returnValue = const_cast<Crew&>(index.value());
         index ++;
         return returnValue;
+    }
+    int getSizeCredits(){
+        return credits.size();
     }
 private:
     QMap<int, Crew> credits;
@@ -168,8 +201,7 @@ struct ShowInfo {
 
     QList<Videos> videos;
 
-    QMap<int, Crew> credits;
-    QMap<int, Crew>::const_iterator index;
+
 
     QMap<uint, QMap<uint,EpisodeInfo>> Episodes;
     void addEpisodes(EpisodeInfo episode){
@@ -220,14 +252,24 @@ struct ShowInfo {
         this->addVideos(video);
     }
     void addCrew(int id, const QString& name, const QString& role, const QString& thumb) {
-        credits[id] = Crew{id, name, role, thumb};
-        index = credits.constBegin();
+        Crew existCrew;
+        existCrew.name = name;
+        existCrew.id = id;
+        existCrew.addRole(role);
+        existCrew.thumb = thumb;
+        this->addCrew(existCrew);
     }
-
     // Метод добавления Crew по объекту
     void addCrew(const Crew& credit) {
-        credits[credit.id] = credit;
-        index = credits.constBegin();
+        if (credits.contains(credit.id)) {
+            // Если Crew с таким ID уже существует, обновляем его
+            Crew& existingCrew = credits[credit.id];
+            existingCrew.role.unite(credit.role);  // Объединяем наборы ролей
+        } else {
+            // Если Crew с таким ID не существует, добавляем новый
+            credits[credit.id] = credit;
+        }
+        index = credits.constBegin();  // Сбрасываем итератор
     }
     Crew getCreditByID(int id){
         if(credits.contains(id)){
@@ -249,6 +291,12 @@ struct ShowInfo {
         index ++;
         return returnValue;
     }
+    void resetIterator(){
+        index = credits.constBegin();  // Сбрасываем итератор
+    }
+private:
+    QMap<int, Crew> credits;
+    QMap<int, Crew>::const_iterator index;
 };
 
 struct TVCollection {

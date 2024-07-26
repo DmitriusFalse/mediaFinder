@@ -149,6 +149,9 @@ void DBManager::updateVideosTV(QList<Videos> videos,QString nameShow, int id)
 void DBManager::createUpdateCrewEpisode(ShowInfo tvshow)
 {
     QSqlQuery query(this->m_database);
+    query.prepare("DELETE FROME crewEpisode WHERE idShow = :idShow");
+    query.bindValue(":idShow", tvshow.idShow);
+    query.exec();
     foreach (const uint seasonNumber, tvshow.Episodes.keys()) {
         QMap<uint, EpisodeInfo>& episodes = tvshow.Episodes[seasonNumber];
         foreach (const uint episodeNumber, episodes.keys()) {
@@ -156,14 +159,16 @@ void DBManager::createUpdateCrewEpisode(ShowInfo tvshow)
             while(episode.nextCrew()){
                 Crew& crewData = episode.getCrew();
                 //INSERT OR REPLACE INTO
-                query.prepare("INSERT OR REPLACE INTO crewEpisode (idShow,id,role,name,thumb) VALUES (:idShow,:id,:role,:name,:thumb)");
-                query.bindValue(":idShow", tvshow.idShow);
-                query.bindValue(":id", crewData.id);
-                query.bindValue(":role",crewData.role);
-                query.bindValue(":name",crewData.name);
-                query.bindValue(":thumb",crewData.thumb);
-                if(!query.exec()){
-                    qDebug() << "createUpdateCrewEpisode - Ошибка выполнения запроса:" << query.lastError().text();
+                for (const QString& roleName : crewData.role) {
+                    query.prepare("INSERT OR REPLACE INTO crewEpisode (idShow,id,role,name,thumb) VALUES (:idShow,:id,:role,:name,:thumb)");
+                    query.bindValue(":idShow", tvshow.idShow);
+                    query.bindValue(":id", crewData.id);
+                    query.bindValue(":role",roleName);
+                    query.bindValue(":name",crewData.name);
+                    query.bindValue(":thumb",crewData.thumb);
+                    if(!query.exec()){
+                        qDebug() << "createUpdateCrewEpisode - Ошибка выполнения запроса:" << query.lastError().text();
+                    }
                 }
             }
         }
@@ -173,34 +178,47 @@ void DBManager::createUpdateCrewEpisode(ShowInfo tvshow)
 void DBManager::createUpdateCrewTVShow(ShowInfo tvshow)
 {
     QSqlQuery query(this->m_database);
+    query.prepare("DELETE FROME crewShowTV WHERE idShow = :idShow");
+    query.bindValue(":idShow", tvshow.idShow);
+    query.exec();
     while(tvshow.nextCrew()){
         Crew& crewData = tvshow.getCrew();
         //INSERT OR REPLACE INTO
-        query.prepare("INSERT OR REPLACE INTO crewShowTV (idShow,id,role,name,thumb) VALUES (:idShow,:id,:role,:name,:thumb)");
-        query.bindValue(":idShow", tvshow.idShow);
-        query.bindValue(":id", crewData.id);
-        query.bindValue(":role",crewData.role);
-        query.bindValue(":name",crewData.name);
-        query.bindValue(":thumb",crewData.thumb);
-        if(!query.exec()){
-            qDebug() << "createUpdateCrewTVShow - Ошибка выполнения запроса:" << query.lastError().text();
+        for (const QString& roleName : crewData.role) {
+            query.prepare("INSERT OR REPLACE INTO crewShowTV (idShow,id,role,name,thumb) VALUES (:idShow,:id,:role,:name,:thumb)");
+            query.bindValue(":idShow", tvshow.idShow);
+            query.bindValue(":id", crewData.id);
+            query.bindValue(":role",roleName);
+            query.bindValue(":name",crewData.name);
+            query.bindValue(":thumb",crewData.thumb);
+            if(!query.exec()){
+                qDebug() << "createUpdateCrewTVShow - Ошибка выполнения запроса:" << query.lastError().text();
+            }
         }
+
     }
 }
 
 void DBManager::createUpdateCrewMovie(MovieInfo movie)
 {
     QSqlQuery query(this->m_database);
+    query.prepare("DELETE FROME crewMovie WHERE idMovie = :idMovie");
+    query.bindValue(":idMovie", movie.IDMovie);
+    query.exec();
     while(movie.nextCrew()){
         Crew& crewData = movie.getCrew();
-        query.prepare("INSERT OR REPLACE INTO crewMovie (idMovie,role,name,thumb) VALUES (:idMovie,:role,:name,:thumb)");
-        query.bindValue(":idMovie", movie.IDMovie);
-        query.bindValue(":role",crewData.role);
-        query.bindValue(":name",crewData.name);
-        query.bindValue(":thumb",crewData.thumb);
-        if(!query.exec()){
-            qDebug() << "createUpdateCrewMovie - Ошибка выполнения запроса:" << query.lastError().text();
+        for (const QString& roleName : crewData.role) {
+            query.prepare("INSERT OR REPLACE INTO crewMovie (idMovie,role,name,thumb, id) VALUES (:idMovie,:role,:name,:thumb, :id)");
+            query.bindValue(":idMovie", movie.IDMovie);
+            query.bindValue(":id",crewData.id);
+            query.bindValue(":role",roleName);
+            query.bindValue(":name",crewData.name);
+            query.bindValue(":thumb",crewData.thumb);
+            if(!query.exec()){
+                qDebug() << "createUpdateCrewMovie - Ошибка выполнения запроса:" << query.lastError().text();
+            }
         }
+
     }
 }
 
@@ -1013,6 +1031,20 @@ TVCollection DBManager::getTVCollection()
                     episode.episodeTitle = querySeries.value("NameEpisode").toString();
                     episode.libraryPath = querySeries.value("PathToSerial").toString();
                     episode.overview = querySeries.value("overview").toString();
+
+                    QSqlQuery queryCrew(this->m_database);
+                    queryCrew.prepare("SELECT * FROM crewEpisode WHERE idShow=:idShow");
+                    queryCrew.bindValue("idShow",showTv.idShow);
+                    queryCrew.exec();
+                    while(queryCrew.next()){
+                        Crew existCrew;
+                        existCrew.addRole(queryCrew.value("role").toString());
+                        existCrew.id = queryCrew.value("id").toInt();
+                        existCrew.name = queryCrew.value("name").toString();
+                        existCrew.thumb = queryCrew.value("thumb").toString();
+                        episode.addCrew(existCrew);
+                    }
+
                     showTv.addEpisodes(episode);
                 }
             }else{
@@ -1052,6 +1084,18 @@ MovieCollections DBManager::getMovieCollection()
             movie.Status = query.value("Status").toString();
             movie.reviews = this->getReviews(movie.IDMovie);
             movie.videos = this->getVideos(movie.IDMovie);
+            QSqlQuery queryCrew(this->m_database);
+            queryCrew.prepare("SELECT * FROM crewMovie WHERE idMovie=:idMovie");
+            queryCrew.bindValue("idMovie",movie.IDMovie);
+            queryCrew.exec();
+            while(queryCrew.next()){
+                Crew existCrew;
+                existCrew.addRole(queryCrew.value("role").toString());
+                existCrew.id = queryCrew.value("id").toInt();
+                existCrew.name = queryCrew.value("name").toString();
+                existCrew.thumb = queryCrew.value("thumb").toString();
+                movie.addCrew(existCrew);
+            }
             movCol.addMovie(movie);
             }
         }
@@ -1159,6 +1203,18 @@ ShowInfo DBManager::getShowTVShowByID(int id)
                     episode.libraryPath = querySeries.value("PathToSerial").toString();
                     episode.overview = querySeries.value("overview").toString();
                     episode.episodeID = querySeries.value("idShow").toInt();
+                    QSqlQuery queryCrew(this->m_database);
+                    queryCrew.prepare("SELECT * FROM crewEpisode WHERE idShow=:idShow");
+                    queryCrew.bindValue("idShow",showTv.idShow);
+                    queryCrew.exec();
+                    while(queryCrew.next()){
+                        Crew existCrew;
+                        existCrew.addRole(queryCrew.value("role").toString());
+                        existCrew.id = queryCrew.value("id").toInt();
+                        existCrew.name = queryCrew.value("name").toString();
+                        existCrew.thumb = queryCrew.value("thumb").toString();
+                        episode.addCrew(existCrew);
+                    }
                     showTv.addEpisodes(episode);
                 }
             }else{
@@ -1194,6 +1250,20 @@ MovieInfo DBManager::getMovieByID(int id)
         movie.Status = query.value("Status").toString();
         movie.reviews = this->getReviews(movie.IDMovie);
         movie.videos = this->getVideos(movie.IDMovie);
+
+        QSqlQuery queryCrew(this->m_database);
+        queryCrew.prepare("SELECT * FROM crewMovie WHERE idMovie=:idMovie");
+        queryCrew.bindValue(":idMovie",movie.IDMovie);
+        queryCrew.exec();
+
+        while(queryCrew.next()){
+            Crew existCrew;
+            existCrew.addRole(queryCrew.value("role").toString());
+            existCrew.id = queryCrew.value("id").toInt();
+            existCrew.name = queryCrew.value("name").toString();
+            existCrew.thumb = queryCrew.value("thumb").toString();
+            movie.addCrew(existCrew);
+        }
     }else{
         qDebug() << "getMovieByID: " << query.lastError().text();
     }
