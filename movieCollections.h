@@ -173,6 +173,9 @@ struct EpisodeInfo {
     int getSizeCredits(){
         return credits.size();
     }
+    void resetIterator(){
+        index = credits.constBegin(); // Сброс итератора
+    }
 private:
     QMap<int, Crew> credits;
     QMap<int, Crew>::const_iterator index;

@@ -390,8 +390,8 @@ void DialogRenamerFiles::on_renameTVButton_clicked()
         QFileInfo oldPosterInfo(oldPoster);
         QString newFileName;
         QString newFilePoster;
+        QString rootPathShowTV = infoEpisode.libraryPath;
         if(this->checkNewFoldersEpisodes){
-            QString rootPathShowTV = infoEpisode.libraryPath;
             QString newPathToEpisodeShowTV = rootPathShowTV + "/Season "+QString::number(season)+"/"+newName+"."+oldPathInfo.suffix();
             newFileName = this->renameAndMoveFile(oldPath,newPathToEpisodeShowTV);
             if(oldPoster!=""){
@@ -404,16 +404,103 @@ void DialogRenamerFiles::on_renameTVButton_clicked()
                 newFilePoster = this->renameFile(oldPoster, newName);
             }
         }
+        if(this->checkTVShowNFO){
+            QFileInfo filepath(newFileName);
+            QFile file(filepath.path()+"/"+newName+".nfo");
+            qDebug() << filepath.path();
+            if (!file.open(QIODevice::WriteOnly)) {
+                qWarning() << "Failed to open file for writing:" << file.errorString();
+                return;
+            }
+            QXmlStreamWriter xmlWriter(&file);
+            xmlWriter.setAutoFormatting(true);
+            xmlWriter.writeStartDocument();
 
+            xmlWriter.writeStartElement("episodedetails");
 
+            xmlWriter.writeStartElement("title");
+            xmlWriter.writeCharacters(infoEpisode.episodeTitle);
+            xmlWriter.writeEndElement();
 
+            xmlWriter.writeStartElement("season");
+            xmlWriter.writeCharacters(QString::number(season));
+            xmlWriter.writeEndElement();
 
+            xmlWriter.writeStartElement("episode");
+            xmlWriter.writeCharacters(QString::number(episode));
+            xmlWriter.writeEndElement();
+
+            xmlWriter.writeStartElement("aired");
+            xmlWriter.writeCharacters(infoEpisode.air_date);
+            xmlWriter.writeEndElement();
+
+            xmlWriter.writeStartElement("plot");
+            xmlWriter.writeCharacters(infoEpisode.overview);
+            xmlWriter.writeEndElement();
+
+            while(infoEpisode.nextCrew()){
+                Crew existCrew = infoEpisode.getCrew();
+                if(!existCrew.hasRole("Director")){
+                    continue;
+                }
+                xmlWriter.writeStartElement("director");
+                xmlWriter.writeCharacters(existCrew.name);
+                xmlWriter.writeEndElement(); // Закрытие director
+            }
+            infoEpisode.resetIterator();
+            while(infoEpisode.nextCrew()){
+                Crew existCrew = infoEpisode.getCrew();
+                if(!existCrew.hasRole("Writer")){
+                    continue;
+                }
+                xmlWriter.writeStartElement("writer");
+                xmlWriter.writeCharacters(existCrew.name);
+                xmlWriter.writeEndElement(); // Закрытие writer
+            }
+            infoEpisode.resetIterator();
+
+            xmlWriter.writeStartElement("crew");
+
+            while(infoEpisode.nextCrew()){
+                Crew existCrew = infoEpisode.getCrew();
+                for (const QString& roleName : existCrew.role) {
+                    xmlWriter.writeStartElement("member");
+                    xmlWriter.writeTextElement("name", existCrew.name);
+                    xmlWriter.writeTextElement("role", roleName);
+                    // xmlWriter.writeTextElement("department", "Writing");
+                    xmlWriter.writeEndElement(); // Закрытие <member>
+                }
+            }
+            infoEpisode.resetIterator();
+            xmlWriter.writeEndElement();
+
+            xmlWriter.writeEndDocument();
+
+            file.close();
+        }
+        /*
+         *
+         * <episodedetails>
+  <title>Название эпизода</title>
+  <season>1</season>
+  <episode>1</episode>
+  <aired>2021-01-01</aired>
+  <plot>Описание эпизода...</plot>
+  <director>Имя Режиссера</director>
+  <credits>Имя Сценариста</credits>
+  <actor>
+    <name>Имя Актера</name>
+    <role>Роль</role>
+  </actor>
+  <actor>
+    <name>Имя Актера</name>
+    <role>Роль</role>
+  </actor>
+</episodedetails>
+
+         * */
         dbmanager->updateEpisodeColumn("file", newFileName, id);
         dbmanager->updateEpisodeColumn("Poster", newFilePoster, id);
-
-
-
-
     }
     QString pathtoTVShow = this->showTv.poster;
     if(this->checkTVShowNFO){
