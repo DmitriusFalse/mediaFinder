@@ -12,6 +12,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
 #include <QStyleFactory>
+#include <QTranslator>
 
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow)
@@ -31,21 +32,24 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     this->mediaLibrary = new MediaLibrary(this, this->dbmanager, settingsData);
     this->progressBar = new DialogShowProgress;
     this->dialogSettingsApp = new SettingsApp(this,dbmanager, settingsData, this->settings);
-
     this->showImageFile = new ShowImageFile;
 
+    this->reloadSettings();
+    this->loadTranslation();
+
+    // translator.load("MediaFinder_ru_RU.qm");
+    qApp->installTranslator(&translator);
+    ui->retranslateUi(this);
     ui->PBRefreshLibrary->hide();
     ui->listMovieLibrary->setStyleSheet("QTreeWidget::item { height: 128px; }");
-    ui->listMovieLibrary->setHeaderLabels({"Афиша","Название"});
+    ui->listMovieLibrary->setHeaderLabels({tr("Афиша"),tr("Название")});
     ui->listMovieLibrary->setColumnWidth(0,128);
 
-    ui->listTVLibrary->setHeaderLabels({"Афиша","Название"});
+    ui->listTVLibrary->setHeaderLabels({tr("Афиша"),tr("Название")});
     ui->listTVLibrary->setColumnWidth(0,128);
 
     QScrollBar *verticalScrollBar = ui->listMovieLibrary->verticalScrollBar ();
     verticalScrollBar->setStyleSheet("width: 30px;");
-
-
 
     //Соединяем клик в QTreeWidget listMovieLibrary с функцией onTreeWidgetItemSelected
     connect(ui->listMovieLibrary, &QTreeWidget::itemSelectionChanged, this, &MainWindow::clickTreeWidgetMovie);
@@ -77,6 +81,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     connect(this->progressBar, &DialogShowProgress::emitCloseProgres, this, &MainWindow::onDialogClosed);
     //
     connect(this->dialogSettingsApp, &SettingsApp::signalWindowClosed, this, &MainWindow::onDialogClosed);
+    connect(this->dialogSettingsApp, &SettingsApp::signalApplySettings, this, &MainWindow::slotApplySettings);
 
     ui->listMovieLibrary->setAlternatingRowColors(true);
     ui->listTVLibrary->setAlternatingRowColors(true);
@@ -106,8 +111,17 @@ MainWindow::~MainWindow()
 void MainWindow::onDialogClosed()
 {
     this->reloadSettings();
+
+    this->loadTranslation();
     // Включаем главное окно после закрытия диалогового окна
     setDisabled(false);
+}
+
+void MainWindow::slotApplySettings()
+{
+    this->reloadSettings();
+
+    this->loadTranslation();
 }
 
 
@@ -116,14 +130,14 @@ void MainWindow::on_refreshLibrary_clicked()
     int index = ui->tabMainWindow->currentIndex ();
     switch (index) {
     case 0:{
-        qDebug() << "Refresh Movie";
+        qDebug() << tr("Обновляем список Фильмов");
         ui->PBRefreshLibrary->show ();
-        ui->PBRefreshLibrary->setFormat ("Обновление коллекции фильмов!");
+        ui->PBRefreshLibrary->setFormat (tr("Обновление коллекции фильмов!"));
         mediaLibrary->refsreshCollectionMovie();
         break;
     }
     case 1: {
-        qDebug() << "Refresh TV";
+        qDebug() << tr("Обновляем список Сериалов");
         mediaLibrary->refsreshCollectionTV ();
         break;
     }
@@ -305,7 +319,6 @@ void MainWindow::updateCollections(QString type)
                 QLabel *imageLabel = new QLabel();
                 imageLabel->setPixmap(pixmap.scaled(90, 128));
                 ui->listTVLibrary->setItemWidget(mainItem, 0, imageLabel);
-                qDebug() << show.ID;
                 mainItem->setData(0, Qt::UserRole, show.ID);
 
                 foreach (const uint seasonNumber, show.Episodes.keys()) {
@@ -329,7 +342,6 @@ void MainWindow::updateCollections(QString type)
 void MainWindow::updateCollectionsByID(QString type, int id)
 {
     QStringList action = {"Movie", "TV"};
-    qDebug() << "type " << type << " id " << id;
     switch (action.indexOf(type)) {
         case 0:{ // movie
 
@@ -390,14 +402,10 @@ void MainWindow::updateCollectionsByID(QString type, int id)
                                 subItem->setData(2,Qt::UserRole,episodeInfo.episodeNumber);
                             }
                         }
-
                         // Прерывание цикла после обновления нужного элемента
                         break;
                     }
                 }
-
-
-
             break;
             }
     }
@@ -543,43 +551,16 @@ void MainWindow::reloadSettings()
     this->settings = dbmanager->getAllSettings(); // Получаем новые настройки из базы данных
 }
 
+void MainWindow::loadTranslation()
+{
+    if(!this->translator.load(":/translation/"+this->settings->getSettings("language"))){
+        qDebug() << "Error load translation";
+    };
 
+    qApp->installTranslator(&translator);
+    ui->retranslateUi(this);
+}
 
-
-
-// void MainWindow::switchLayoutTVShow(int index)
-// {
-//     switch (index) {
-//     case 1: {
-//         // Удаляем EpisodeLayout из текущего родителя, если он есть
-//         if (EpisodeLayout->parentWidget()) {
-//             EpisodeLayout->parentWidget()->layout()->removeItem(EpisodeLayout);
-//         }
-//         this->setLayoutVisibility(ui->ShowInfoLayout, false);
-//         this->setLayoutVisibility(ui->EpisodeInfoLayout, true);
-//         // Удаляем TvShowLayout из TVShowInfoLayout, если он там есть
-//         ui->TVShowInfoLayout->removeItem(TvShowLayout);
-
-//         // Добавляем TvShowLayout в TVShowInfoLayout
-//         ui->TVShowInfoLayout->addLayout(TvShowLayout);
-//         break;
-//     }
-//     case 2: {
-//         // Удаляем TvShowLayout из текущего родителя, если он есть
-//         if (TvShowLayout->parentWidget()) {
-//             TvShowLayout->parentWidget()->layout()->removeItem(TvShowLayout);
-//         }
-//         this->setLayoutVisibility(ui->ShowInfoLayout, true);
-//         this->setLayoutVisibility(ui->EpisodeInfoLayout, false);
-//         // Удаляем EpisodeLayout из TVShowInfoLayout, если он там есть
-//         ui->TVShowInfoLayout->removeItem(EpisodeLayout);
-
-//         // Добавляем EpisodeLayout в TVShowInfoLayout
-//         ui->TVShowInfoLayout->addLayout(EpisodeLayout);
-//         break;
-//     }
-//     }
-// }
 
 void MainWindow::slotUptateProgressBar(const QString &str)
 {
@@ -616,27 +597,10 @@ void MainWindow::slotEndSearch()
     switch (ui->tabMainWindow->currentIndex ()) {
     case 0:{ //Movie
         this->updateCollections("Movie");
-        // ui->listMovieLibrary->clearSelection();
-        // QTreeWidgetItem *itemMovie = ui->listMovieLibrary->topLevelItem(0); // Первый элемент в дереве
-        // if (itemMovie) {
-        //     qDebug() << "Selecting Item 1";
-        //     itemMovie->setSelected(false); // Снимаем выделение
-        //     itemMovie->setSelected(true);  // Снова выделяем элемент
-        //     ui->listMovieLibrary->scrollToItem(itemMovie); // Прокручиваем к выбранному элементу
-        // }
         }
         break;
     case 1:{ //TV
             this->updateCollections("TV");
-            // ui->listTVLibrary->clearSelection();
-
-            // QTreeWidgetItem *itemTV = ui->listTVLibrary->topLevelItem(0); // Первый элемент в дереве
-            // if (itemTV) {
-            //     qDebug() << "Selecting Item 1";
-            //     itemTV->setSelected(false); // Снимаем выделение
-            //     itemTV->setSelected(true);  // Снова выделяем элемент
-            //     ui->listTVLibrary->scrollToItem(itemTV); // Прокручиваем к выбранному элементу
-            // }
         }
         break;
     }
@@ -645,7 +609,7 @@ void MainWindow::slotEndSearch()
 
 void MainWindow::slotChangetSelection()
 {
-    qDebug() << "Выделение снято";
+    qDebug() << tr("Выделение снято");
     auto treeWidget = qobject_cast<QTreeWidget*>(sender());
     if (treeWidget->selectedItems().isEmpty()) {
         if(treeWidget->objectName()=="listMovieLibrary"){
@@ -670,7 +634,7 @@ void MainWindow::on_openSettings_clicked()
             this,
             &MainWindow::slotUpdateListLibraries);
     // dialogSettingsApp->setAttribute(Qt::WA_DeleteOnClose);
-    dialogSettingsApp->setWindowTitle("Настройки - MediaFinder");
+    dialogSettingsApp->setWindowTitle(tr("Настройки - MediaFinder"));
     // Показываем диалоговое окно при нажатии на кнопку
     dialogSettingsApp->show();
 }
@@ -684,7 +648,7 @@ void MainWindow::on_loadMediaButton_clicked()
     MainWindow::setDisabled (true);
     this->searchMedia->setDisabled (false);
     // this->searchWindow->setAttribute(Qt::WA_DeleteOnClose);
-    this->searchMedia->setWindowTitle("Обновление метаданных - MediaFinder");
+    this->searchMedia->setWindowTitle(tr("Обновление метаданных - MediaFinder"));
     QTreeWidgetItem *selectedItem;
     switch (ui->tabMainWindow->currentIndex ()) {
     case 0:{ //Movie
@@ -708,14 +672,10 @@ void MainWindow::on_loadMediaButton_clicked()
                 idMediaDB = selectedItem->data(0, Qt::UserRole).toInt();
                 searchText = selectedItem->text(1);
             }
-            qDebug() << idMediaDB;
             this->searchMedia->setIdTVDB (idMediaDB);
             this->searchMedia->setSearchWord (searchText);
             this->searchMedia->fillFields ("TV");
         }
-
-
-
         break;
     }
     }
@@ -727,15 +687,11 @@ void MainWindow::on_loadMediaButton_clicked()
 
 void MainWindow::on_renameButton_clicked()
 {
-
-
-
     if(this->renameFiles!=nullptr){ // Проверяем существование инициализированного DialogRenamerFiles
         // отключаем соединения
         if(renameConnection.isConnected){
             disconnect(renameConnection.connection);
         }
-
         // и удаляем
         delete this->renameFiles;
     }
@@ -749,7 +705,6 @@ void MainWindow::on_renameButton_clicked()
         QTreeWidgetItem *selectedItem;
         selectedItem = ui->listMovieLibrary->currentItem();
         int idMediaDB = selectedItem->data(0, Qt::UserRole).toInt();
-        qDebug() << idMediaDB;
         MovieInfo movie = dbmanager->getMovieByID(idMediaDB);
         this->renameFiles->setMediaData(movie);
     }break;
@@ -825,9 +780,7 @@ void MainWindow::on_zoomEpisodeImage_clicked()
     QString title = ui->zoomEpisodeImage->property("title").toString();
     this->showImageFile->setImage(image,title);
     this->showImageFile->show();
-
 }
-
 
 void MainWindow::on_tabMainWindow_currentChanged(int index)
 {
@@ -844,7 +797,6 @@ void MainWindow::on_tabMainWindow_currentChanged(int index)
     }
 }
 
-
 void MainWindow::on_zoomShowTVImage_clicked()
 {
     QString image = ui->zoomShowTVImage->property("image").toString();
@@ -853,7 +805,6 @@ void MainWindow::on_zoomShowTVImage_clicked()
     this->showImageFile->show();
 }
 
-
 void MainWindow::on_zoomMovieImage_clicked()
 {
     QString image = ui->zoomMovieImage->property("image").toString();
@@ -861,4 +812,3 @@ void MainWindow::on_zoomMovieImage_clicked()
     this->showImageFile->setImage(image,title);
     this->showImageFile->show();
 }
-

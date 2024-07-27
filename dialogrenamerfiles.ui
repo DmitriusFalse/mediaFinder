@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Переименование</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
@@ -20,11 +20,21 @@
       <enum>QTabWidget::TabPosition::West</enum>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
      </property>
      <widget class="QWidget" name="tabMovie">
+      <attribute name="icon">
+       <iconset resource="data.qrc">
+        <normaloff>:/icons/movie</normaloff>:/icons/movie</iconset>
+      </attribute>
       <attribute name="title">
-       <string>Movie</string>
+       <string notr="true"/>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
@@ -209,8 +219,12 @@
       </layout>
      </widget>
      <widget class="QWidget" name="tabTV">
+      <attribute name="icon">
+       <iconset resource="data.qrc">
+        <normaloff>:/icons/tv</normaloff>:/icons/tv</iconset>
+      </attribute>
       <attribute name="title">
-       <string>TV</string>
+       <string notr="true"/>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
@@ -265,7 +279,11 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="patternTVEdit"/>
+          <widget class="QLineEdit" name="patternTVEdit">
+           <property name="text">
+            <string notr="true"/>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>

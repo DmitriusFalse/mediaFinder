@@ -58,12 +58,8 @@ struct MovieInfo{
     void addVideos(QList<Videos> video){
         this->videos.append(video);
     }
-    void addVideos(QString key){
-        this->addVideos(Videos{.key = key});
-    }
-    // void addCrew(int id, const QString& name, const QString& role, const QString& thumb) {
-    //     credits[id] = Crew{id, name, role, thumb};
-    //     index = credits.constBegin();
+    // void addVideos(QString key){
+    //     this->addVideos(Videos{.key = key});
     // }
 
     // Метод добавления Crew по объекту

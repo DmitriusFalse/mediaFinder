@@ -11,7 +11,10 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Media Finder</string>
+  </property>
+  <property name="toolTip">
+   <string notr="true"/>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -29,7 +32,7 @@
          <string>Настройки</string>
         </property>
         <property name="text">
-         <string/>
+         <string notr="true"/>
         </property>
         <property name="icon">
          <iconset resource="data.qrc">
@@ -61,7 +64,7 @@
          <string>Обновить</string>
         </property>
         <property name="text">
-         <string/>
+         <string notr="true"/>
         </property>
         <property name="icon">
          <iconset resource="data.qrc">
@@ -90,7 +93,7 @@
          <string>Загрузить</string>
         </property>
         <property name="text">
-         <string/>
+         <string notr="true"/>
         </property>
         <property name="icon">
          <iconset resource="data.qrc">
@@ -122,7 +125,7 @@
          <set>Qt::InputMethodHint::ImhNone</set>
         </property>
         <property name="text">
-         <string/>
+         <string notr="true"/>
         </property>
         <property name="icon">
          <iconset resource="data.qrc">
@@ -161,7 +164,7 @@
          <string>Выход</string>
         </property>
         <property name="text">
-         <string/>
+         <string notr="true"/>
         </property>
         <property name="icon">
          <iconset resource="data.qrc">
@@ -206,18 +209,31 @@
       </item>
       <item row="0" column="0">
        <widget class="QTabWidget" name="tabMainWindow">
-        <property name="autoFillBackground">
-         <bool>false</bool>
+        <property name="toolTip">
+         <string notr="true"/>
         </property>
         <property name="tabPosition">
          <enum>QTabWidget::TabPosition::West</enum>
         </property>
+        <property name="tabShape">
+         <enum>QTabWidget::TabShape::Rounded</enum>
+        </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
         </property>
         <widget class="QWidget" name="tabMovie">
+         <attribute name="icon">
+          <iconset resource="data.qrc">
+           <normaloff>:/icons/movie</normaloff>:/icons/movie</iconset>
+         </attribute>
          <attribute name="title">
-          <string>Movie</string>
+          <string notr="true"/>
          </attribute>
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
@@ -279,6 +295,9 @@
               </item>
               <item>
                <widget class="QLineEdit" name="fileMovieInfo">
+                <property name="text">
+                 <string notr="true"/>
+                </property>
                 <property name="readOnly">
                  <bool>true</bool>
                 </property>
@@ -308,7 +327,7 @@
                    </size>
                   </property>
                   <property name="text">
-                   <string/>
+                   <string notr="true"/>
                   </property>
                  </widget>
                 </item>
@@ -370,7 +389,7 @@
                   <item>
                    <widget class="QLabel" name="imdbText">
                     <property name="text">
-                     <string>TextLabel</string>
+                     <string notr="true"/>
                     </property>
                    </widget>
                   </item>
@@ -394,7 +413,7 @@
                   <item>
                    <widget class="QLabel" name="TMDBText">
                     <property name="text">
-                     <string>TextLabel</string>
+                     <string notr="true"/>
                     </property>
                    </widget>
                   </item>
@@ -411,14 +430,14 @@
                      </size>
                     </property>
                     <property name="text">
-                     <string>Status:</string>
+                     <string>Статус:</string>
                     </property>
                    </widget>
                   </item>
                   <item>
                    <widget class="QLabel" name="statusText">
                     <property name="text">
-                     <string>TextLabel</string>
+                     <string notr="true"/>
                     </property>
                    </widget>
                   </item>
@@ -456,7 +475,7 @@
                      <bool>true</bool>
                     </property>
                     <property name="text">
-                     <string>Пример</string>
+                     <string notr="true"/>
                     </property>
                     <property name="readOnly">
                      <bool>true</bool>
@@ -514,7 +533,7 @@
                     <item>
                      <widget class="QLabel" name="genreText">
                       <property name="text">
-                       <string>TextLabel</string>
+                       <string notr="true"/>
                       </property>
                      </widget>
                     </item>
@@ -555,7 +574,7 @@
                       <rect>
                        <x>0</x>
                        <y>0</y>
-                       <width>555</width>
+                       <width>548</width>
                        <height>299</height>
                       </rect>
                      </property>
@@ -573,8 +592,12 @@
          </layout>
         </widget>
         <widget class="QWidget" name="tabTV">
+         <attribute name="icon">
+          <iconset resource="data.qrc">
+           <normaloff>:/icons/tv</normaloff>:/icons/tv</iconset>
+         </attribute>
          <attribute name="title">
-          <string>TV</string>
+          <string notr="true"/>
          </attribute>
          <layout class="QHBoxLayout" name="horizontalLayout_7">
           <item>
@@ -614,7 +637,7 @@
               <item>
                <widget class="QTabWidget" name="TVShowInfoTab">
                 <property name="currentIndex">
-                 <number>1</number>
+                 <number>0</number>
                 </property>
                 <property name="tabsClosable">
                  <bool>false</bool>
@@ -645,7 +668,7 @@
                            </size>
                           </property>
                           <property name="text">
-                           <string>posterLabel</string>
+                           <string/>
                           </property>
                          </widget>
                         </item>
@@ -670,7 +693,7 @@
                           <item>
                            <widget class="QPushButton" name="zoomShowTVImage">
                             <property name="text">
-                             <string/>
+                             <string notr="true"/>
                             </property>
                             <property name="icon">
                              <iconset resource="data.qrc">
@@ -725,7 +748,7 @@
                              </size>
                             </property>
                             <property name="text">
-                             <string>-</string>
+                             <string notr="true">-</string>
                             </property>
                            </widget>
                           </item>
@@ -767,7 +790,7 @@
                              </size>
                             </property>
                             <property name="text">
-                             <string>-</string>
+                             <string notr="true">-</string>
                             </property>
                            </widget>
                           </item>
@@ -809,7 +832,7 @@
                              </size>
                             </property>
                             <property name="text">
-                             <string>-</string>
+                             <string notr="true">-</string>
                             </property>
                            </widget>
                           </item>
@@ -851,7 +874,7 @@
                              </size>
                             </property>
                             <property name="text">
-                             <string>-</string>
+                             <string notr="true">-</string>
                             </property>
                            </widget>
                           </item>
@@ -902,7 +925,11 @@
                            </widget>
                           </item>
                           <item>
-                           <widget class="QLineEdit" name="originalNameShowText"/>
+                           <widget class="QLineEdit" name="originalNameShowText">
+                            <property name="text">
+                             <string notr="true"/>
+                            </property>
+                           </widget>
                           </item>
                          </layout>
                         </item>
@@ -932,6 +959,9 @@
                           </item>
                           <item>
                            <widget class="QLineEdit" name="nameTVShow">
+                            <property name="text">
+                             <string notr="true"/>
+                            </property>
                             <property name="readOnly">
                              <bool>true</bool>
                             </property>
@@ -1024,6 +1054,9 @@
                       </item>
                       <item>
                        <widget class="QLineEdit" name="fileEpisodeInfo">
+                        <property name="text">
+                         <string notr="true"/>
+                        </property>
                         <property name="readOnly">
                          <bool>true</bool>
                         </property>
@@ -1050,7 +1083,7 @@
                            </size>
                           </property>
                           <property name="text">
-                           <string>posterEpisode</string>
+                           <string notr="true"/>
                           </property>
                          </widget>
                         </item>
@@ -1130,7 +1163,7 @@
                              </size>
                             </property>
                             <property name="text">
-                             <string>-</string>
+                             <string notr="true">-</string>
                             </property>
                            </widget>
                           </item>
@@ -1172,7 +1205,7 @@
                              </size>
                             </property>
                             <property name="text">
-                             <string>-</string>
+                             <string notr="true">-</string>
                             </property>
                            </widget>
                           </item>
@@ -1218,6 +1251,9 @@
                           </item>
                           <item>
                            <widget class="QLineEdit" name="nameEpisodeText">
+                            <property name="text">
+                             <string/>
+                            </property>
                             <property name="readOnly">
                              <bool>true</bool>
                             </property>
@@ -1280,7 +1316,7 @@
                              <string>9999</string>
                             </property>
                             <property name="text">
-                             <string/>
+                             <string notr="true"/>
                             </property>
                            </widget>
                           </item>
@@ -1321,14 +1357,14 @@
                              <string>9999</string>
                             </property>
                             <property name="text">
-                             <string/>
+                             <string notr="true"/>
                             </property>
                            </widget>
                           </item>
                           <item>
                            <widget class="QPushButton" name="saveSeasonEpisodeNum">
                             <property name="text">
-                             <string/>
+                             <string notr="true"/>
                             </property>
                             <property name="icon">
                              <iconset resource="data.qrc">

@@ -28,7 +28,6 @@ void SettingsData::writeLibraryToSettings(const QList<libraryItem> &data)
         bool delOldItem = true;
         for (auto& item : data) {
             if (oldItem.path == item.path){
-                // qDebug() << oldItem.path;
                 delOldItem = false;
             }
         }

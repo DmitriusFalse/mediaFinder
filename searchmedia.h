@@ -98,7 +98,7 @@ private slots:
     void slotChangetSelection();
     void slotFinishRequestChooseMedia(QNetworkReply *reply);
     void slotFinishRequestChooseMediaEpisodes(QNetworkReply *reply);
-    void slotSavePosterFile(QNetworkReply *reply, QString pathFile, QString nameShow);
+    void slotSavePosterFile(QNetworkReply *reply, QString pathFile);
 
     void processResponseTV(QJsonObject jsonObject);
     void processResponseMovie(QJsonObject jsonObject);

@@ -11,6 +11,7 @@
 #include "medialibrary.h"
 #include "dbmanager.h"
 #include "showimagefile.h"
+#include <QTranslator>
 
 struct Connection {
     bool isConnected;
@@ -42,8 +43,10 @@ private:
   void fillTvShowForm(int id);
   void fillTvShowEpisodeForm(int id, int seasonsNumber, int episodeNumber);
   void reloadSettings();
+  void loadTranslation();
 
   Ui::MainWindow *ui;
+  QTranslator translator;
   DBManager *dbmanager = nullptr;
   MediaLibrary *mediaLibrary = nullptr;
   SettingsData *settingsData = nullptr;
@@ -54,13 +57,15 @@ private:
   DialogRenamerFiles *renameFiles = nullptr;
   ShowImageFile *showImageFile = nullptr;
 
+
   QString NameShowLoaded="";
 
   Connection renameConnection;
-      int numSeason, numEpisode, idShow, episodeID;
+    int numSeason, numEpisode, idShow, episodeID;
 
 private slots:
     void onDialogClosed();
+    void slotApplySettings();
     void on_refreshLibrary_clicked();
     void on_openSettings_clicked();
     void slotChangetSelection();

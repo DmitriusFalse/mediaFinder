@@ -37,7 +37,6 @@ void ShowImageFile::setImage(QString path, QString title)
     image = new QPixmap;
     image->load(path);
     QSize widgetSize = ui->imageView->size();
-    qDebug() << widgetSize;
     QPixmap scaledImage = image->scaled(QSize{this->screenWidth,this->screenHeight}, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     ui->imageView->setPixmap(scaledImage);
     this->setWindowTitle(title);

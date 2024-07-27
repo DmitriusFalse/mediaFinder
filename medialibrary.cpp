@@ -38,7 +38,7 @@ QStringList MediaLibrary::scanLibraryMovie(QString path)
     // SettingsData* settingsData = new SettingsData();
     QDir directory(path);
     if (!directory.exists()) {
-        qWarning() << "Directory does not exist.";
+        qWarning() << tr("Каталог не существует!");
     }
     QStringList listMovie;
     QStringList scanList = directory.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
@@ -117,7 +117,6 @@ void MediaLibrary::removeOldMoviesInDB()
 }
 void MediaLibrary::removeOldTVInDB()
 {
-    qDebug() << "removeOldTVInDB";
     this->m_dbmanager->removeOldRecordInBD ("TV");
 }
 

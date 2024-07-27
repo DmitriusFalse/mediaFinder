@@ -109,7 +109,7 @@ void DialogRenamerFiles::setMediaData(ShowInfo sh)
     description.append("<table>");
 
     // Добавляем заголовок таблицы
-    description.append("<tr><th>Описание</th><th>Подстановочное слово</th><th>Пример</th></tr>");
+    description.append("<tr><th>" + tr("Описание") + "</th><th>" + tr("Подстановочное слово") + "</th><th>" + tr("Пример") + "</th></tr>");
 
     // Обходим все заполненные ключи
     QSet<QString> processedKeys;
@@ -118,9 +118,9 @@ void DialogRenamerFiles::setMediaData(ShowInfo sh)
         QString desc = this->replacePlaceholdersTV->fieldDescriptions[keyText];
         QString value = this->replacePlaceholdersTV->getValue(1,1,keyText);
         QString row = "<tr>"
-                            "<td><b>Описание:</b> " + desc + "</td>"
-                            "<td><b>Подстановочное слово:</b> " + keyText + "</td>"
-                            "<td><b>Пример:</b> " + value + "</td>"
+                            "<td><b>"+tr("Описание:")+"</b> " + desc + "</td>"
+                            "<td><b>"+tr("Подстановочное слово:")+"</b> " + keyText + "</td>"
+                            "<td><b>"+tr("Пример:")+"</b> " + value + "</td>"
                         "</tr>";
         // Добавляем сформированную строку в общий текст таблицы
         description.append(row);
@@ -133,7 +133,6 @@ void DialogRenamerFiles::setMediaData(ShowInfo sh)
 
 void DialogRenamerFiles::on_patternMovieEdit_textChanged(const QString &arg1)
 {
-    qDebug() << arg1;
     if(arg1==""){
         ui->renameMovieButton->setDisabled(true);
     }else{
@@ -149,7 +148,6 @@ void DialogRenamerFiles::on_patternTVEdit_textChanged(const QString &arg1)
     }else{
         ui->renameTVButton->setDisabled(false);
     }
-    qDebug() << arg1;
     this->changeNameTv(arg1);
 }
 
@@ -231,9 +229,7 @@ QString DialogRenamerFiles::renameFile(const QString &filePath, const QString &n
         if (file.rename(newFilePath)) {
             return newFilePath; // Возвращаем полный путь к новому файлу при успехе
         } else {
-            qDebug() << "Не удалось переименовать файл:" << file.errorString();
-            qDebug() << "Old File: " << filePath;
-            qDebug() << "New File: " << newFilePath;
+            qDebug() << tr("Не удалось переименовать файл:") << file.errorString();
             return filePath; // Возвращаем полный путь к старому файлу при провале
         }
     }else{
@@ -260,9 +256,7 @@ QString DialogRenamerFiles::renameAndMoveFile(const QString &oldPath, const QStr
     if (file.rename(newPath)) {
         return newPath; // Возвращаем полный путь к новому файлу при успехе
     } else {
-        qDebug() << "Не удалось переименовать и переместить файл:" << file.errorString();
-        qDebug() << "Old File: " << oldPath;
-        qDebug() << "New File: " << newPath;
+        qDebug() << tr("Не удалось переименовать и переместить файл:") << file.errorString();
         return oldPath; // Возвращаем полный путь к старому файлу при провале
     }
     return oldPath;
@@ -282,7 +276,7 @@ void DialogRenamerFiles::on_renameMovieButton_clicked()
         QFileInfo filepath(newFilePath);
         QFile file(filepath.path()+"/"+newFileName+".nfo");
         if (!file.open(QIODevice::WriteOnly)) {
-            qWarning() << "Failed to open file for writing:" << file.errorString();
+            qWarning() << tr("Не удалось открыть файл для записи:") << file.errorString();
             return;
         }
         QXmlStreamWriter xmlWriter(&file);
@@ -407,9 +401,9 @@ void DialogRenamerFiles::on_renameTVButton_clicked()
         if(this->checkTVShowNFO){
             QFileInfo filepath(newFileName);
             QFile file(filepath.path()+"/"+newName+".nfo");
-            qDebug() << filepath.path();
+
             if (!file.open(QIODevice::WriteOnly)) {
-                qWarning() << "Failed to open file for writing:" << file.errorString();
+                qWarning() << tr("Не удалось открыть файл для записи:") << file.errorString();
                 return;
             }
             QXmlStreamWriter xmlWriter(&file);
@@ -445,7 +439,7 @@ void DialogRenamerFiles::on_renameTVButton_clicked()
                 }
                 xmlWriter.writeStartElement("director");
                 xmlWriter.writeCharacters(existCrew.name);
-                xmlWriter.writeEndElement(); // Закрытие director
+                xmlWriter.writeEndElement();
             }
             infoEpisode.resetIterator();
             while(infoEpisode.nextCrew()){
@@ -455,7 +449,7 @@ void DialogRenamerFiles::on_renameTVButton_clicked()
                 }
                 xmlWriter.writeStartElement("writer");
                 xmlWriter.writeCharacters(existCrew.name);
-                xmlWriter.writeEndElement(); // Закрытие writer
+                xmlWriter.writeEndElement();
             }
             infoEpisode.resetIterator();
 
@@ -468,7 +462,7 @@ void DialogRenamerFiles::on_renameTVButton_clicked()
                     xmlWriter.writeTextElement("name", existCrew.name);
                     xmlWriter.writeTextElement("role", roleName);
                     // xmlWriter.writeTextElement("department", "Writing");
-                    xmlWriter.writeEndElement(); // Закрытие <member>
+                    xmlWriter.writeEndElement();
                 }
             }
             infoEpisode.resetIterator();
@@ -478,27 +472,7 @@ void DialogRenamerFiles::on_renameTVButton_clicked()
 
             file.close();
         }
-        /*
-         *
-         * <episodedetails>
-  <title>Название эпизода</title>
-  <season>1</season>
-  <episode>1</episode>
-  <aired>2021-01-01</aired>
-  <plot>Описание эпизода...</plot>
-  <director>Имя Режиссера</director>
-  <credits>Имя Сценариста</credits>
-  <actor>
-    <name>Имя Актера</name>
-    <role>Роль</role>
-  </actor>
-  <actor>
-    <name>Имя Актера</name>
-    <role>Роль</role>
-  </actor>
-</episodedetails>
 
-         * */
         dbmanager->updateEpisodeColumn("file", newFileName, id);
         dbmanager->updateEpisodeColumn("Poster", newFilePoster, id);
     }
@@ -507,7 +481,7 @@ void DialogRenamerFiles::on_renameTVButton_clicked()
         QFileInfo filepath(pathtoTVShow);
         QFile file(filepath.path()+"/"+this->showTv.nameShow+".nfo");
         if (!file.open(QIODevice::WriteOnly)) {
-            qWarning() << "Failed to open file for writing:" << file.errorString();
+            qWarning() << tr("Не удалось открыть файл для записи:") << file.errorString();
             return;
         }
         QXmlStreamWriter xmlWriter(&file);
@@ -566,28 +540,6 @@ void DialogRenamerFiles::on_renameTVButton_clicked()
 
         xmlWriter.writeEndDocument();
     }
-
-    /*
-         * <>
-    <title>Название сериала</title>
-    <originaltitle>Оригинальное название сериала</originaltitle>
-    <year>2021</year>
-    <genre>Драма</genre>
-    <studio>Студия</studio>
-    <plot>Описание сериала...</plot>
-    <cast>
-        <actor>
-            <name>Имя Актера</name>
-            <role>Роль</role>
-        </actor>
-        <actor>
-            <name>Имя Актера</name>
-            <role>Роль</role>
-        </actor>
-    </cast>
-</tvshow>
-*/
-
     this->close();
     emit signalFinishRename("TV", this->showTv.ID);
 }

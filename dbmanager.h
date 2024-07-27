@@ -55,7 +55,7 @@ private:
     void closeConnection();
     void checkDB();
     void createStructureDB(QString nameTables);
-    void updateReviewsTV(QList<Reviews> reviews, QString NameShow, int id);
+    void updateReviewsTV(QList<Reviews> reviews, int id);
     void updateTvShowEpisode(ShowInfo show);
     void updateVideosTV(QList<Videos> videos, QString nameShow, int id);
     // void createUpdateCrewEpisode(int idShow,int id,QString role, QString name,QString thumb);

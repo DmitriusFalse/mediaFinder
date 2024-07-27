@@ -10,6 +10,7 @@
 #include <QSettings>
 #include <QMetaType>
 #include <QString>
+#include <QTranslator>
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -35,6 +36,9 @@ SettingsApp::SettingsApp(QWidget *parent, DBManager *dbManager, SettingsData *se
     }else{
         ui->defLangComboBox->setCurrentIndex(0);
     }
+
+    this->loadTranslation();
+
 }
 
 SettingsApp::~SettingsApp()
@@ -75,15 +79,24 @@ default:
 
 }
 
+void SettingsApp::loadTranslation()
+{
+    this->parametrs = this->m_dbManager->getAllSettings();
+    if(!this->translator.load(":/translation/"+this->parametrs->getSettings("language"))){
+        qDebug() << "Error load translation";
+    };
+    qApp->installTranslator(&translator);
+    ui->retranslateUi(this);
+}
+
 void SettingsApp::closeEvent(QCloseEvent *event)
 {
     if (changeSettings==false){
-        qDebug() << changeSettings;
         event->accept();
     }else{
         QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "Подтверждение",
-                                      "Сохранить изменения перед выходом?",
+        reply = QMessageBox::question(this, tr("Подтверждение"),
+                                      tr("Сохранить изменения перед выходом?"),
                                       QMessageBox::Yes | QMessageBox::No);
 
         if (reply == QMessageBox::Yes) {
@@ -99,18 +112,19 @@ void SettingsApp::closeEvent(QCloseEvent *event)
 
 void SettingsApp::on_saveButton_clicked()
 {
-    qDebug() << "Save settings";
     changeSettings = false;
     this->saveLangApp();
+    this->loadTranslation();
     SettingsApp::saveLibraryFolder(true);
     close();
 }
 
 void SettingsApp::on_applySaveSettings_clicked()
 {
-    // changeSettings = true;
     this->saveLangApp();
+    this->loadTranslation();
     SettingsApp::saveLibraryFolder(false);
+    emit signalApplySettings();
 }
 
 void SettingsApp::on_addPath_clicked()
@@ -119,7 +133,7 @@ void SettingsApp::on_addPath_clicked()
     qRegisterMetaType<libraryItem>("libraryItem");
     QList<libraryItem> libFolders = m_settings->readLibraryFromSettings();
     QString directory = QFileDialog::getExistingDirectory(this,
-                                                          "Выберите папку",
+                                                          tr("Выберите папку"),
                                                           QDir::homePath(),
                                                           QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     bool yesAdd = true;
@@ -137,11 +151,11 @@ void SettingsApp::on_addPath_clicked()
         SettingsApp::addPathToListLibrary();
     }else{
         changeSettings = false;
-        QMessageBox::information(nullptr, "Информация",
-                                 "Путь к библиотеке не добавлен.\n"
-                                 "Путь '/home/noc101/Медиа' является родительским\n"
+        QMessageBox::information(nullptr, tr("Информация"),
+                                 tr("Путь к библиотеке не добавлен.\n"
+                                 "Путь '/home/user/media' является родительским\n"
                                  "для уже добавленного пути.\n"
-                                 "Пожалуйста, выберите другую папку.");
+                                 "Пожалуйста, выберите другую папку."));
     }
 }
 
@@ -155,18 +169,26 @@ void SettingsApp::addPathToListLibrary(){
 
     SettingsApp::ui->tableDirsType->setRowCount(size);
     SettingsApp::ui->tableDirsType->setColumnCount(2);
-    SettingsApp::ui->tableDirsType->setHorizontalHeaderLabels(QStringList() << "Библиотека" << "Тип");
+    SettingsApp::ui->tableDirsType->setHorizontalHeaderLabels(QStringList() << tr("Библиотека") << tr("Тип"));
 
     int row = 0; // номер строки, куда вы хотите вставить выпадающий список
     int column = 1; // номер столбца, куда вы хотите вставить выпадающий список
+    int iconSize = 24;
 
     for (const auto &libFolder : libraryFolders) {
         QTableWidgetItem *itemPath = new QTableWidgetItem(libFolder.path);
         itemPath->setFlags(itemPath->flags() & ~Qt::ItemIsEditable);
         ui->tableDirsType->setItem(row, 0, itemPath);
         QComboBox *comboBox = new QComboBox();
-        comboBox->addItem("Movie");
-        comboBox->addItem("TV");
+        comboBox->setIconSize(QSize(iconSize, iconSize));
+        QIcon iconMovie(":/icons/movie");
+        QPixmap pixmapMovie = iconMovie.pixmap(iconSize, iconSize);
+
+        comboBox->addItem(QIcon(pixmapMovie),"Movie");
+
+        QIcon iconTV(":/icons/tv");
+        QPixmap pixmapTV = iconTV.pixmap(iconSize, iconSize);
+        comboBox->addItem(QIcon(pixmapTV),"TV");
         comboBox->setCurrentText(libFolder.type);
         SettingsApp::ui->tableDirsType->setCellWidget(row, column, comboBox);
         row++;

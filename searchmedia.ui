@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1144</width>
-    <height>679</height>
+    <width>1338</width>
+    <height>742</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Поиск</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -104,7 +104,7 @@
            <widget class="QComboBox" name="mediaSource">
             <item>
              <property name="text">
-              <string>TMDB</string>
+              <string notr="true">TMDB</string>
              </property>
             </item>
            </widget>

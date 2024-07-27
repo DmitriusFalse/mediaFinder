@@ -10,8 +10,10 @@ namespace Ui {
 class DialogRenamerFiles;
 }
 
-struct PlaceholdersMovie
+class PlaceholdersMovie : public QObject
 {
+    Q_OBJECT
+public:
     QMap<QString, QString> placeholders;
     QMap<QString, QString> fieldDescriptions; // Новый QMap для хранения описаний полей
     QStringList keysList; // Список ключей для удобства итерации
@@ -28,37 +30,37 @@ struct PlaceholdersMovie
 
         if (!movie.name.isEmpty()) {
             placeholders[":name"] = movie.name;
-            fieldDescriptions[":name"] = "Название фильма";
+            fieldDescriptions[":name"] = tr("Название фильма");
             keysList.append(":name");
         }
         if (!movie.originalName.isEmpty()) {
             placeholders[":originalName"] = movie.originalName;
-            fieldDescriptions[":originalName"] = "Оригинальное название";
+            fieldDescriptions[":originalName"] = tr("Оригинальное название");
             keysList.append(":originalName");
         }
         if (movie.IDMovie != 0) {
             placeholders[":idMovie"] = QString::number(movie.IDMovie);
-            fieldDescriptions[":idMovie"] = "ID фильма";
+            fieldDescriptions[":idMovie"] = tr("ID фильма");
             keysList.append(":idMovie");
         }
         if (movie.imdbID != "") {
             placeholders[":imdbID"] = movie.imdbID;
-            fieldDescriptions[":imdbID"] = "IMDB ID";
+            fieldDescriptions[":imdbID"] = tr("IMDB ID");
             keysList.append(":imdbID");
         }
         if (!movie.originalLang.isEmpty()) {
             placeholders[":originalLang"] = movie.originalLang;
-            fieldDescriptions[":originalLang"] = "Оригинальный язык";
+            fieldDescriptions[":originalLang"] = tr("Оригинальный язык");
             keysList.append(":originalLang");
         }
         if (!movie.release_date.isEmpty()) {
             placeholders[":release_date"] = movie.release_date;
-            fieldDescriptions[":release_date"] = "Дата релиза";
+            fieldDescriptions[":release_date"] = tr("Дата релиза");
             keysList.append(":release_date");
         }
         if (!movie.Status.isEmpty()) {
             placeholders[":Status"] = movie.Status;
-            fieldDescriptions[":Status"] = "Статус";
+            fieldDescriptions[":Status"] = tr("Статус");
             keysList.append(":Status");
         }
 
@@ -89,12 +91,15 @@ struct PlaceholdersMovie
         return QString();
     }
 };
-struct PlaceholdersTV {
+class PlaceholdersTV : public QObject {
+    Q_OBJECT
+private:
     QMap<uint, QMap<uint, QMap<QString, QString>>> data;
-    QMap<QString, QString> fieldDescriptions;
     QList<QString> keys;
     int currentIndex = -1;
 
+public:
+    QMap<QString, QString> fieldDescriptions;
     PlaceholdersTV(ShowInfo &showInfo) {
         updateData(showInfo);
         initializeFieldDescriptions();
@@ -117,14 +122,14 @@ struct PlaceholdersTV {
     }
 
     void initializeFieldDescriptions() {
-        fieldDescriptions[":nameShow"] = "Название шоу";
-        fieldDescriptions[":originalNameShow"] = "Оригинальное название шоу";
-        fieldDescriptions[":status"] = "Статус шоу";
-        fieldDescriptions[":idShow"] = "ID шоу";
-        fieldDescriptions[":episodeNumber"] = "Номер серии";
-        fieldDescriptions[":seasonsNumber"] = "Номер сезона";
-        fieldDescriptions[":episodeTitle"] = "Название серии";
-        fieldDescriptions[":air_date"] = "Дата выхода серии";
+        fieldDescriptions[":nameShow"] = tr("Название шоу");
+        fieldDescriptions[":originalNameShow"] = tr("Оригинальное название шоу");
+        fieldDescriptions[":status"] = tr("Статус шоу");
+        fieldDescriptions[":idShow"] = tr("ID шоу");
+        fieldDescriptions[":episodeNumber"] = tr("Номер серии");
+        fieldDescriptions[":seasonsNumber"] = tr("Номер сезона");
+        fieldDescriptions[":episodeTitle"] = tr("Название серии");
+        fieldDescriptions[":air_date"] = tr("Дата выхода серии");
     }
 
     QString getValue(uint season, uint episode, const QString &key) const {

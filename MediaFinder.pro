@@ -45,7 +45,10 @@ FORMS += \
     showimagefile.ui
 
 TRANSLATIONS += \
-    MediaFinder_ru_RU.ts
+    MediaFinder_ru_RU.ts \  
+    MediaFinder_en_EN.ts \
+    MediaFinder_en_EN.qm \
+    MediaFinder_ru_RU.qm \
 CONFIG += lrelease
 CONFIG += embed_translations
 

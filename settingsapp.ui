@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string notr="true">MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_2">
@@ -51,10 +51,18 @@
            <property name="text">
             <string>Английский</string>
            </property>
+           <property name="icon">
+            <iconset resource="data.qrc">
+             <normaloff>:/icons/en</normaloff>:/icons/en</iconset>
+           </property>
           </item>
           <item>
            <property name="text">
             <string>Русский</string>
+           </property>
+           <property name="icon">
+            <iconset resource="data.qrc">
+             <normaloff>:/icons/ru</normaloff>:/icons/ru</iconset>
            </property>
           </item>
          </widget>
@@ -128,12 +136,12 @@
         </attribute>
         <column>
          <property name="text">
-          <string>Path</string>
+          <string>Путь</string>
          </property>
         </column>
         <column>
          <property name="text">
-          <string>Type</string>
+          <string>Тип медиа</string>
          </property>
         </column>
        </widget>
@@ -156,14 +164,40 @@
         <item>
          <widget class="QPushButton" name="addPath">
           <property name="text">
-           <string>+ Add</string>
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="data.qrc">
+            <normaloff>:/icons/add</normaloff>:/icons/add</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>32</width>
+            <height>32</height>
+           </size>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="removeLibraryRow">
           <property name="text">
-           <string>- Remove</string>
+           <string notr="true"/>
+          </property>
+          <property name="icon">
+           <iconset resource="data.qrc">
+            <normaloff>:/icons/remove</normaloff>:/icons/remove</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>32</width>
+            <height>32</height>
+           </size>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -185,6 +219,8 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <resources/>
+ <resources>
+  <include location="data.qrc"/>
+ </resources>
  <connections/>
 </ui>

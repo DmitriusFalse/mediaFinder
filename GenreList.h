@@ -15,8 +15,7 @@ public:
         if (it != genreMap.end()) {
             return it.value().name;
         } else {
-            qDebug() << "Жанр с ID" << id << "не найден.";
-            return QString::number (id);
+            return "";
         }
     }
     GenreList& addGenre(int id, const QString& name) {

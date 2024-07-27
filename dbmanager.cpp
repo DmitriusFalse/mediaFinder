@@ -15,11 +15,10 @@ DBManager::DBManager(QObject *parent)
 {
     this->m_database = QSqlDatabase::addDatabase("QSQLITE", "MediaFinder");
     this->m_database.setDatabaseName(DB_NAME);
-    qDebug() << "DB_NAME" << DB_NAME;
     if (this->openConnection()) {
         this->checkDB();
     } else {
-        QMessageBox::critical(QApplication::activeWindow(), "Ошибка", "Ошибка открытия базы данных!", QMessageBox::Ok);
+        QMessageBox::critical(QApplication::activeWindow(), tr("Ошибка"), tr("Ошибка открытия базы данных!"), QMessageBox::Ok);
     }
 }
 
@@ -37,7 +36,7 @@ void DBManager::closeConnection() {
 
 bool DBManager::openConnection() {
     if (!this->m_database.open()) {
-        qDebug() << "Ошибка открытия соединения с базой данных:"
+        qDebug() << tr("Ошибка открытия соединения с базой данных:")
                  << this->m_database.lastError().text();
         return false;
     }
@@ -190,7 +189,7 @@ void DBManager::createStructureDB(QString nameTables) {
     query.finish();
 }
 
-void DBManager::updateReviewsTV(QList<Reviews> reviews, QString NameShow, int id)
+void DBManager::updateReviewsTV(QList<Reviews> reviews, int id)
 {
     QSqlQuery query(this->m_database);
     //Удаляем старые обзоры перед обновлением
@@ -200,14 +199,13 @@ void DBManager::updateReviewsTV(QList<Reviews> reviews, QString NameShow, int id
 
     for (const auto& review : reviews) {
         query.clear();
-        // QString q = "INSERT INTO ReviewsTV (nameShow, author, content) VALUE ("+review.nameShow+", "+review.nameShow+", "+review.nameShow+"")";
         query.prepare("INSERT INTO ReviewsTV (nameShow, author, content, idShow) VALUES (:name, :a, :c, :id)");
         query.bindValue(":name", review.nameShow);
         query.bindValue(":a", review.author);
         query.bindValue(":c", review.content);
         query.bindValue(":id", review.idShow);
         if(!query.exec()){
-            qDebug() << "1-1 Ошибка выполнения запроса:" << query.lastError().text();
+            qDebug() << tr("Обновление обзоров - Ошибка выполнения запроса:") << query.lastError().text();
         }
     }
 }
@@ -220,7 +218,6 @@ void DBManager::updateTvShowEpisode(ShowInfo show)
         const QMap<uint, EpisodeInfo>& episodes = show.Episodes[seasonNumber];
         foreach (const uint episodeNumber, episodes.keys()) {
             const EpisodeInfo& episode = episodes[episodeNumber];
-            qDebug() << "Обновляем серии";
 
             // Обновляем информацию об эпизоде в таблице TVEpisodes
             query.prepare ("UPDATE TVEpisodes SET "
@@ -240,7 +237,7 @@ void DBManager::updateTvShowEpisode(ShowInfo show)
             query.bindValue (":season", episode.seasonsNumber);
             if (!query.exec()) {
                 // Выводим сообщение об ошибке, если запрос не выполнен
-                qDebug() << "2Ошибка выполнения запроса:" << query.lastError().text();
+                qDebug() << tr("Обновление серий - шибка выполнения запроса:") << query.lastError().text();
             }
         }
     }
@@ -260,7 +257,7 @@ void DBManager::updateVideosTV(QList<Videos> videos,QString nameShow, int id)
         query.bindValue(":key",video.key);
         query.bindValue(":id",video.idShow);
         if(!query.exec()){
-            qDebug() << "3Ошибка выполнения запроса:" << query.lastError().text();
+            qDebug() << tr("Обновление видео из ютуба - шибка выполнения запроса:") << query.lastError().text();
         }
     }
 }
@@ -286,7 +283,7 @@ void DBManager::createUpdateCrewEpisode(ShowInfo tvshow)
                     query.bindValue(":name",crewData.name);
                     query.bindValue(":thumb",crewData.thumb);
                     if(!query.exec()){
-                        qDebug() << "createUpdateCrewEpisode - Ошибка выполнения запроса:" << query.lastError().text();
+                        qDebug() << tr("Обновление Команды серий - Ошибка выполнения запроса:") << query.lastError().text();
                     }
                 }
             }
@@ -311,7 +308,7 @@ void DBManager::createUpdateCrewTVShow(ShowInfo tvshow)
             query.bindValue(":name",crewData.name);
             query.bindValue(":thumb",crewData.thumb);
             if(!query.exec()){
-                qDebug() << "createUpdateCrewTVShow - Ошибка выполнения запроса:" << query.lastError().text();
+                qDebug() << tr("Обновление Команды шоу - Ошибка выполнения запроса:") << query.lastError().text();
             }
         }
 
@@ -334,7 +331,7 @@ void DBManager::createUpdateCrewMovie(MovieInfo movie)
             query.bindValue(":name",crewData.name);
             query.bindValue(":thumb",crewData.thumb);
             if(!query.exec()){
-                qDebug() << "createUpdateCrewMovie - Ошибка выполнения запроса:" << query.lastError().text();
+                qDebug() << tr("Обновление Команды Фильма - Ошибка выполнения запроса:") << query.lastError().text();
             }
         }
 
@@ -407,7 +404,7 @@ QStringList DBManager::readLibrary()
                 data.append(path + ":" + type);
             }
         } else {
-            qDebug() << "Error executing query:" << query.lastError().text();
+            qDebug() << tr("Ошибка выполнения запроса:") << query.lastError().text();
         }
     }
     query.finish();
@@ -481,7 +478,7 @@ void DBManager::updateTvShow(ShowInfo showTV, int id)
                 //Обновляем информацию о Эпизодах
                 this->updateTvShowEpisode(showTV);
                 // Вносим обзоры в базу
-                this->updateReviewsTV(showTV.reviews, showTV.nameShow, showTV.idShow);
+                this->updateReviewsTV(showTV.reviews, showTV.idShow);
                 // Обновляем видео ролики
                 this->updateVideosTV(showTV.videos, showTV.nameShow, showTV.idShow);
                 // Добавляем или обновляем Crew
@@ -489,14 +486,14 @@ void DBManager::updateTvShow(ShowInfo showTV, int id)
                 // Отправляем сигнал об обновлении главного окна
                 emit signalUpdateMainWindowByID("TV", id);
             }else{
-                qDebug () << query.lastError ().text ();
+                qDebug () << tr("Ошибка при обновлении серии: ") << query.lastError ().text ();
             }
 
         }else{
-            qDebug () << query.lastError ().text ();
+            qDebug () << tr("Ошибка при обновлении Сериала: ") << query.lastError ().text ();
         }
     }else{
-        qDebug () << query.lastError ().text ();
+        qDebug () << tr("Ошибка получении NameShow сериала: ") << query.lastError ().text ();
     }
 }
 
@@ -528,7 +525,7 @@ void DBManager::updateMovie(MovieInfo movie, int id)
     query.bindValue(":id",id);
 
     if(query.exec()){
-        this->updateReviewsTV(movie.reviews, movie.name, movie.IDMovie);
+        this->updateReviewsTV(movie.reviews, movie.IDMovie);
         // Обновляем видео ролики
         this->updateVideosTV(movie.videos, movie.name, movie.IDMovie);
         // Добавляем или обновляем Crew
@@ -536,7 +533,7 @@ void DBManager::updateMovie(MovieInfo movie, int id)
         // Отправляем сигнал об обновлении главного окна
         emit signalUpdateMainWindowByID("Movie", id);
     }else{
-        qDebug() << "Update Movie Error: " << query.lastError().text();
+        qDebug() << tr("Ошибка обновления фильма: ") << query.lastError().text();
     }
 
 }
@@ -623,7 +620,7 @@ bool DBManager::checkSeasonEpisodeExist(const int &season, const int &episode)
     query.bindValue(":episode", episode);
 
     if (!query.exec()) {
-        qDebug() << "Query execution error:" << query.lastError().text();
+        qDebug() << tr("Ошибка выполнения запроса:") << query.lastError().text();
         return false;
     }
 
@@ -642,7 +639,7 @@ bool DBManager::updateMovieColumn(const QString &columnName, const QVariant &new
     if (query.exec()) {
         return true;
     } else {
-        qDebug() << "updateMovieColumn - Ошибка выполнения запроса:" << query.lastError().text();
+        qDebug() << tr("updateMovieColumn - Ошибка выполнения запроса:") << query.lastError().text();
         return false;
     }
 }
@@ -659,8 +656,7 @@ bool DBManager::updateEpisodeColumn(const QString &columnName, const QVariant &n
     if (query.exec()) {
         return true;
     } else {
-        qDebug() << "columnName: " << columnName << "newValue: " << newValue << "rowId: " <<rowId;
-        qDebug() << "updateEpisodeColumn - Ошибка выполнения запроса:" << query.lastError().text();
+        qDebug() << tr("updateEpisodeColumn - Ошибка выполнения запроса:") << query.lastError().text();
         return false;
     }
 }
@@ -669,7 +665,7 @@ bool DBManager::updateEpisodeColumn(const QString &columnName, const QVariant &n
 bool DBManager::checkConnectingDB()
 {
     if (!this->m_database.open()) {
-        qDebug() << "Ошибка открытия соединения с базой данных:"
+        qDebug() << tr("Ошибка открытия соединения с базой данных:")
                  << this->m_database.lastError().text();
         return false;
     }
@@ -681,7 +677,7 @@ void DBManager::writeMovieCollectionToDB(QStringList pathlList)
 {
 
 
-    emit signalUpdateProgresBar ("Обновляем Базу Данных");
+    emit signalUpdateProgresBar (tr("Обновляем Базу Данных"));
     QStringList srcData;
     QStringList libraryPaths;
     srcData.append(DBManager::readLibrary("Movie"));
@@ -756,7 +752,7 @@ void DBManager::writeMovieCollectionToDB(QStringList pathlList)
 void DBManager::writeTVCollectionToDB(QStringList pathlList)
 {
 
-    emit signalUpdateProgresBar ("Обновляем Базу Данных");
+    emit signalUpdateProgresBar (tr("Обновляем Базу Данных"));
     //Сортируем на всякий пожарный
     pathlList.sort ();
     //Получаем список наших библиотек, для получения пути к онной
@@ -907,7 +903,7 @@ void DBManager::removeOldRecordInBD(QString type)
 {
     const QString MOVIE = "Movie";
     const QString TV = "TV";
-    emit signalUpdateProgresBar ("Чистим базу от старых записей!");
+    emit signalUpdateProgresBar (tr("Чистим базу от старых записей!"));
     QSqlQuery query(this->m_database);
     if (type == MOVIE){
         //Получаем список фильмов из БД которые записаны в базу
@@ -1403,10 +1399,3 @@ MovieInfo DBManager::getMovieByID(int id)
 
     return movie;
 }
-
-
-
-
-
-
-

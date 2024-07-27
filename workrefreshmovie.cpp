@@ -26,7 +26,7 @@ QStringList WorkRefreshMovie::scanFoldersLibrary(QString path)
         if(fileInfo.isFile()) {
             QString fileSuffix = fileInfo.suffix();
             if (fileExt.contains(fileSuffix)) {
-                emit progressUpdated("Нашли: "+fileName);
+                emit progressUpdated(tr("Нашли: ")+fileName);
                 list.append(path+"/"+fileName);
             }
         } else if(fileInfo.isDir()) {

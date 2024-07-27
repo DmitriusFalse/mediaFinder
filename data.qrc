@@ -10,5 +10,15 @@
         <file alias="zoom">icons/zoom-in.png</file>
         <file alias="nfo">icons/test.png</file>
         <file alias="dir">icons/directory.png</file>
+        <file alias="movie">icons/video.png</file>
+        <file alias="tv">icons/tv.png</file>
+        <file alias="remove">icons/remove.png</file>
+        <file alias="add">icons/add.png</file>
+        <file alias="en">icons/en.png</file>
+        <file alias="ru">icons/ru.png</file>
+    </qresource>
+    <qresource prefix="/translation">
+        <file alias="ru-RU">MediaFinder_ru_RU.qm</file>
+        <file alias="en-EN">MediaFinder_en_EN.qm</file>
     </qresource>
 </RCC>
