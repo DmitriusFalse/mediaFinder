@@ -269,6 +269,24 @@
              </spacer>
             </item>
             <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_10">
+              <item>
+               <widget class="QLabel" name="label_2">
+                <property name="text">
+                 <string>Файл:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="fileMovieInfo">
+                <property name="readOnly">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
              <layout class="QHBoxLayout" name="bodyDetailsMovieLayout">
               <item>
                <layout class="QVBoxLayout" name="rightLayout">
@@ -293,6 +311,46 @@
                    <string/>
                   </property>
                  </widget>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_6">
+                  <item>
+                   <spacer name="horizontalSpacer_11">
+                    <property name="orientation">
+                     <enum>Qt::Orientation::Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                     <enum>QSizePolicy::Policy::Maximum</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>160</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="zoomMovieImage">
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="data.qrc">
+                      <normaloff>:/icons/zoom</normaloff>:/icons/zoom</iconset>
+                    </property>
+                    <property name="iconSize">
+                     <size>
+                      <width>24</width>
+                      <height>24</height>
+                     </size>
+                    </property>
+                    <property name="flat">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
                 </item>
                 <item>
                  <layout class="QHBoxLayout" name="imdbLayout">
@@ -498,7 +556,7 @@
                        <x>0</x>
                        <y>0</y>
                        <width>555</width>
-                       <height>371</height>
+                       <height>299</height>
                       </rect>
                      </property>
                     </widget>
@@ -590,6 +648,46 @@
                            <string>posterLabel</string>
                           </property>
                          </widget>
+                        </item>
+                        <item>
+                         <layout class="QHBoxLayout" name="horizontalLayout_4">
+                          <item>
+                           <spacer name="horizontalSpacer_10">
+                            <property name="orientation">
+                             <enum>Qt::Orientation::Horizontal</enum>
+                            </property>
+                            <property name="sizeType">
+                             <enum>QSizePolicy::Policy::Maximum</enum>
+                            </property>
+                            <property name="sizeHint" stdset="0">
+                             <size>
+                              <width>160</width>
+                              <height>20</height>
+                             </size>
+                            </property>
+                           </spacer>
+                          </item>
+                          <item>
+                           <widget class="QPushButton" name="zoomShowTVImage">
+                            <property name="text">
+                             <string/>
+                            </property>
+                            <property name="icon">
+                             <iconset resource="data.qrc">
+                              <normaloff>:/icons/zoom</normaloff>:/icons/zoom</iconset>
+                            </property>
+                            <property name="iconSize">
+                             <size>
+                              <width>24</width>
+                              <height>24</height>
+                             </size>
+                            </property>
+                            <property name="flat">
+                             <bool>true</bool>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
                         </item>
                         <item>
                          <layout class="QHBoxLayout" name="infoCountSLayout">
@@ -916,6 +1014,24 @@
                   <item>
                    <layout class="QVBoxLayout" name="EpisodeInfoLayout">
                     <item>
+                     <layout class="QHBoxLayout" name="horizontalLayout_8">
+                      <item>
+                       <widget class="QLabel" name="label">
+                        <property name="text">
+                         <string>Файл:</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QLineEdit" name="fileEpisodeInfo">
+                        <property name="readOnly">
+                         <bool>true</bool>
+                        </property>
+                       </widget>
+                      </item>
+                     </layout>
+                    </item>
+                    <item>
                      <layout class="QHBoxLayout" name="bodyEpisodeLayout">
                       <item>
                        <layout class="QVBoxLayout" name="bodyEpisodeLeftLayout">
@@ -957,7 +1073,7 @@
                            </spacer>
                           </item>
                           <item>
-                           <widget class="QPushButton" name="zoomImage">
+                           <widget class="QPushButton" name="zoomEpisodeImage">
                             <property name="text">
                              <string/>
                             </property>

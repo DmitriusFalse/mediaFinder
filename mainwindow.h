@@ -71,9 +71,13 @@ private slots:
     void on_saveSeasonEpisodeNum_clicked();
     void on_episodeEdit_textEdited(const QString &arg1);
 
-    void on_zoomImage_clicked();
+    void on_zoomEpisodeImage_clicked();
 
     void on_tabMainWindow_currentChanged(int index);
+
+    void on_zoomShowTVImage_clicked();
+
+    void on_zoomMovieImage_clicked();
 
 public slots:
     // void slotUptateProgressBar(const int &i);

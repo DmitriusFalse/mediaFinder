@@ -15,7 +15,7 @@ DBManager::DBManager(QObject *parent)
 {
     this->m_database = QSqlDatabase::addDatabase("QSQLITE", "MediaFinder");
     this->m_database.setDatabaseName(DB_NAME);
-
+    qDebug() << "DB_NAME" << DB_NAME;
     if (this->openConnection()) {
         this->checkDB();
     } else {
@@ -46,9 +46,12 @@ bool DBManager::openConnection() {
 
 void DBManager::checkDB() {
     QStringList tables = this->m_database.tables();
-    QStringList tbDB = {"Movie", "Library"};
-
-    for (auto& table : tbDB) {
+    QStringList tbDB = {
+        "Movie", "Library", "TVEpisodes", "Genres",
+        "ReviewsTV", "TVShow", "VideosTV", "settings",
+        "crewEpisode", "crewShowTV", "crewMovie"
+    };
+    for (const QString& table : tbDB) {
         if (!tables.contains(table)) {
             this->createStructureDB(table);
         }
@@ -56,16 +59,132 @@ void DBManager::checkDB() {
 }
 
 void DBManager::createStructureDB(QString nameTables) {
-    QStringList actionTb = {"Movie", "Library"};
+    qDebug() << "nameTables:" << nameTables;
+    QStringList actionTb = {
+        "Movie", "Library", "TVEpisodes", "Genres",
+        "ReviewsTV", "TVShow", "VideosTV", "settings",
+        "crewEpisode", "crewShowTV", "crewMovie"
+    };
 
     QSqlQuery query(this->m_database);
 
     switch (actionTb.indexOf(nameTables)) {
     case 0:
-        query.exec("CREATE TABLE Movie (id INTEGER PRIMARY KEY, type TEXT, path TEXT UNIQUE, poster TEXT, name TEXT)");
+        query.exec("CREATE TABLE IF NOT EXISTS Movie ("
+                   "id INTEGER PRIMARY KEY, "
+                   "Genre TEXT, "
+                   "path TEXT UNIQUE, "
+                   "poster TEXT, "
+                   "name TEXT, "
+                   "Library_path TEXT NOT NULL, "
+                   "Description TEXT, "
+                   "idMovie INTEGER, "
+                   "originalLang TEXT, "
+                   "imdbID INTEGER, "
+                   "release_date TEXT, "
+                   "originalName TEXT, "
+                   "Status TEXT"
+                   ")");
         break;
     case 1:
-        query.exec("CREATE TABLE Library (id INTEGER PRIMARY KEY, path TEXT UNIQUE, type TEXT)");
+        query.exec("CREATE TABLE IF NOT EXISTS Library ("
+                   "id INTEGER PRIMARY KEY, "
+                   "path TEXT UNIQUE, "
+                   "type TEXT"
+                   ")");
+        break;
+    case 2:
+        query.exec("CREATE TABLE IF NOT EXISTS TVEpisodes ("
+                   "ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
+                   "NameShow TEXT NOT NULL, "
+                   "PathToSerial TEXT NOT NULL, "
+                   "LibraryPath TEXT NOT NULL, "
+                   "Overview TEXT, "
+                   "Poster TEXT, "
+                   "File TEXT NOT NULL, "
+                   "Episode TEXT, "
+                   "Season TEXT, "
+                   "NameEpisode TEXT, "
+                   "idShow INTEGER, "
+                   "air_date TEXT"
+                   ")");
+        break;
+    case 3:
+        query.exec("CREATE TABLE IF NOT EXISTS Genres ("
+                   "id INTEGER NOT NULL PRIMARY KEY, "
+                   "ru TEXT NOT NULL, "
+                   "en TEXT NOT NULL"
+                   ")");
+        break;
+    case 4:
+        query.exec("CREATE TABLE IF NOT EXISTS ReviewsTV ("
+                   "nameShow TEXT NOT NULL, "
+                   "author TEXT NOT NULL, "
+                   "content TEXT NOT NULL, "
+                   "idShow INTEGER"
+                   ")");
+        break;
+    case 5:
+        query.exec("CREATE TABLE IF NOT EXISTS TVShow ("
+                   "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
+                   "NameShow TEXT NOT NULL, "
+                   "Overview TEXT, "
+                   "Poster TEXT, "
+                   "Original_nameShow TEXT, "
+                   "Number_of_episodes INTEGER, "
+                   "Number_of_seasons INTEGER, "
+                   "Status TEXT, "
+                   "Genres TEXT, "
+                   "IdShow INTEGER, "
+                   "production_companies_name TEXT, "
+                   "production_companies_logo_path TEXT, "
+                   "first_air_date TEXT, "
+                   "last_air_date TEXT, "
+                   "imdb_id TEXT"
+                   ")");
+        break;
+    case 6:
+        query.exec("CREATE TABLE IF NOT EXISTS VideosTV ("
+                   "NameShow TEXT, "
+                   "key TEXT NOT NULL ON CONFLICT REPLACE, "
+                   "idShow INTEGER"
+                   ")");
+        break;
+    case 7:
+        query.exec("CREATE TABLE IF NOT EXISTS settings ("
+                   "name TEXT UNIQUE ON CONFLICT REPLACE, "
+                   "value TEXT NOT NULL"
+                   ")");
+        break;
+    case 8:
+        query.exec("CREATE TABLE IF NOT EXISTS crewEpisode ("
+                   "idShow INTEGER NOT NULL, "
+                   "id INTEGER NOT NULL, "
+                   "role TEXT, "
+                   "name TEXT NOT NULL, "
+                   "thumb TEXT, "
+                   "CONSTRAINT crewEpisode_pk UNIQUE (idShow, id, role)"
+                   ")");
+        break;
+    case 9:
+        query.exec("CREATE TABLE IF NOT EXISTS crewShowTV ("
+                   "idShow INTEGER NOT NULL, "
+                   "id INTEGER, "
+                   "name TEXT, "
+                   "role TEXT, "
+                   "thumb TEXT, "
+                   "CONSTRAINT crewShowTV_pk UNIQUE (idShow, id, role)"
+                   ")");
+        break;
+    case 10:
+        query.exec("CREATE TABLE IF NOT EXISTS crewMovie ("
+                   "idMovie INTEGER, "
+                   "name TEXT, "
+                   "role TEXT, "
+                   "thumb TEXT, "
+                   "id INTEGER, "
+                   "CONSTRAINT crewMovie_pk UNIQUE (idMovie, name, role, id)"
+                   ")");
         break;
     }
     query.finish();
@@ -601,12 +720,14 @@ void DBManager::writeMovieCollectionToDB(QStringList pathlList)
         QString path = info.canonicalFilePath();
         QFileInfo posterFile(info.absolutePath()+"/poster.png");
         QString poster;
-        // if(posterFile.exists()){
-        //     poster = posterFile.canonicalFilePath();
-        // }else{
-        //     poster = "/opt/MediaFinder/poster.png";
-        // }
-        poster = posterFile.canonicalFilePath();
+        if(QFile::exists(info.absolutePath()+"/poster.png")){
+            poster = info.absolutePath()+"/poster.png";
+        }else if(QFile::exists(info.absolutePath()+"/poster.jpg")){
+            poster = info.absolutePath()+"/poster.jpg";
+        }else{
+            poster = "/opt/MediaFinder/poster.png";
+        }
+
         QString name = info.completeBaseName();
         QString description = "";
 
@@ -695,14 +816,15 @@ void DBManager::writeTVCollectionToDB(QStringList pathlList)
             PathToSerial = dir.canonicalPath ();
         }
         // Если постер есть, то добавляем его в БД
-        QString poster = "";
-        // if(QFile::exists (PathToSerial+"/poster.png")){
-        //     poster = PathToSerial+"/poster.png";
-        // }else{
-        //     // Или пишем стандартный постер
-        //     poster = "/opt/MediaFinder/poster.png";
-        // }
-        poster = PathToSerial+"/poster.png";
+        QString poster = PathToSerial+"/poster.png";
+        if(QFile::exists (PathToSerial+"/poster.png")){
+            poster = PathToSerial+"/poster.png";
+        }else if(QFile::exists (PathToSerial+"/poster.jpg")){
+            poster = PathToSerial+"/poster.jpg";
+        }else{
+            poster = "/opt/MediaFinder/poster.png";
+        }
+
         QString NumSeason = "0";
         QString NumEpisode = "0";
 
@@ -711,11 +833,14 @@ void DBManager::writeTVCollectionToDB(QStringList pathlList)
             NumSeason = match.captured(1);  // Извлекаем номер сезона
             NumEpisode = match.captured(2); // Извлекаем номер серии
         }
+
         NumSeason = this->removeLeadingZeros(NumSeason);
         NumEpisode = this->removeLeadingZeros(NumEpisode);
+        //Проверяем существовании информации о Шоу в целом
         query.prepare("SELECT id FROM TVShow WHERE NameShow = :name");
         query.bindValue(":name", NameShow);
         if(query.exec ()){
+            //если информации о шоу нет, мы добавляем информацию о шоу в Базу
             if(!query.next ()){
                 query.clear ();
                 query.prepare ("INSERT INTO TVShow (NameShow, Overview, Poster) VALUES (:name, :desc, :poster)");
@@ -727,8 +852,6 @@ void DBManager::writeTVCollectionToDB(QStringList pathlList)
                 }
             }
         }
-        // INSERT INTO TVShow (NameShow, Overview, Poster) VALUES (:name, :desc, :poster);
-
         query.clear ();
 
         query.prepare("SELECT id FROM TVEpisodes WHERE File = :File");
@@ -740,16 +863,22 @@ void DBManager::writeTVCollectionToDB(QStringList pathlList)
             }
         }
 
-        // INSERT INTO TVEpisodes (NameShow, PathToSerial, LibraryPath, Description, Poster, File, Episode, Season )
-        //                 VALUES (:name,      :path,        :library,    :desc,       :poster,:file,:ep,     :seas);
+        QString posterEpisode = fileInfo.path()+"/S"+NumSeason+"E"+NumEpisode+"-poster.png";
 
-        query.prepare ("INSERT INTO TVEpisodes (NameShow, PathToSerial, LibraryPath, Overview, File, Episode, Season, NameEpisode ) "
-                                       "VALUES (:name,    :path,       :library,    :desc,    :file, :ep,    :seas,  :NameEpisode)");
+        if(QFile::exists (fileInfo.path()+"/S"+NumSeason+"E"+NumEpisode+"-poster.png")){
+            posterEpisode = fileInfo.path()+"/S"+NumSeason+"E"+NumEpisode+"-poster.png";
+        }else if(QFile::exists (fileInfo.path()+"/S"+NumSeason+"E"+NumEpisode+"-poster.jpg")){
+            posterEpisode = fileInfo.path()+"/S"+NumSeason+"E"+NumEpisode+"-poster.jpg";
+        }else{
+            posterEpisode = "";
+        }
+        query.prepare ("INSERT INTO TVEpisodes (NameShow, PathToSerial, LibraryPath, Overview, File, Episode, Season, NameEpisode, Poster ) "
+                                       "VALUES (:name,    :path,       :library,    :desc,    :file, :ep,    :seas,  :NameEpisode, :poster)");
         query.bindValue (":name", NameShow);
         query.bindValue (":path", PathToSerial);
         query.bindValue (":library", LibraryPath);
         query.bindValue (":desc", "");
-        // query.bindValue (":poster", "/opt/MediaFinder/poster.png");
+        query.bindValue (":poster", posterEpisode);
         query.bindValue (":file", File);
         query.bindValue (":ep", NumEpisode);
         query.bindValue (":seas", NumSeason);
@@ -799,7 +928,9 @@ void DBManager::removeOldRecordInBD(QString type)
                 }
             }
         }
+        query.exec("DELETE FROM Movie WHERE Library_path NOT IN (SELECT path FROM Library);");
     }else if (type==TV) {
+
         query.prepare("SELECT ID, NameShow, File FROM TVEpisodes");
         if(query.exec ()){
             while(query.next ()){
@@ -831,6 +962,8 @@ void DBManager::removeOldRecordInBD(QString type)
                 }
             }
         }
+        query.exec("DELETE FROM TVEpisodes WHERE LibraryPath NOT IN (SELECT path FROM Library)");
+        query.exec("DELETE FROM TVShow WHERE NameShow NOT IN (SELECT NameShow FROM TVEpisodes)");
     }
 }
 

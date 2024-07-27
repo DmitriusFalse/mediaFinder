@@ -145,13 +145,17 @@ void MainWindow::clickTreeWidgetMovie()
     int id = selectedItem->data(0, Qt::UserRole).toInt();
 
     MovieInfo movie = dbmanager->getMovieByID(id);
-
+    ui->fileMovieInfo->setText(movie.path);
     QPixmap posterPixmap(movie.poster);
 
     if(QFile::exists (movie.poster)){
+        ui->zoomMovieImage->show();
+        ui->zoomMovieImage->setProperty("image", QVariant::fromValue(movie.poster));
+        ui->zoomMovieImage->setProperty("title", QVariant::fromValue(movie.name));
         posterPixmap.load (movie.poster);
     }else{
         posterPixmap.load ("/opt/MediaFinder/poster.png");
+        ui->zoomMovieImage->hide();
     }
 
     QPixmap scaledPixmap = posterPixmap.scaled(200, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation);
@@ -430,11 +434,14 @@ void MainWindow::fillTvShowForm(int id)
     ShowInfo show = dbmanager->getShowTVShowByID(id);
     this->NameShowLoaded = show.nameShow;
     QPixmap posterPixmap(show.poster);
-
     if(QFile::exists (show.poster)){
         posterPixmap.load (show.poster);
+        ui->zoomShowTVImage->show();
+        ui->zoomShowTVImage->setProperty("image", QVariant::fromValue(show.poster));
+        ui->zoomShowTVImage->setProperty("title", QVariant::fromValue(show.nameShow));
     }else{
         posterPixmap.load ("/opt/MediaFinder/poster.png");
+        ui->zoomShowTVImage->hide();
     }
 
     QPixmap scaledPixmap = posterPixmap.scaled(200, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation);
@@ -478,6 +485,8 @@ void MainWindow::fillTvShowEpisodeForm(int id, int seasonsNumber, int episodeNum
         this->fillTvShowForm(id);
     }
     EpisodeInfo episode = showTV.getEpisode(seasonsNumber, episodeNumber);
+
+    ui->fileEpisodeInfo->setText(episode.filePath);
     this->episodeID = episode.ID;
     if(episode.episodeTitle.size()>0){
         ui->nameEpisodeText->setText(episode.episodeTitle);
@@ -514,13 +523,12 @@ void MainWindow::fillTvShowEpisodeForm(int id, int seasonsNumber, int episodeNum
 
     if(QFile::exists (episode.still_path)){
         posterPixmap.load (episode.still_path);
-        ui->zoomImage->show();
-        ui->zoomImage->setProperty("image", QVariant::fromValue(episode.still_path));
-        ui->zoomImage->setProperty("title", QVariant::fromValue(showTV.nameShow+"-"+episode.episodeTitle+"S"+QString::number(episode.seasonsNumber)+"E"+QString::number(episode.episodeNumber)));
+        ui->zoomEpisodeImage->show();
+        ui->zoomEpisodeImage->setProperty("image", QVariant::fromValue(episode.still_path));
+        ui->zoomEpisodeImage->setProperty("title", QVariant::fromValue(showTV.nameShow+"-"+episode.episodeTitle+"S"+QString::number(episode.seasonsNumber)+"E"+QString::number(episode.episodeNumber)));
     }else{
         posterPixmap.load ("/opt/MediaFinder/poster.png");
-        ui->zoomImage->hide();
-
+        ui->zoomEpisodeImage->hide();
     }
 
     QPixmap scaledPixmap = posterPixmap.scaled(200, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation);
@@ -811,10 +819,10 @@ void MainWindow::on_saveSeasonEpisodeNum_clicked()
     ui->saveSeasonEpisodeNum->hide();
 }
 
-void MainWindow::on_zoomImage_clicked()
+void MainWindow::on_zoomEpisodeImage_clicked()
 {
-    QString image = ui->zoomImage->property("image").toString();
-    QString title = ui->zoomImage->property("title").toString();
+    QString image = ui->zoomEpisodeImage->property("image").toString();
+    QString title = ui->zoomEpisodeImage->property("title").toString();
     this->showImageFile->setImage(image,title);
     this->showImageFile->show();
 
@@ -834,5 +842,23 @@ void MainWindow::on_tabMainWindow_currentChanged(int index)
         }
         break;
     }
+}
+
+
+void MainWindow::on_zoomShowTVImage_clicked()
+{
+    QString image = ui->zoomShowTVImage->property("image").toString();
+    QString title = ui->zoomShowTVImage->property("title").toString();
+    this->showImageFile->setImage(image,title);
+    this->showImageFile->show();
+}
+
+
+void MainWindow::on_zoomMovieImage_clicked()
+{
+    QString image = ui->zoomMovieImage->property("image").toString();
+    QString title = ui->zoomMovieImage->property("title").toString();
+    this->showImageFile->setImage(image,title);
+    this->showImageFile->show();
 }
 

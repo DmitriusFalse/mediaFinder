@@ -22,6 +22,8 @@ private slots:
 private:
     Ui::ShowImageFile *ui;
     QPixmap *image = nullptr;
+    int screenWidth = 800;
+    int screenHeight = 600;
 };
 
 #endif // SHOWIMAGEFILE_H
