@@ -13,6 +13,11 @@ QRegularExpression DBManager::re(".*[sS](\\d+)[eE](\\d+).*");
 DBManager::DBManager(QObject *parent)
     : QObject(parent)
 {
+    QFileInfo file(DB_NAME);
+    if(!QFile::exists(file.path())){
+        QDir dir;
+        dir.mkpath(file.path());
+    }
     this->m_database = QSqlDatabase::addDatabase("QSQLITE", "MediaFinder");
     this->m_database.setDatabaseName(DB_NAME);
     if (this->openConnection()) {
@@ -612,10 +617,11 @@ QList<int> DBManager::getListNumberSeason(int idDBTVShow)
     return list;
 }
 
-bool DBManager::checkSeasonEpisodeExist(const int &season, const int &episode)
+bool DBManager::checkSeasonEpisodeExist(const QString NameShow, const int &season, const int &episode)
 {
     QSqlQuery query(this->m_database);
-    query.prepare("SELECT 1 FROM TVEpisodes WHERE Season = :season AND Episode = :episode");
+    query.prepare("SELECT 1 FROM TVEpisodes WHERE NameShow = :NameShow AND Season = :season AND Episode = :episode");
+    query.bindValue(":NameShow", NameShow);
     query.bindValue(":season", season);
     query.bindValue(":episode", episode);
 
@@ -721,7 +727,7 @@ void DBManager::writeMovieCollectionToDB(QStringList pathlList)
         }else if(QFile::exists(info.absolutePath()+"/poster.jpg")){
             poster = info.absolutePath()+"/poster.jpg";
         }else{
-            poster = "/opt/MediaFinder/poster.png";
+            poster = ":/images/poster";
         }
 
         QString name = info.completeBaseName();
@@ -818,7 +824,7 @@ void DBManager::writeTVCollectionToDB(QStringList pathlList)
         }else if(QFile::exists (PathToSerial+"/poster.jpg")){
             poster = PathToSerial+"/poster.jpg";
         }else{
-            poster = "/opt/MediaFinder/poster.png";
+            poster = ":/images/poster";
         }
 
         QString NumSeason = "0";
@@ -859,14 +865,12 @@ void DBManager::writeTVCollectionToDB(QStringList pathlList)
             }
         }
 
-        QString posterEpisode = fileInfo.path()+"/S"+NumSeason+"E"+NumEpisode+"-poster.png";
+        QString posterEpisode = "";
 
-        if(QFile::exists (fileInfo.path()+"/S"+NumSeason+"E"+NumEpisode+"-poster.png")){
-            posterEpisode = fileInfo.path()+"/S"+NumSeason+"E"+NumEpisode+"-poster.png";
-        }else if(QFile::exists (fileInfo.path()+"/S"+NumSeason+"E"+NumEpisode+"-poster.jpg")){
-            posterEpisode = fileInfo.path()+"/S"+NumSeason+"E"+NumEpisode+"-poster.jpg";
-        }else{
-            posterEpisode = "";
+        if(QFile::exists (fileInfo.path()+"/"+NameEpisode+"-thumb.png")){
+            posterEpisode = fileInfo.path()+"/"+NameEpisode+"-thumb.png";
+        }else if(QFile::exists (fileInfo.path()+"/"+NameEpisode+"-thumb.jpg")){
+            posterEpisode = fileInfo.path()+"/"+NameEpisode+"-thumb.jpg";
         }
         query.prepare ("INSERT INTO TVEpisodes (NameShow, PathToSerial, LibraryPath, Overview, File, Episode, Season, NameEpisode, Poster ) "
                                        "VALUES (:name,    :path,       :library,    :desc,    :file, :ep,    :seas,  :NameEpisode, :poster)");

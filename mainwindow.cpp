@@ -41,15 +41,21 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     qApp->installTranslator(&translator);
     ui->retranslateUi(this);
     ui->PBRefreshLibrary->hide();
-    ui->listMovieLibrary->setStyleSheet("QTreeWidget::item { height: 128px; }");
+
+    // ui->listMovieLibrary->setStyleSheet("QTreeWidget::item { height: 128px; }");
+    // ui->listTVLibrary->setStyleSheet("QTreeWidget::item { height: 128px; }");
+
     ui->listMovieLibrary->setHeaderLabels({tr("Афиша"),tr("Название")});
     ui->listMovieLibrary->setColumnWidth(0,128);
 
     ui->listTVLibrary->setHeaderLabels({tr("Афиша"),tr("Название")});
     ui->listTVLibrary->setColumnWidth(0,128);
 
-    QScrollBar *verticalScrollBar = ui->listMovieLibrary->verticalScrollBar ();
-    verticalScrollBar->setStyleSheet("width: 30px;");
+    QScrollBar *scrollMovieList = ui->listMovieLibrary->verticalScrollBar ();
+    scrollMovieList->setStyleSheet("width: 30px;");
+
+    QScrollBar *scrolShowTVList = ui->listTVLibrary->verticalScrollBar ();
+    scrolShowTVList->setStyleSheet("width: 30px;");
 
     //Соединяем клик в QTreeWidget listMovieLibrary с функцией onTreeWidgetItemSelected
     connect(ui->listMovieLibrary, &QTreeWidget::itemSelectionChanged, this, &MainWindow::clickTreeWidgetMovie);
@@ -168,7 +174,7 @@ void MainWindow::clickTreeWidgetMovie()
         ui->zoomMovieImage->setProperty("title", QVariant::fromValue(movie.name));
         posterPixmap.load (movie.poster);
     }else{
-        posterPixmap.load ("/opt/MediaFinder/poster.png");
+        posterPixmap.load (":/images/poster");
         ui->zoomMovieImage->hide();
     }
 
@@ -238,7 +244,6 @@ void MainWindow::clickTreeWidgetTV()
 
     if (parentItem != nullptr) { //Дочерний элемент
         //Episode select
-        qDebug() << "1";
         ui->TVShowInfoTab->setTabEnabled(1, true);
         ui->TVShowInfoTab->setCurrentIndex(1);
         this->numSeason = selectedItem->data(1, Qt::UserRole).toInt();
@@ -289,7 +294,7 @@ void MainWindow::updateCollections(QString type)
                 if(QFile::exists (movie.poster)){
                     pixmap.load (movie.poster);
                 }else{
-                    pixmap.load ("/opt/MediaFinder/poster.png");
+                    pixmap.load (":/images/poster");
                 }
 
                 QLabel *imageLabel = new QLabel();
@@ -314,7 +319,7 @@ void MainWindow::updateCollections(QString type)
                 if(QFile::exists (show.poster)){
                     pixmap.load (show.poster);
                 }else{
-                    pixmap.load ("/opt/MediaFinder/poster.png");
+                    pixmap.load (":/images/poster");
                 }
                 QLabel *imageLabel = new QLabel();
                 imageLabel->setPixmap(pixmap.scaled(90, 128));
@@ -352,7 +357,7 @@ void MainWindow::updateCollectionsByID(QString type, int id)
             if(QFile::exists (movie.poster)){
                 pixmap.load (movie.poster);
             }else{
-                pixmap.load ("/opt/MediaFinder/poster.png");
+                pixmap.load (":/images/poster");
             }
             QLabel *imageLabel = new QLabel();
             imageLabel->setPixmap(pixmap.scaled(90, 128));
@@ -382,7 +387,7 @@ void MainWindow::updateCollectionsByID(QString type, int id)
                         if (QFile::exists(show.poster)) {
                             pixmap.load(show.poster);
                         } else {
-                            pixmap.load("/opt/MediaFinder/poster.png");
+                            pixmap.load(":/images/poster");
                         }
 
                         // Создание QLabel для отображения постера и установка его в QTreeWidgetItem
@@ -448,7 +453,7 @@ void MainWindow::fillTvShowForm(int id)
         ui->zoomShowTVImage->setProperty("image", QVariant::fromValue(show.poster));
         ui->zoomShowTVImage->setProperty("title", QVariant::fromValue(show.nameShow));
     }else{
-        posterPixmap.load ("/opt/MediaFinder/poster.png");
+        posterPixmap.load (":/images/poster");
         ui->zoomShowTVImage->hide();
     }
 
@@ -528,14 +533,14 @@ void MainWindow::fillTvShowEpisodeForm(int id, int seasonsNumber, int episodeNum
         ui->episodeEdit->setText("-");
     }
     QPixmap posterPixmap;
-
+    qDebug() << episode.still_path;
     if(QFile::exists (episode.still_path)){
         posterPixmap.load (episode.still_path);
         ui->zoomEpisodeImage->show();
         ui->zoomEpisodeImage->setProperty("image", QVariant::fromValue(episode.still_path));
         ui->zoomEpisodeImage->setProperty("title", QVariant::fromValue(showTV.nameShow+"-"+episode.episodeTitle+"S"+QString::number(episode.seasonsNumber)+"E"+QString::number(episode.episodeNumber)));
     }else{
-        posterPixmap.load ("/opt/MediaFinder/poster.png");
+        posterPixmap.load (":/images/poster");
         ui->zoomEpisodeImage->hide();
     }
 
@@ -554,7 +559,7 @@ void MainWindow::reloadSettings()
 void MainWindow::loadTranslation()
 {
     if(!this->translator.load(":/translation/"+this->settings->getSettings("language"))){
-        qDebug() << "Error load translation";
+        qDebug() << "Error load translation: "<< this->settings->getSettings("language");
     };
 
     qApp->installTranslator(&translator);

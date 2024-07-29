@@ -397,13 +397,19 @@ void SearchMedia::getImageTVShow()
         this->showTv->poster = namePoster;
 
     }
+
+
     foreach (const uint seasonNumber, this->showTv->Episodes.keys()) {
         QMap<uint, EpisodeInfo>& episodes = this->showTv->Episodes[seasonNumber];
         foreach (const uint episodeNumber, episodes.keys()) {
             showProgres->updateProgres();
             EpisodeInfo& episode = episodes[episodeNumber];
+
+            QString seasonWithNull = QString::number(seasonNumber, 10).rightJustified(2, '0');
+            QString episodeWithNull = QString::number(episodeNumber, 10).rightJustified(2, '0');
+
             QFileInfo posterEpisodeFile(episode.still_path);
-            QString namePosterEpisode = pathToShowTV+"/Season "+QString::number(seasonNumber)+"/S"+QString::number(episode.seasonsNumber)+"E"+QString::number(episode.episodeNumber)+"-poster."+posterEpisodeFile.suffix();
+            QString namePosterEpisode = pathToShowTV+"/Season "+seasonWithNull+"/S"+seasonWithNull+"E"+episodeWithNull+" - "+episode.episodeTitle+"-thumb."+posterEpisodeFile.suffix();
             QFileInfo filePhotoActor(namePosterEpisode);
             if(!QFile::exists(filePhotoActor.absolutePath())){
                 QDir dir(filePhotoActor.absolutePath());
@@ -456,8 +462,12 @@ void SearchMedia::getImageTVShow()
             while(episode.nextCrew()){
                 Crew& crewData = episode.getCrew();
                 if(crewData.thumb.startsWith("/")){
+
+                    QString seasonWithNull = QString::number(seasonNumber, 10).rightJustified(2, '0');
+                    QString episodeWithNull = QString::number(episodeNumber, 10).rightJustified(2, '0');
+
                     QFileInfo fileThumb(crewData.thumb);
-                    QString namePhotoActor = pathToShowTV+"/Season "+QString::number(seasonNumber)+"/actor/"+QString::number(crewData.id)+"."+fileThumb.suffix();
+                    QString namePhotoActor = pathToShowTV+"/Season "+seasonWithNull+"/actor/"+QString::number(crewData.id)+"."+fileThumb.suffix();
                     QFileInfo filePhotoActor(namePhotoActor);
                     if(!QFile::exists(filePhotoActor.absolutePath())){
                         QDir dir(filePhotoActor.absolutePath());
@@ -587,7 +597,7 @@ void SearchMedia::slotFinishRequestFindMedia(QNetworkReply *reply, QString media
             }else{
 
             QPixmap pixmap;
-            pixmap.load ("/opt/MediaFinder/poster.png");
+            pixmap.load (":/images/poster");
             QLabel *imageLabel = new QLabel();
             imageLabel->setPixmap(pixmap.scaled(90, 128));
             uiSearch->viewSearchTree->setItemWidget(item, 0, imageLabel);
@@ -693,7 +703,7 @@ void SearchMedia::slotFinishRequestChooseMediaEpisodes(QNetworkReply *reply)
             episode->ID = itemEpisodes.value ("id").toInt ();
             episode->episodeNumber = itemEpisodes.value ("episode_number").toInt ();
             episode->seasonsNumber = itemEpisodes.value ("season_number").toInt ();
-            if(!this->dbManager->checkSeasonEpisodeExist(episode->seasonsNumber, episode->episodeNumber)){
+            if(!this->dbManager->checkSeasonEpisodeExist(this->showTv->nameShow, episode->seasonsNumber, episode->episodeNumber)){
                 continue;
             }
             episode->air_date = itemEpisodes.value ("air_date").toString ();

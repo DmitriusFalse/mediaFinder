@@ -112,17 +112,17 @@ struct MovieCollections {
 };
 
 struct EpisodeInfo {
-    int ID;
-    int episodeNumber;
-    int seasonsNumber;
-    int episodeID;
-    QString episodeTitle;
-    QString filePath;
-    QString air_date;
-    QString still_path;
-    QString overview;
-    QString pathToSerial;
-    QString libraryPath;
+    int ID=0;
+    int episodeNumber=0;
+    int seasonsNumber=0;
+    int episodeID=0;
+    QString episodeTitle="";
+    QString filePath="";
+    QString air_date="";
+    QString still_path="";
+    QString overview="";
+    QString pathToSerial="";
+    QString libraryPath="";
 
     EpisodeInfo(): index(credits.constBegin()) {}
     // Метод добавления Crew по отдельным параметрам

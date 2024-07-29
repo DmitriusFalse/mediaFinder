@@ -36,7 +36,8 @@ SettingsApp::SettingsApp(QWidget *parent, DBManager *dbManager, SettingsData *se
     }else{
         ui->defLangComboBox->setCurrentIndex(0);
     }
-
+    ui->tableDirsType->setColumnWidth(0, 400);
+    ui->tableDirsType->setColumnWidth(1, 100);
     this->loadTranslation();
 
 }

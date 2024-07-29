@@ -47,7 +47,7 @@ public:
     QString getPathToShowTV(QString nameShow);
     QString getPathToMovie(QString name);
     QList<int> getListNumberSeason(int idDBTVShow);
-    bool checkSeasonEpisodeExist(const int& season, const int& episode);
+    bool checkSeasonEpisodeExist(const QString NameShow, const int& season, const int& episode);
     bool updateMovieColumn(const QString &columnName, const QVariant &newValue, int rowId);
     bool updateEpisodeColumn(const QString &columnName, const QVariant &newValue, int rowId);
 private:

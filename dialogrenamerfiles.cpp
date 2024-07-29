@@ -385,11 +385,14 @@ void DialogRenamerFiles::on_renameTVButton_clicked()
         QString newFileName;
         QString newFilePoster;
         QString rootPathShowTV = infoEpisode.libraryPath;
+
+        QString seasonWithNull = QString::number(season, 10).rightJustified(2, '0');
+        QString episodeWithNull = QString::number(episode, 10).rightJustified(2, '0');
         if(this->checkNewFoldersEpisodes){
-            QString newPathToEpisodeShowTV = rootPathShowTV + "/Season "+QString::number(season)+"/"+newName+"."+oldPathInfo.suffix();
+            QString newPathToEpisodeShowTV = rootPathShowTV + "/Season "+seasonWithNull+"/"+newName+"."+oldPathInfo.suffix();
             newFileName = this->renameAndMoveFile(oldPath,newPathToEpisodeShowTV);
             if(oldPoster!=""){
-                QString newPathToPosterEpisodeShowTV = rootPathShowTV + "/Season "+QString::number(season)+"/S"+QString::number(season)+"E"+QString::number(episode)+"-poster."+oldPosterInfo.suffix();
+                QString newPathToPosterEpisodeShowTV = rootPathShowTV + "/Season "+seasonWithNull+"/S"+seasonWithNull+"E"+episodeWithNull+" - "+ infoEpisode.episodeTitle +"-thumb."+oldPosterInfo.suffix();
                 newFilePoster = this->renameAndMoveFile(oldPoster, newPathToPosterEpisodeShowTV);
             }
         }else{
@@ -417,11 +420,11 @@ void DialogRenamerFiles::on_renameTVButton_clicked()
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("season");
-            xmlWriter.writeCharacters(QString::number(season));
+            xmlWriter.writeCharacters(seasonWithNull);
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("episode");
-            xmlWriter.writeCharacters(QString::number(episode));
+            xmlWriter.writeCharacters(episodeWithNull);
             xmlWriter.writeEndElement();
 
             xmlWriter.writeStartElement("aired");

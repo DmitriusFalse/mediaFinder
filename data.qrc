@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/icons">
-        <file>icons/editorial-design.png</file>
         <file alias="rename">icons/register.png</file>
         <file alias="search">icons/download.png</file>
         <file alias="refresh">icons/refresh.png</file>
@@ -16,9 +15,13 @@
         <file alias="add">icons/add.png</file>
         <file alias="en">icons/en.png</file>
         <file alias="ru">icons/ru.png</file>
+        <file alias="subtitles">icons/subtitles.png</file>
     </qresource>
     <qresource prefix="/translation">
         <file alias="ru-RU">MediaFinder_ru_RU.qm</file>
         <file alias="en-EN">MediaFinder_en_EN.qm</file>
+    </qresource>
+    <qresource prefix="/images">
+        <file alias="poster">noposter.png</file>
     </qresource>
 </RCC>
