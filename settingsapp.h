@@ -49,9 +49,9 @@ public slots:
 private slots:
     void on_saveButton_clicked();
     void on_addPath_clicked();
-    void on_applySaveSettings_clicked();
+
     void on_removeLibraryRow_clicked();
-    void on_saveCloseGenreSettings_clicked();
+
     void on_refreshGenreList_clicked();
     void slotFinishRequestGetGenre(QNetworkReply *reply, QString lang, QString show);
 
@@ -72,7 +72,6 @@ private:
 signals:
     void signalUpdateListCollection();
     void signalWindowClosed();
-    void signalApplySettings();
 
 protected:
     void closeEvent(QCloseEvent *event) override;

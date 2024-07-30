@@ -15,6 +15,7 @@ SOURCES += \
     mainwindow.cpp \
     medialibrary.cpp \
     searchmedia.cpp \
+    secretVault.cpp \
     settingsapp.cpp \
     settingsdata.cpp \
     showimagefile.cpp \

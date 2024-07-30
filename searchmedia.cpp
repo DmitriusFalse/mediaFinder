@@ -197,7 +197,7 @@ void SearchMedia::sendRequestTMDBSearch(QString Name, QString type)
     QNetworkRequest request(url);
 
     // Установка заголовков
-    QByteArray api = Vault::getKey().toUtf8();
+    QByteArray api = "Bearer " + Vault::getValue("tmdbApiToken").toUtf8();
     request.setRawHeader("Authorization", api);
     request.setRawHeader("accept", "application/json");
 
@@ -259,7 +259,7 @@ void SearchMedia::sendRequestTMDBGetInformation(QString lang)
     QNetworkRequest request(url);
 
     // Установка заголовков
-    QByteArray api = Vault::getKey().toUtf8();
+    QByteArray api = "Bearer " + Vault::getValue("tmdbApiToken").toUtf8();
     request.setRawHeader("Authorization", api);
     request.setRawHeader("accept", "application/json");
 
@@ -298,7 +298,7 @@ void SearchMedia::sendRequestTMDBGetInformationEpisodes(QString lang)
         QNetworkRequest request(url);
 
         // Установка заголовков
-        QByteArray api = Vault::getKey().toUtf8();
+        QByteArray api = "Bearer " + Vault::getValue("tmdbApiToken").toUtf8();
         request.setRawHeader("Authorization", api);
         request.setRawHeader("accept", "application/json");
 

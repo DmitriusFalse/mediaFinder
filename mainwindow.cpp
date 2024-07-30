@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include <QTextDocument>
+#include "secretVault.h"
 #include "settingsapp.h"
 #include "ui_mainwindow.h"
 #include <QScrollBar>
@@ -27,6 +28,10 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     qRegisterMetaType<EpisodeInfo>("EpisodeInfo");
     ui->setupUi(this);
     this->dbmanager = new DBManager(this);
+    // Получаем АПИ ключи доступа и назначаем его
+    QString tmdbApiToken = this->dbmanager->getSetting("tmdbApiToken");
+    Vault::putVault("tmdbApiToken", tmdbApiToken);
+
     this->settings = dbmanager->getAllSettings();
     this->settingsData = new SettingsData(this->dbmanager);
     this->mediaLibrary = new MediaLibrary(this, this->dbmanager, settingsData);
@@ -87,7 +92,6 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     connect(this->progressBar, &DialogShowProgress::emitCloseProgres, this, &MainWindow::onDialogClosed);
     //
     connect(this->dialogSettingsApp, &SettingsApp::signalWindowClosed, this, &MainWindow::onDialogClosed);
-    connect(this->dialogSettingsApp, &SettingsApp::signalApplySettings, this, &MainWindow::slotApplySettings);
 
     ui->listMovieLibrary->setAlternatingRowColors(true);
     ui->listTVLibrary->setAlternatingRowColors(true);
@@ -122,14 +126,6 @@ void MainWindow::onDialogClosed()
     // Включаем главное окно после закрытия диалогового окна
     setDisabled(false);
 }
-
-void MainWindow::slotApplySettings()
-{
-    this->reloadSettings();
-
-    this->loadTranslation();
-}
-
 
 void MainWindow::on_refreshLibrary_clicked()
 {

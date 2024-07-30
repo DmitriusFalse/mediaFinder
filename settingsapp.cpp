@@ -50,6 +50,8 @@ SettingsApp::SettingsApp(QWidget *parent, DBManager *dbManager, SettingsData *se
     ui->tableDirsType->setColumnWidth(1, 100);
     this->loadTranslation();
     this->refreshGenresList();
+    QString tmdbApiToken = m_dbManager->getSetting("tmdbApiToken");
+    ui->apiKeyText->setPlainText(tmdbApiToken);
 
 }
 
@@ -161,20 +163,19 @@ void SettingsApp::closeEvent(QCloseEvent *event)
 
 void SettingsApp::on_saveButton_clicked()
 {
+    // Сохранение настроек программы
     changeSettings = false;
     this->saveLangApp();
     this->loadTranslation();
     SettingsApp::saveLibraryFolder(true);
-    close();
+
+    QString tmdbApiToken = ui->apiKeyText->toPlainText();
+    m_dbManager->saveSettings("tmdbApiToken", tmdbApiToken);
+    ui->apiKeyText->setPlainText(tmdbApiToken);
+    this->close();
 }
 
-void SettingsApp::on_applySaveSettings_clicked()
-{
-    this->saveLangApp();
-    this->loadTranslation();
-    SettingsApp::saveLibraryFolder(false);
-    emit signalApplySettings();
-}
+
 
 void SettingsApp::on_addPath_clicked()
 {
@@ -255,17 +256,10 @@ void SettingsApp::on_removeLibraryRow_clicked()
     }
 }
 
-
-void SettingsApp::on_saveCloseGenreSettings_clicked()
-{
-    this->close();
-}
-
-
 void SettingsApp::on_refreshGenreList_clicked()
 {
     qDebug() << tr("Загружаем Жанры");
-    QByteArray api = Vault::getKey().toUtf8();
+    QByteArray api = "Bearer " + Vault::getValue("tmdbApiToken").toUtf8();
     showProgres->reset();
     showProgres->show();
     showProgres->setMainLineMessage("Обновляем жанры");
@@ -410,4 +404,3 @@ void SettingsApp::slotFinishRequestGetGenre(QNetworkReply *reply, QString lang, 
         this->refreshGenresList();
     }
 }
-

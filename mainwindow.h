@@ -65,7 +65,6 @@ private:
 
 private slots:
     void onDialogClosed();
-    void slotApplySettings();
     void on_refreshLibrary_clicked();
     void on_openSettings_clicked();
     void slotChangetSelection();
