@@ -767,8 +767,6 @@ void DBManager::writeMovieCollectionToDB(QStringList pathlList)
         query.finish();
     }
     emit signalUpdateMainWindow ("Movie");
-    // INSERT INTO Movie (id,Genre,"path",poster,name,Library_path,Description) VALUES
-    //     (1,'Kino','/home/noc101','/home/noc101/poster.png','Life','/home/noc101','My shit life');
 }
 
 void DBManager::writeTVCollectionToDB(QStringList pathlList)
