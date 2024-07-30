@@ -31,6 +31,7 @@ HEADERS += \
     medialibrary.h \
     movieCollections.h \
     searchmedia.h \
+    secretVault.h \
     settingsapp.h \
     settingsdata.h \
     showimagefile.h \

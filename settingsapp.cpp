@@ -20,7 +20,7 @@
 #include <QUrl>
 #include "qurlquery.h"
 #include <QJsonArray>
-
+#include "secretVault.h"
 
 //////////////////////////////////////////////////////////////////////////
 /// \brief SettingsApp::SettingsApp
@@ -265,6 +265,7 @@ void SettingsApp::on_saveCloseGenreSettings_clicked()
 void SettingsApp::on_refreshGenreList_clicked()
 {
     qDebug() << tr("Загружаем Жанры");
+    QByteArray api = Vault::getKey().toUtf8();
     showProgres->reset();
     showProgres->show();
     showProgres->setMainLineMessage("Обновляем жанры");
@@ -283,7 +284,8 @@ void SettingsApp::on_refreshGenreList_clicked()
     QNetworkRequest requestEnMovie(urlEnMovie);
 
     // Установка заголовков
-    requestEnMovie.setRawHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MzRiMjAxZmI0ZTEzYjM5N2E3ZjBkZWYxMzYxNmRiOSIsIm5iZiI6MTcxOTk0MTM3OC40MjIzNTcsInN1YiI6IjY1OTJlY2QwNjUxZmNmNjA5NjhkYTkzYSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.zrR3Abjt6k3dIQsdTVsMdUmU-OJCkajxr3KKSadijog");
+
+    requestEnMovie.setRawHeader("Authorization", api);
     requestEnMovie.setRawHeader("accept", "application/json");
 
     QNetworkAccessManager *managerEnMovie = new QNetworkAccessManager(this);
@@ -310,7 +312,8 @@ void SettingsApp::on_refreshGenreList_clicked()
     QNetworkRequest requestRuMovie(urlRuMovie);
 
     // Установка заголовков
-    requestRuMovie.setRawHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MzRiMjAxZmI0ZTEzYjM5N2E3ZjBkZWYxMzYxNmRiOSIsIm5iZiI6MTcxOTk0MTM3OC40MjIzNTcsInN1YiI6IjY1OTJlY2QwNjUxZmNmNjA5NjhkYTkzYSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.zrR3Abjt6k3dIQsdTVsMdUmU-OJCkajxr3KKSadijog");
+
+    requestRuMovie.setRawHeader("Authorization", api);
     requestRuMovie.setRawHeader("accept", "application/json");
 
     QNetworkAccessManager *managerRuMovie = new QNetworkAccessManager(this);
@@ -338,7 +341,7 @@ void SettingsApp::on_refreshGenreList_clicked()
     QNetworkRequest requestEnShowTv(urlEnShowTv);
 
     // Установка заголовков
-    requestEnShowTv.setRawHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MzRiMjAxZmI0ZTEzYjM5N2E3ZjBkZWYxMzYxNmRiOSIsIm5iZiI6MTcxOTk0MTM3OC40MjIzNTcsInN1YiI6IjY1OTJlY2QwNjUxZmNmNjA5NjhkYTkzYSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.zrR3Abjt6k3dIQsdTVsMdUmU-OJCkajxr3KKSadijog");
+    requestEnShowTv.setRawHeader("Authorization", api);
     requestEnShowTv.setRawHeader("accept", "application/json");
 
     QNetworkAccessManager *managerEnShowTv = new QNetworkAccessManager(this);
@@ -364,7 +367,7 @@ void SettingsApp::on_refreshGenreList_clicked()
     QNetworkRequest requestRuShowTv(urlRuShowTv);
 
     // Установка заголовков
-    requestRuShowTv.setRawHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MzRiMjAxZmI0ZTEzYjM5N2E3ZjBkZWYxMzYxNmRiOSIsIm5iZiI6MTcxOTk0MTM3OC40MjIzNTcsInN1YiI6IjY1OTJlY2QwNjUxZmNmNjA5NjhkYTkzYSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.zrR3Abjt6k3dIQsdTVsMdUmU-OJCkajxr3KKSadijog");
+    requestRuShowTv.setRawHeader("Authorization", api);
     requestRuShowTv.setRawHeader("accept", "application/json");
 
     QNetworkAccessManager *managerRuShowTv = new QNetworkAccessManager(this);

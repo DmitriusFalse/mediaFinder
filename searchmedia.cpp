@@ -10,6 +10,7 @@
 #include <QUrl>
 #include <QJsonArray>
 #include <QFileInfo>
+#include "secretVault.h"
 
 SearchMedia::SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db, DialogShowProgress *sp, Settings *param)
     : QMainWindow(parent)
@@ -196,7 +197,8 @@ void SearchMedia::sendRequestTMDBSearch(QString Name, QString type)
     QNetworkRequest request(url);
 
     // Установка заголовков
-    request.setRawHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MzRiMjAxZmI0ZTEzYjM5N2E3ZjBkZWYxMzYxNmRiOSIsIm5iZiI6MTcxOTk0MTM3OC40MjIzNTcsInN1YiI6IjY1OTJlY2QwNjUxZmNmNjA5NjhkYTkzYSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.zrR3Abjt6k3dIQsdTVsMdUmU-OJCkajxr3KKSadijog");
+    QByteArray api = Vault::getKey().toUtf8();
+    request.setRawHeader("Authorization", api);
     request.setRawHeader("accept", "application/json");
 
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
@@ -257,7 +259,8 @@ void SearchMedia::sendRequestTMDBGetInformation(QString lang)
     QNetworkRequest request(url);
 
     // Установка заголовков
-    request.setRawHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MzRiMjAxZmI0ZTEzYjM5N2E3ZjBkZWYxMzYxNmRiOSIsIm5iZiI6MTcxOTk0MTM3OC40MjIzNTcsInN1YiI6IjY1OTJlY2QwNjUxZmNmNjA5NjhkYTkzYSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.zrR3Abjt6k3dIQsdTVsMdUmU-OJCkajxr3KKSadijog");
+    QByteArray api = Vault::getKey().toUtf8();
+    request.setRawHeader("Authorization", api);
     request.setRawHeader("accept", "application/json");
 
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
@@ -295,7 +298,8 @@ void SearchMedia::sendRequestTMDBGetInformationEpisodes(QString lang)
         QNetworkRequest request(url);
 
         // Установка заголовков
-        request.setRawHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MzRiMjAxZmI0ZTEzYjM5N2E3ZjBkZWYxMzYxNmRiOSIsIm5iZiI6MTcxOTk0MTM3OC40MjIzNTcsInN1YiI6IjY1OTJlY2QwNjUxZmNmNjA5NjhkYTkzYSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.zrR3Abjt6k3dIQsdTVsMdUmU-OJCkajxr3KKSadijog");
+        QByteArray api = Vault::getKey().toUtf8();
+        request.setRawHeader("Authorization", api);
         request.setRawHeader("accept", "application/json");
 
         QNetworkAccessManager *manager = new QNetworkAccessManager(this);
