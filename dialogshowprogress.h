@@ -18,8 +18,8 @@ public:
     void closeProgres();
 
     void updateProgres();
+    void reset();
     void setTextProgres(QString text);
-
 
     void setMainLineMessage(const QString &newMainLineMessage);
 

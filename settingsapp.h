@@ -1,5 +1,7 @@
 #ifndef SETTINGSAPP_H
 #define SETTINGSAPP_H
+#include "dialogshowprogress.h"
+#include "qnetworkreply.h"
 #include "settingsdata.h"
 #include "dbmanager.h"
 #include <QMainWindow>
@@ -11,19 +13,47 @@
 namespace Ui {
 class SettingsApp;
 }
+struct requestGenre
+{
+public:
+    bool enMovie = false;
+    bool ruMovie = false;
+    bool enShowTV = false;
+    bool ruShowTV = false;
+
+    bool checkRequest() const {
+        return enMovie || ruMovie || enShowTV || ruShowTV;
+    }
+    void setRequest(const QString& language, const QString& name, bool flag) {
+        if (language == "en" && name == "movie") {
+            enMovie = flag;
+        } else if (language == "ru" && name == "movie") {
+            ruMovie = flag;
+        } else if (language == "en" && name == "show") {
+            enShowTV = flag;
+        } else if (language == "ru" && name == "show") {
+            ruShowTV = flag;
+        }
+    }
+};
 class SettingsApp : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit SettingsApp(QWidget *parent, DBManager *dbManager, SettingsData *settings, Settings *param);
+    explicit SettingsApp(QWidget *parent, DBManager *dbManager, SettingsData *settings, Settings *param, DialogShowProgress *sp);
     ~SettingsApp();
+
+public slots:
 
 private slots:
     void on_saveButton_clicked();
     void on_addPath_clicked();
     void on_applySaveSettings_clicked();
     void on_removeLibraryRow_clicked();
+    void on_saveCloseGenreSettings_clicked();
+    void on_refreshGenreList_clicked();
+    void slotFinishRequestGetGenre(QNetworkReply *reply, QString lang, QString show);
 
 private:
     Ui::SettingsApp *ui;
@@ -32,14 +62,18 @@ private:
     void saveLangApp();
     bool changeSettings;
     void loadTranslation();
+    void refreshGenresList();
     QTranslator translator;
     SettingsData *m_settings;
     DBManager *m_dbManager;
     Settings *parametrs;
+    DialogShowProgress *showProgres;
+    requestGenre sendReuqestGenre;
 signals:
     void signalUpdateListCollection();
     void signalWindowClosed();
     void signalApplySettings();
+
 protected:
     void closeEvent(QCloseEvent *event) override;
 };

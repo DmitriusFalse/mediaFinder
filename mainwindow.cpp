@@ -31,7 +31,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     this->settingsData = new SettingsData(this->dbmanager);
     this->mediaLibrary = new MediaLibrary(this, this->dbmanager, settingsData);
     this->progressBar = new DialogShowProgress;
-    this->dialogSettingsApp = new SettingsApp(this,dbmanager, settingsData, this->settings);
+    this->dialogSettingsApp = new SettingsApp(this,dbmanager, settingsData, this->settings, this->progressBar);
     this->showImageFile = new ShowImageFile;
 
     this->reloadSettings();

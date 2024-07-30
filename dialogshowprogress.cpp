@@ -31,6 +31,12 @@ void DialogShowProgress::updateProgres()
     ui->progressBar->setValue (val);
 }
 
+void DialogShowProgress::reset()
+{
+    ui->progressBar->setFormat("");
+    ui->progressBar->setValue (0);
+}
+
 void DialogShowProgress::setTextProgres(QString text)
 {
     if(text != ""){

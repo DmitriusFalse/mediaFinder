@@ -1,5 +1,6 @@
 #ifndef DBMANAGER_H
 #define DBMANAGER_H
+#include "GenreList.h"
 #include "Settings.h"
 #include "movieCollections.h"
 #include <QSqlDatabase>
@@ -26,7 +27,8 @@ public:
     void writeTVCollectionToDB(QStringList pathlList);
     void removeMovieCollectionsLibrary(QString libraryPath);
     void removeOldRecordInBD(QString type);
-    QStringList loadGenre();
+    GenreList loadGenre(QString lang);
+    void saveGenres(GenreList genres);
     QList<Videos> getVideos(int idShow);
     QList<Reviews> getReviews(int idShow);
     QStringList readMovieCollection(QString detailLevel);
@@ -42,7 +44,7 @@ public:
     void updateTvShow(ShowInfo show, int id);
     void updateMovie(MovieInfo movie, int id);
     void saveSettings(QString name, QString value);
-    void getSetting(QString name, QString value);
+    QString getSetting(QString name);
     Settings* getAllSettings();
     QString getPathToShowTV(QString nameShow);
     QString getPathToMovie(QString name);

@@ -115,9 +115,9 @@ void DBManager::createStructureDB(QString nameTables) {
         break;
     case 3:
         query.exec("CREATE TABLE IF NOT EXISTS Genres ("
-                   "id INTEGER NOT NULL PRIMARY KEY, "
-                   "ru TEXT NOT NULL, "
-                   "en TEXT NOT NULL"
+                   "id INTEGER NOT NULL, "
+                   "ru TEXT, "
+                   "en TEXT"
                    ")");
         break;
     case 4:
@@ -555,6 +555,22 @@ void DBManager::saveSettings(QString name, QString value)
     }
 }
 
+QString  DBManager::getSetting(QString name)
+{
+    QSqlQuery query(this->m_database);
+    query.prepare("SELECT value FROM settings WHERE name = :name");
+    query.bindValue(":name", name);
+
+    if (!query.exec()) {
+        return QString();
+    }
+    if (query.next()) {
+        return query.value(0).toString();
+    } else {
+        return QString();
+    }
+}
+
 Settings* DBManager::getAllSettings()
 {
     Settings *settings = new Settings;
@@ -967,17 +983,74 @@ void DBManager::removeOldRecordInBD(QString type)
     }
 }
 
-QStringList DBManager::loadGenre()
+GenreList DBManager::loadGenre(QString lang)
 {
-    QStringList genres;
+    GenreList genres;
     QSqlQuery query(this->m_database);
-    query.prepare ("SELECT id, ru FROM Genres");
-    if(query.exec ()){
-        while(query.next()){
-            genres.append (query.value ("id").toString ()+":"+query.value ("ru").toString ());
+    if(lang=="ru-RU"){
+        query.prepare ("SELECT id, ru FROM Genres");
+        if(query.exec ()){
+            while(query.next()){
+                uint id = query.value ("id").toInt();
+                QString name = query.value ("ru").toString ();
+                if(id>0 && name!=""){
+                    genres.addGenre(id, name,"ru");
+                }
+            }
+        }
+    }else{
+        query.prepare ("SELECT id, en FROM Genres");
+        if(query.exec ()){
+            while(query.next()){
+                uint id = query.value ("id").toInt();
+                QString name = query.value ("en").toString ();
+                if(id>0 && name!=""){
+                    genres.addGenre(id, name,"en");
+                }
+            }
         }
     }
+
     return genres;
+}
+
+void DBManager::saveGenres(GenreList genres)
+{
+    QSqlQuery query(this->m_database);
+    while(genres.next()){
+        genre g = genres.get();
+        query.prepare("SELECT 1 FROM Genres WHERE id=:id");
+        query.bindValue(":id", g.id);
+        query.exec();
+        if(query.next()){
+            // update
+            if(g.lang == "en"){
+                query.prepare("UPDATE Genres SET en=:en WHERE id = :id");
+                query.bindValue(":en", g.name);
+                query.bindValue(":id",g.id);
+                query.exec();
+            }else{
+                query.prepare("UPDATE Genres SET ru=:ru WHERE id = :id");
+                query.bindValue(":ru", g.name);
+                query.bindValue(":id",g.id);
+                query.exec();
+            }
+        }else{
+            // insert
+            if(g.lang == "en"){
+                query.prepare("INSERT INTO Genres (id, en) VALUES (:id, :en)");
+                query.bindValue(":en", g.name);
+                query.bindValue(":id",g.id);
+                query.exec();
+            }else{
+                query.prepare("INSERT INTO Genres (id, ru) VALUES (:id, :en)");
+                query.bindValue(":ru", g.name);
+                query.bindValue(":id",g.id);
+                query.exec();
+            }
+        }
+    }
+    genres.resetIterator();
 }
 
 QList<Videos> DBManager::getVideos(int idShow)

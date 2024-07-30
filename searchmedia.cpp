@@ -534,11 +534,8 @@ void SearchMedia::slotFinishRequestFindMedia(QNetworkReply *reply, QString media
 {
     if (reply->error() == QNetworkReply::NoError) {
         this->progresSearchAdd();
-        QStringList srcListGenres = dbManager->loadGenre ();
-        for (auto& src : srcListGenres) {
-            QStringList paraData = src.split (":");
-            genres->addGenre (paraData[0].toInt (), paraData[1]);
-        }
+        QString lang = dbManager->getSetting("language");
+        GenreList genre = dbManager->loadGenre (lang);
 
         // Запрос выполнен успешно:
         QByteArray data = reply->readAll(); // Читаем полученные данные
@@ -588,7 +585,7 @@ void SearchMedia::slotFinishRequestFindMedia(QNetworkReply *reply, QString media
                 this->progresSearchAdd();
                 if (genreIdValue.isDouble()) { // Проверяем, что значение является числом
                     uint idGenre = genreIdValue.toInt();
-                    listGenre.append (genres->getGenre (idGenre));
+                    listGenre.append (genre.getGenre (idGenre));
                 }
             }
             QTreeWidgetItem *item = new QTreeWidgetItem(uiSearch->viewSearchTree);
