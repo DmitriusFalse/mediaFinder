@@ -5,10 +5,15 @@ Vault::Vault(QObject *parent)
 {
 
 }
-QHash<QString, QString> Vault::hash;
+
 void Vault::putVault(const QString &key, const QString &value)
 {
     hash[key] = value;
+}
+
+void Vault::putVault(QHash<QString, QString> data)
+{
+    this->hash = data;
 }
 
 QString Vault::getValue(const QString &key)

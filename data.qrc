@@ -22,6 +22,6 @@
         <file alias="en-EN">MediaFinder_en_EN.qm</file>
     </qresource>
     <qresource prefix="/images">
-        <file alias="poster">noposter.png</file>
+        <file alias="poster">images/noposter.png</file>
     </qresource>
 </RCC>

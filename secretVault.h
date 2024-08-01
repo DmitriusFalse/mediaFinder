@@ -8,11 +8,12 @@ class Vault : public QObject {
     Q_OBJECT
 public:
     Vault(QObject *parent = nullptr);
-    static void putVault(const QString& key, const QString& value);
-    static QString getValue(const QString& key);
+    void putVault(const QString& key, const QString& value);
+    void putVault(QHash<QString, QString> data);
+    QString getValue(const QString& key);
 
 private:
-    static QHash<QString, QString> hash;
+    QHash<QString, QString> hash;
 };
 
 #endif // SECRETVAULT_H

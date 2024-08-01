@@ -29,8 +29,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     ui->setupUi(this);
     this->dbmanager = new DBManager(this);
     // Получаем АПИ ключи доступа и назначаем его
-    QString tmdbApiToken = this->dbmanager->getSetting("tmdbApiToken");
-    Vault::putVault("tmdbApiToken", tmdbApiToken);
+
+    // QString tmdbApiToken = this->dbmanager->getSetting("tmdbApiToken");
+    // Vault::putVault("tmdbApiToken", tmdbApiToken);
 
     this->settings = dbmanager->getAllSettings();
     this->settingsData = new SettingsData(this->dbmanager);
@@ -643,7 +644,7 @@ void MainWindow::on_openSettings_clicked()
 void MainWindow::on_loadMediaButton_clicked()
 {
     //Открытие окна поиска
-    this->searchMedia = new SearchMedia(this, this->mediaLibrary,this->dbmanager,progressBar, this->settings);
+    this->searchMedia = new SearchMedia(this, this->mediaLibrary,this->dbmanager,progressBar, this->settings, this->settingsData);
     connect(this->searchMedia, &SearchMedia::windowClosed, this, &MainWindow::onDialogClosed);
     connect(this->searchMedia, &SearchMedia::endSearch, this,  &MainWindow::slotEndSearch);
     MainWindow::setDisabled (true);

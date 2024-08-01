@@ -5,7 +5,7 @@
 #include <QMetaType>
 #include <QString>
 #include <QJsonObject>
-
+#include "secretVault.h"
 
 
 class SettingsData
@@ -21,8 +21,12 @@ public:
     // QStringList videoExtensions = ;
     static const QString INSTALL_PATH;
     QString getInstallPath();
-
     QStringList getVideoExtensions() const;
+    void saveApiKey(const QString &name, const QString& api);
+    QByteArray getApiAccessToken(const QString &name);
+
+    Vault* vault;
+    void reloadVault();
 private:
     DBManager* m_dbmanager;
 };

@@ -35,10 +35,18 @@ SettingsApp::SettingsApp(QWidget *parent, DBManager *dbManager, SettingsData *se
     , showProgres(sp)
 {
     ui->setupUi(this);
+
     setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
+
+    QString tmdbApiToken = this->m_settings->getApiAccessToken("tmdbApiToken");
+    ui->apiKeyText->setPlainText(tmdbApiToken);
+
     SettingsApp::addPathToListLibrary();
+
     changeSettings = false;
+
     QString defLang = param->getSettings("language");
+
     if(defLang=="en-EN"){
         ui->defLangComboBox->setCurrentIndex(0);
     }else if(defLang=="ru-RU"){
@@ -50,8 +58,8 @@ SettingsApp::SettingsApp(QWidget *parent, DBManager *dbManager, SettingsData *se
     ui->tableDirsType->setColumnWidth(1, 100);
     this->loadTranslation();
     this->refreshGenresList();
-    QString tmdbApiToken = m_dbManager->getSetting("tmdbApiToken");
-    ui->apiKeyText->setPlainText(tmdbApiToken);
+
+
 
 }
 
@@ -170,12 +178,10 @@ void SettingsApp::on_saveButton_clicked()
     SettingsApp::saveLibraryFolder(true);
 
     QString tmdbApiToken = ui->apiKeyText->toPlainText();
-    m_dbManager->saveSettings("tmdbApiToken", tmdbApiToken);
+    m_settings->saveApiKey("tmdbApiToken", tmdbApiToken);
     ui->apiKeyText->setPlainText(tmdbApiToken);
     this->close();
 }
-
-
 
 void SettingsApp::on_addPath_clicked()
 {
@@ -259,7 +265,7 @@ void SettingsApp::on_removeLibraryRow_clicked()
 void SettingsApp::on_refreshGenreList_clicked()
 {
     qDebug() << tr("Загружаем Жанры");
-    QByteArray api = "Bearer " + Vault::getValue("tmdbApiToken").toUtf8();
+    QByteArray api = "Bearer " + m_settings->getApiAccessToken("tmdbApiToken");
     showProgres->reset();
     showProgres->show();
     showProgres->setMainLineMessage("Обновляем жанры");

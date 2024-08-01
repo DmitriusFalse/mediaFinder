@@ -7,7 +7,7 @@
 #include "dbmanager.h"
 #include "qnetworkreply.h"
 #include <QMainWindow>
-
+#include "settingsdata.h"
 
 
 namespace Ui {
@@ -19,7 +19,7 @@ class SearchMedia : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db, DialogShowProgress *sp, Settings *param);
+    explicit SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db, DialogShowProgress *sp, Settings *param, SettingsData *setin);
     ~SearchMedia();
     void fillFields(QString type);
     void setSearchWord(const QString &newNameSearch);
@@ -68,6 +68,7 @@ private:
     MovieInfo *movie;
     MovieInfo oldMovie;
     DialogShowProgress *showProgres;
+    SettingsData *settings;
 
     void setLangSearchMedia();
 

@@ -44,6 +44,8 @@ public:
     void updateTvShow(ShowInfo show, int id);
     void updateMovie(MovieInfo movie, int id);
     void saveSettings(QString name, QString value);
+    void putVault(QString name, QString value);
+    QHash<QString,QString> getVault();
     QString getSetting(QString name);
     Settings* getAllSettings();
     QString getPathToShowTV(QString nameShow);
@@ -56,7 +58,7 @@ private:
     bool openConnection();
     void closeConnection();
     void checkDB();
-    void createStructureDB(QString nameTables);
+    void createStructureDB(int index);
     void updateReviewsTV(QList<Reviews> reviews, int id);
     void updateTvShowEpisode(ShowInfo show);
     void updateVideosTV(QList<Videos> videos, QString nameShow, int id);

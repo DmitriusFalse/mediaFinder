@@ -8,6 +8,10 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     qDebug() << "Qt Version:" << QT_VERSION_STR;
+    QStringList paths = QCoreApplication::libraryPaths();
+    paths.append(".");
+    paths.append("libs");
+    QCoreApplication::setLibraryPaths(paths);
 
     a.setApplicationName("MediaFinder");
     QTranslator translator;

@@ -10,15 +10,16 @@
 #include <QUrl>
 #include <QJsonArray>
 #include <QFileInfo>
-#include "secretVault.h"
 
-SearchMedia::SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db, DialogShowProgress *sp, Settings *param)
+
+SearchMedia::SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db, DialogShowProgress *sp, Settings *param, SettingsData *setin)
     : QMainWindow(parent)
     , uiSearch(new  Ui::SearchMedia)
     , parametrs(param)
     , mediaLibrary(mLib)
     , dbManager(db)
     , showProgres(sp)
+    , settings(setin)
 {
     uiSearch->setupUi(this);
     setTypeMediaSearch ("Multi");
@@ -197,7 +198,7 @@ void SearchMedia::sendRequestTMDBSearch(QString Name, QString type)
     QNetworkRequest request(url);
 
     // Установка заголовков
-    QByteArray api = "Bearer " + Vault::getValue("tmdbApiToken").toUtf8();
+    QByteArray api = "Bearer " + settings->getApiAccessToken("tmdbApiToken");
     request.setRawHeader("Authorization", api);
     request.setRawHeader("accept", "application/json");
 
@@ -259,7 +260,7 @@ void SearchMedia::sendRequestTMDBGetInformation(QString lang)
     QNetworkRequest request(url);
 
     // Установка заголовков
-    QByteArray api = "Bearer " + Vault::getValue("tmdbApiToken").toUtf8();
+    QByteArray api = "Bearer " + settings->getApiAccessToken("tmdbApiToken");
     request.setRawHeader("Authorization", api);
     request.setRawHeader("accept", "application/json");
 
@@ -298,7 +299,7 @@ void SearchMedia::sendRequestTMDBGetInformationEpisodes(QString lang)
         QNetworkRequest request(url);
 
         // Установка заголовков
-        QByteArray api = "Bearer " + Vault::getValue("tmdbApiToken").toUtf8();
+        QByteArray api = "Bearer " + settings->getApiAccessToken("tmdbApiToken");
         request.setRawHeader("Authorization", api);
         request.setRawHeader("accept", "application/json");
 

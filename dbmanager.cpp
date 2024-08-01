@@ -53,26 +53,21 @@ void DBManager::checkDB() {
     QStringList tbDB = {
         "Movie", "Library", "TVEpisodes", "Genres",
         "ReviewsTV", "TVShow", "VideosTV", "settings",
-        "crewEpisode", "crewShowTV", "crewMovie"
+        "crewEpisode", "crewShowTV", "crewMovie", "Vault"
     };
     for (const QString& table : tbDB) {
         if (!tables.contains(table)) {
-            this->createStructureDB(table);
+            qDebug() << tr("Создаем таблицу:") << tables;
+            this->createStructureDB(tbDB.indexOf(table));
         }
     }
 }
 
-void DBManager::createStructureDB(QString nameTables) {
-    qDebug() << "nameTables:" << nameTables;
-    QStringList actionTb = {
-        "Movie", "Library", "TVEpisodes", "Genres",
-        "ReviewsTV", "TVShow", "VideosTV", "settings",
-        "crewEpisode", "crewShowTV", "crewMovie"
-    };
+void DBManager::createStructureDB(int index) {
 
     QSqlQuery query(this->m_database);
 
-    switch (actionTb.indexOf(nameTables)) {
+    switch (index) {
     case 0:
         query.exec("CREATE TABLE IF NOT EXISTS Movie ("
                    "id INTEGER PRIMARY KEY, "
@@ -189,6 +184,13 @@ void DBManager::createStructureDB(QString nameTables) {
                    "id INTEGER, "
                    "CONSTRAINT crewMovie_pk UNIQUE (idMovie, name, role, id)"
                    ")");
+        break;
+    case 11:
+        query.exec("CREATE TABLE vault ("
+                   "name TEXT PRIMARY KEY ON CONFLICT REPLACE "
+                   "UNIQUE ON CONFLICT REPLACE "
+                   "NOT NULL, "
+                   "data TEXT NOT NULL)");
         break;
     }
     query.finish();
@@ -553,6 +555,33 @@ void DBManager::saveSettings(QString name, QString value)
     if(!query.exec()){
         qDebug() << "Error update Settings: " << query.lastError().text();
     }
+}
+
+void DBManager::putVault(QString name, QString value)
+{
+    QSqlQuery query(this->m_database);
+    query.prepare("INSERT INTO Vault (name, data) VALUES (:name, :value)");
+    query.bindValue(":name", name);
+    query.bindValue(":value", value);
+
+    if(!query.exec()){
+        qDebug() << "Ошибка обновления Vault: " << query.lastError().text();
+    }
+}
+
+QHash<QString, QString> DBManager::getVault()
+{
+    QHash<QString, QString> hash;
+    QSqlQuery query(this->m_database);
+    query.prepare("SELECT * FROM Vault");
+    if(query.exec()){
+        while(query.next()){
+            hash[query.value("name").toString()]=query.value("data").toString();
+        }
+    }else{
+        qDebug() << "getVault: " << query.lastError().text();
+    }
+    return hash;
 }
 
 QString  DBManager::getSetting(QString name)

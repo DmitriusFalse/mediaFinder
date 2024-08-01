@@ -6,17 +6,21 @@
 #include <QString>
 #include "dbmanager.h"
 
+
 Q_DECLARE_METATYPE(libraryItem);
 
 
 const QString SettingsData::INSTALL_PATH = "/opt/MediaFinder";
+
 SettingsData::SettingsData(DBManager *dbmanager) : m_dbmanager(dbmanager) {
     qRegisterMetaType<libraryItem>("libraryItem");
+    this->vault = new Vault;
+    this->reloadVault();
 }
 
 SettingsData::~SettingsData()
 {
-
+    delete this->vault;
 }
 
 void SettingsData::writeLibraryToSettings(const QList<libraryItem> &data)
@@ -89,6 +93,23 @@ QList<libraryItem> SettingsData::checkLibraryDuplicate(QList<libraryItem> libFol
 QStringList SettingsData::getVideoExtensions() const
 {
     return {"mp4", "avi", "mkv", "mov", "wmv", "flv", "mpeg", "mpg"};
+}
+
+void SettingsData::saveApiKey(const QString &name, const QString &api)
+{
+    this->m_dbmanager->putVault(name, api);
+    this->vault->putVault(name, api);
+}
+
+QByteArray SettingsData::getApiAccessToken(const QString &name)
+{
+    return this->vault->getValue(name).toUtf8();
+}
+
+void SettingsData::reloadVault()
+{
+  QHash<QString, QString> hash = m_dbmanager->getVault();
+    this->vault->putVault(hash);
 }
 
 QString SettingsData::getInstallPath()
