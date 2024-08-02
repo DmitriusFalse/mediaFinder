@@ -1,7 +1,6 @@
 #ifndef DBMANAGER_H
 #define DBMANAGER_H
 #include "GenreList.h"
-#include "Settings.h"
 #include "movieCollections.h"
 #include <QSqlDatabase>
 #include <QSqlQuery>
@@ -43,11 +42,11 @@ public:
     void extracted(ShowInfo &show);
     void updateTvShow(ShowInfo show, int id);
     void updateMovie(MovieInfo movie, int id);
-    void saveSettings(QString name, QString value);
+    void saveSettings(QString name, QVariant value);
     void putVault(QString name, QString value);
     QHash<QString,QString> getVault();
-    QString getSetting(QString name);
-    Settings* getAllSettings();
+    QVariant getSetting(QString name);
+    QMap<QString, QVariant> getAllSettings();
     QString getPathToShowTV(QString nameShow);
     QString getPathToMovie(QString name);
     QList<int> getListNumberSeason(int idDBTVShow);

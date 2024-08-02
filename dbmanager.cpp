@@ -545,12 +545,19 @@ void DBManager::updateMovie(MovieInfo movie, int id)
 
 }
 
-void DBManager::saveSettings(QString name, QString value)
+void DBManager::saveSettings(QString name, QVariant value)
 {
     QSqlQuery query(this->m_database);
     query.prepare("INSERT INTO settings (name, value) VALUES (:name, :value)");
     query.bindValue(":name", name);
-    query.bindValue(":value", value);
+
+    QString data;
+    if (value.canConvert<QString>()) {
+        data = "string:"+value.toString();
+    } else if (value.canConvert<QStringList>()) {
+        data = "list:"+value.toStringList().join(";");
+    }
+    query.bindValue(":value", data);
 
     if(!query.exec()){
         qDebug() << "Error update Settings: " << query.lastError().text();
@@ -584,30 +591,51 @@ QHash<QString, QString> DBManager::getVault()
     return hash;
 }
 
-QString  DBManager::getSetting(QString name)
+QVariant  DBManager::getSetting(QString name)
 {
     QSqlQuery query(this->m_database);
     query.prepare("SELECT value FROM settings WHERE name = :name");
     query.bindValue(":name", name);
 
     if (!query.exec()) {
-        return QString();
+        return QVariant();
     }
     if (query.next()) {
-        return query.value(0).toString();
+        QString value = query.value(0).toString();
+
+        QStringList data = value.split(":");
+        QVariant var;
+        if(data[0]=="list"){
+            QStringList tmp = data[1].split(";");
+            var.setValue(tmp);
+        }else if(data[0]=="string"){
+            var.setValue(data[0]);
+        }
+
+        return var;
     } else {
-        return QString();
+        return QVariant();
     }
 }
 
-Settings* DBManager::getAllSettings()
+QMap<QString, QVariant>  DBManager::getAllSettings()
 {
-    Settings *settings = new Settings;
+    QMap<QString, QVariant>  settings;
     QSqlQuery query(this->m_database);
     query.prepare("SELECT * FROM settings");
     if(query.exec()){
         while (query.next()) {
-            settings->addSettings(query.value("name").toString(),query.value("value").toString());
+            QString name = query.value("name").toString();
+            QString value = query.value("value").toString();
+            QStringList data = value.split(":");
+            QVariant var;
+            if(data[0]=="list"){
+                QStringList tmp = data[1].split(";");
+                var.setValue(tmp);
+            }else if(data[0]=="string"){
+                var.setValue(data[1]);
+            }
+            settings[name] = var;
         }
     }
     return settings;

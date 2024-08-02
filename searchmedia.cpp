@@ -12,10 +12,9 @@
 #include <QFileInfo>
 
 
-SearchMedia::SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db, DialogShowProgress *sp, Settings *param, SettingsData *setin)
+SearchMedia::SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db, DialogShowProgress *sp, SettingsData *setin)
     : QMainWindow(parent)
     , uiSearch(new  Ui::SearchMedia)
-    , parametrs(param)
     , mediaLibrary(mLib)
     , dbManager(db)
     , showProgres(sp)
@@ -39,7 +38,7 @@ SearchMedia::SearchMedia(QWidget *parent, MediaLibrary *mLib, DBManager *db, Dia
 
     this->setIdSelectMedia (0);
 
-    QString defLang = param->getSettings("language");
+    QString defLang = this->settings->getLangApp();
     if(defLang=="en-EN"){
         uiSearch->langSearchComboBox->setCurrentIndex(0);
     }else if(defLang=="ru-RU"){
@@ -539,7 +538,7 @@ void SearchMedia::slotFinishRequestFindMedia(QNetworkReply *reply, QString media
 {
     if (reply->error() == QNetworkReply::NoError) {
         this->progresSearchAdd();
-        QString lang = dbManager->getSetting("language");
+        QString lang = this->settings->getLangApp();
         GenreList genre = dbManager->loadGenre (lang);
 
         // Запрос выполнен успешно:
@@ -987,3 +986,9 @@ void SearchMedia::on_selectFindMediaButton_clicked()
     //Кнопка только закрывает окно
     //А загрузка данных происходит по событию Click и вызывает endSelectMedia();
 }
+
+void SearchMedia::on_searchClose_clicked()
+{
+    this->close();
+}
+

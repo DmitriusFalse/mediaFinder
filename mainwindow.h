@@ -53,7 +53,7 @@ private:
   SettingsApp *dialogSettingsApp = nullptr;
   SearchMedia *searchMedia = nullptr;
   DialogShowProgress *progressBar = nullptr;
-  Settings *settings;
+
   DialogRenamerFiles *renameFiles = nullptr;
   ShowImageFile *showImageFile = nullptr;
 

@@ -134,9 +134,9 @@ void DialogRenamerFiles::setMediaData(ShowInfo sh)
 void DialogRenamerFiles::on_patternMovieEdit_textChanged(const QString &arg1)
 {
     if(arg1==""){
-        ui->renameMovieButton->setDisabled(true);
+        ui->renameButton->setDisabled(true);
     }else{
-        ui->renameMovieButton->setDisabled(false);
+        ui->renameButton->setDisabled(false);
     }
     this->changeNameMovie(arg1);
 }
@@ -262,8 +262,7 @@ QString DialogRenamerFiles::renameAndMoveFile(const QString &oldPath, const QStr
     return oldPath;
 }
 
-
-void DialogRenamerFiles::on_renameMovieButton_clicked()
+void DialogRenamerFiles::renameMovie()
 {
     QString oldPath = movie.path;
     QString oldPoster = movie.poster;
@@ -362,10 +361,8 @@ void DialogRenamerFiles::on_renameMovieButton_clicked()
     emit signalFinishRename("Movie", movie.id);
 }
 
-
-void DialogRenamerFiles::on_renameTVButton_clicked()
+void DialogRenamerFiles::renameTV()
 {
-
     QTreeWidgetItem *topLevelItem = ui->newListTV->topLevelItem(0);
 
     for (int i = 0; i < topLevelItem->childCount(); ++i) {
@@ -514,7 +511,7 @@ void DialogRenamerFiles::on_renameTVButton_clicked()
             xmlWriter.writeEndElement(); // Закрытие director
         }
 
-            QStringList production_companies = this->showTv.production_companies.split(",");
+        QStringList production_companies = this->showTv.production_companies.split(",");
         for (const QString &comnpany : production_companies) {
             xmlWriter.writeStartElement("studio");
             xmlWriter.writeCharacters(comnpany);
@@ -563,5 +560,25 @@ void DialogRenamerFiles::on_createMovieNFOcheckBox_checkStateChanged(const Qt::C
 void DialogRenamerFiles::on_createTVShowNFOcheckBox_checkStateChanged(const Qt::CheckState &arg1)
 {
     this->checkTVShowNFO = (arg1==Qt::Checked);
+}
+
+
+void DialogRenamerFiles::on_renameClose_clicked()
+{
+    this->close();
+}
+
+
+void DialogRenamerFiles::on_renameButton_clicked()
+{
+    int index = ui->tabRenamer->currentIndex();
+    switch (index) {
+    case 0:
+        this->renameMovie();
+        break;
+    case 1:
+        this->renameTV();
+        break;
+    }
 }
 

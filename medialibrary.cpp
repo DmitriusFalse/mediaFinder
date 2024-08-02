@@ -42,7 +42,7 @@ QStringList MediaLibrary::scanLibraryMovie(QString path)
     }
     QStringList listMovie;
     QStringList scanList = directory.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
-    QStringList fileExt = m_settingsData->getVideoExtensions();
+    QStringList fileExt = this->m_settingsData->getSettings("videoExtendion").toStringList();
     foreach(const QString &fileName, scanList) {
         QFileInfo fileInfo(path+"/"+fileName);
         if(fileInfo.isFile()) {

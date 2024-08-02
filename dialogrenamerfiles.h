@@ -154,18 +154,20 @@ public:
 private slots:
     void on_patternMovieEdit_textChanged(const QString &arg1);
 
-    void on_renameMovieButton_clicked();
-
+    void renameMovie();
 
     void on_patternTVEdit_textChanged(const QString &arg1);
 
-    void on_renameTVButton_clicked();
-
+    void renameTV();
     void on_folderSeasonsCheckBox_checkStateChanged(const Qt::CheckState &arg1);
 
     void on_createMovieNFOcheckBox_checkStateChanged(const Qt::CheckState &arg1);
 
     void on_createTVShowNFOcheckBox_checkStateChanged(const Qt::CheckState &arg1);
+
+    void on_renameClose_clicked();
+
+    void on_renameButton_clicked();
 
 private:
     Ui::DialogRenamerFiles *ui;

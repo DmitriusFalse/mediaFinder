@@ -26,7 +26,6 @@ SOURCES += \
 HEADERS += \
     GenreList.h \
     LibraryItem.h \
-    Settings.h \
     dbmanager.h \
     dialogrenamerfiles.h \
     dialogshowprogress.h \

@@ -18,7 +18,7 @@
     <item row="1" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabGeneral">
        <attribute name="title">
@@ -317,7 +317,14 @@
       <item>
        <widget class="QPushButton" name="saveButton">
         <property name="text">
-         <string>Сохранить и выйти</string>
+         <string>Сохранить и закрыть</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton">
+        <property name="text">
+         <string>Закрыть</string>
         </property>
        </widget>
       </item>

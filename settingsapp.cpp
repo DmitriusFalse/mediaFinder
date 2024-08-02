@@ -26,12 +26,11 @@
 /// \brief SettingsApp::SettingsApp
 /// \param parent
 //////////////////////////////////////////////////////////////////////////
-SettingsApp::SettingsApp(QWidget *parent, DBManager *dbManager, SettingsData *settings, Settings *param, DialogShowProgress *sp)
+SettingsApp::SettingsApp(QWidget *parent, DBManager *dbManager, SettingsData *settings, DialogShowProgress *sp)
     : QMainWindow(parent)
     , ui(new Ui::SettingsApp)
     , m_settings(settings)
     , m_dbManager(dbManager)
-    , parametrs(param)
     , showProgres(sp)
 {
     ui->setupUi(this);
@@ -45,7 +44,7 @@ SettingsApp::SettingsApp(QWidget *parent, DBManager *dbManager, SettingsData *se
 
     changeSettings = false;
 
-    QString defLang = param->getSettings("language");
+    QString defLang = settings->getLangApp();
 
     if(defLang=="en-EN"){
         ui->defLangComboBox->setCurrentIndex(0);
@@ -88,11 +87,12 @@ void SettingsApp::saveLangApp()
 
     switch (ui->defLangComboBox->currentIndex()) {
     case 0:{
-        m_dbManager->saveSettings("language","en-EN");
+        this->m_settings->saveSettings("language",QVariant(QString{"en-EN"}));
     }
     break;
     case 1:{
-        m_dbManager->saveSettings("language","ru-RU");
+
+        this->m_settings->saveSettings("language",QVariant(QString{"ru-RU"}));
     }
     break;
 default:
@@ -103,8 +103,8 @@ default:
 
 void SettingsApp::loadTranslation()
 {
-    this->parametrs = this->m_dbManager->getAllSettings();
-    if(!this->translator.load(":/translation/"+this->parametrs->getSettings("language"))){
+    QString lang = m_settings->getLangApp();
+    if(!this->translator.load(":/translation/"+lang)){
         qDebug() << "Error load translation";
     };
     qApp->installTranslator(&translator);
@@ -174,6 +174,7 @@ void SettingsApp::on_saveButton_clicked()
     // Сохранение настроек программы
     changeSettings = false;
     this->saveLangApp();
+    this->m_settings->reloadSettings();
     this->loadTranslation();
     SettingsApp::saveLibraryFolder(true);
 
@@ -410,3 +411,9 @@ void SettingsApp::slotFinishRequestGetGenre(QNetworkReply *reply, QString lang, 
         this->refreshGenresList();
     }
 }
+
+void SettingsApp::on_pushButton_clicked()
+{
+    this->close();
+}
+

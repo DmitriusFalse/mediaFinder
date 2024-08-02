@@ -41,7 +41,7 @@ class SettingsApp : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit SettingsApp(QWidget *parent, DBManager *dbManager, SettingsData *settings, Settings *param, DialogShowProgress *sp);
+    explicit SettingsApp(QWidget *parent, DBManager *dbManager, SettingsData *settings, DialogShowProgress *sp);
     ~SettingsApp();
 
 public slots:
@@ -55,6 +55,8 @@ private slots:
     void on_refreshGenreList_clicked();
     void slotFinishRequestGetGenre(QNetworkReply *reply, QString lang, QString show);
 
+    void on_pushButton_clicked();
+
 private:
     Ui::SettingsApp *ui;
     void addPathToListLibrary();
@@ -66,7 +68,6 @@ private:
     QTranslator translator;
     SettingsData *m_settings;
     DBManager *m_dbManager;
-    Settings *parametrs;
     DialogShowProgress *showProgres;
     requestGenre sendReuqestGenre;
 signals:

@@ -9,13 +9,13 @@
 
 Q_DECLARE_METATYPE(libraryItem);
 
-
-const QString SettingsData::INSTALL_PATH = "/opt/MediaFinder";
-
 SettingsData::SettingsData(DBManager *dbmanager) : m_dbmanager(dbmanager) {
     qRegisterMetaType<libraryItem>("libraryItem");
     this->vault = new Vault;
     this->reloadVault();
+    this->reloadSettings();
+
+
 }
 
 SettingsData::~SettingsData()
@@ -90,11 +90,6 @@ QList<libraryItem> SettingsData::checkLibraryDuplicate(QList<libraryItem> libFol
     return newLibFolders;
 }
 
-QStringList SettingsData::getVideoExtensions() const
-{
-    return {"mp4", "avi", "mkv", "mov", "wmv", "flv", "mpeg", "mpg"};
-}
-
 void SettingsData::saveApiKey(const QString &name, const QString &api)
 {
     this->m_dbmanager->putVault(name, api);
@@ -112,7 +107,46 @@ void SettingsData::reloadVault()
     this->vault->putVault(hash);
 }
 
-QString SettingsData::getInstallPath()
+QVariant SettingsData::getSettings(QString name){
+    if (settingsMap.contains(name)) {
+        return settingsMap[name].value;
+    } else {
+        return QVariant();
+    }
+}
+
+void SettingsData::addSettings(QString name, QVariant value){
+    settingsMap[name]=setting{name,value};
+}
+
+void SettingsData::addSettings(setting sett){
+    settingsMap[sett.name]=sett;
+}
+
+void SettingsData::saveSettings(QString name, QVariant value)
 {
-    return INSTALL_PATH;
+    this->m_dbmanager->saveSettings(name, value);
+    this->reloadSettings();
+}
+
+QString SettingsData::getLangApp()
+{
+    QVariant var = this->getSettings("language");
+    if(!var.isNull()){
+        // QStringList data = var.toString().split(":");
+        return var.toString();
+    }else{
+        return "ru-RU";
+    }
+}
+
+void SettingsData::reloadSettings()
+{
+    QMap<QString, QVariant> var = m_dbmanager->getAllSettings();
+
+    for (const QString& key : var.keys()) {
+        QVariant value = var.value(key);
+        this->addSettings(key, value);
+    }
+    this->addSettings("videoExtendion",QVariant(QStringList{"mp4", "avi", "mkv", "mov", "wmv", "flv", "mpeg", "mpg"}));
 }

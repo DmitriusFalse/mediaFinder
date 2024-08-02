@@ -1,16 +1,24 @@
 #ifndef SETTINGSDATA_H
 #define SETTINGSDATA_H
+
 #include "LibraryItem.h"
 #include "dbmanager.h"
 #include <QMetaType>
 #include <QString>
 #include <QJsonObject>
 #include "secretVault.h"
-
-
-class SettingsData
+#include <QObject>
+struct setting{
+    QString name;
+    QVariant value;
+};
+class SettingsData : QObject
 {
-    // Q_OBJECT
+    Q_OBJECT
+private:
+    DBManager* m_dbmanager;
+
+    QMap<QString, setting> settingsMap;
 public:
     SettingsData(DBManager *dbmanager);
     ~SettingsData();
@@ -18,16 +26,19 @@ public:
     QList<libraryItem> readLibraryFromSettings();
     QList<libraryItem> readLibraryFromSettings(QString type);
     QList<libraryItem> checkLibraryDuplicate(QList<libraryItem> libFolder);
-    // QStringList videoExtensions = ;
-    static const QString INSTALL_PATH;
-    QString getInstallPath();
-    QStringList getVideoExtensions() const;
+
     void saveApiKey(const QString &name, const QString& api);
     QByteArray getApiAccessToken(const QString &name);
 
     Vault* vault;
     void reloadVault();
-private:
-    DBManager* m_dbmanager;
+
+    QVariant getSettings(QString name);
+    void addSettings(QString name, QVariant value);
+    void addSettings(setting sett);
+    void saveSettings(QString name, QVariant value);
+    QString getLangApp();
+    void reloadSettings();
+
 };
 #endif // SETTINGSDATA_H

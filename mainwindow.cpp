@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include <QTextDocument>
-#include "secretVault.h"
 #include "settingsapp.h"
 #include "ui_mainwindow.h"
 #include <QScrollBar>
@@ -33,11 +32,10 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     // QString tmdbApiToken = this->dbmanager->getSetting("tmdbApiToken");
     // Vault::putVault("tmdbApiToken", tmdbApiToken);
 
-    this->settings = dbmanager->getAllSettings();
     this->settingsData = new SettingsData(this->dbmanager);
     this->mediaLibrary = new MediaLibrary(this, this->dbmanager, settingsData);
     this->progressBar = new DialogShowProgress;
-    this->dialogSettingsApp = new SettingsApp(this,dbmanager, settingsData, this->settings, this->progressBar);
+    this->dialogSettingsApp = new SettingsApp(this,dbmanager, this->settingsData, this->progressBar);
     this->showImageFile = new ShowImageFile;
 
     this->reloadSettings();
@@ -549,14 +547,14 @@ void MainWindow::fillTvShowEpisodeForm(int id, int seasonsNumber, int episodeNum
 
 void MainWindow::reloadSettings()
 {
-    delete this->settings; // Освобождаем память от старых настроек
-    this->settings = dbmanager->getAllSettings(); // Получаем новые настройки из базы данных
+    // Освобождаем память от старых настроек
+    // Получаем новые настройки из базы данных
 }
 
 void MainWindow::loadTranslation()
 {
-    if(!this->translator.load(":/translation/"+this->settings->getSettings("language"))){
-        qDebug() << "Error load translation: "<< this->settings->getSettings("language");
+    if(!this->translator.load(":/translation/"+this->settingsData->getLangApp())){
+        qDebug() << "Error load translation: "<< this->settingsData->getLangApp();
     };
 
     qApp->installTranslator(&translator);
@@ -644,7 +642,7 @@ void MainWindow::on_openSettings_clicked()
 void MainWindow::on_loadMediaButton_clicked()
 {
     //Открытие окна поиска
-    this->searchMedia = new SearchMedia(this, this->mediaLibrary,this->dbmanager,progressBar, this->settings, this->settingsData);
+    this->searchMedia = new SearchMedia(this, this->mediaLibrary,this->dbmanager,progressBar, this->settingsData);
     connect(this->searchMedia, &SearchMedia::windowClosed, this, &MainWindow::onDialogClosed);
     connect(this->searchMedia, &SearchMedia::endSearch, this,  &MainWindow::slotEndSearch);
     MainWindow::setDisabled (true);
