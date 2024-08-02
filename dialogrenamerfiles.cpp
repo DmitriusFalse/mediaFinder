@@ -5,7 +5,7 @@
 #include <QFileInfo>
 #include <QRegularExpression>
 #include <QDir>
-
+#include <QKeyEvent>
 
 DialogRenamerFiles::DialogRenamerFiles(QWidget *parent, DBManager *db)
     : QDialog(parent)
@@ -90,7 +90,7 @@ void DialogRenamerFiles::setMediaData(ShowInfo sh)
     QTreeWidgetItem *mainItem = new QTreeWidgetItem(ui->oldListTV);
     mainItem->setText(0, showTv.nameShow);
     mainItem->setData(0, Qt::UserRole, showTv.ID);
-    uint countRow = 0;
+
     foreach (const uint seasonNumber, showTv.Episodes.keys()) {
         const QMap<uint, EpisodeInfo>& episodes = showTv.Episodes[seasonNumber];
         foreach (const uint episodeNumber, episodes.keys()) {
@@ -101,7 +101,6 @@ void DialogRenamerFiles::setMediaData(ShowInfo sh)
             subItem1->setData(1,Qt::UserRole,episodeInfo.seasonsNumber);
             subItem1->setData(2,Qt::UserRole,episodeInfo.episodeNumber);
             subItem1->setData(3,Qt::UserRole,episodeInfo.ID);
-            countRow++;
         }
     }
     mainItem->setExpanded(true);
@@ -112,7 +111,7 @@ void DialogRenamerFiles::setMediaData(ShowInfo sh)
     description.append("<tr><th>" + tr("Описание") + "</th><th>" + tr("Подстановочное слово") + "</th><th>" + tr("Пример") + "</th></tr>");
 
     // Обходим все заполненные ключи
-    QSet<QString> processedKeys;
+
     for (const auto& field : this->replacePlaceholdersTV->fieldDescriptions) {
         QString keyText = this->replacePlaceholdersTV->fieldDescriptions.key(field);
         QString desc = this->replacePlaceholdersTV->fieldDescriptions[keyText];
@@ -157,7 +156,7 @@ void DialogRenamerFiles::changeNameTv(QString pattern)
     QTreeWidgetItem *mainItem = new QTreeWidgetItem(ui->newListTV);
     mainItem->setText(0, showTv.nameShow);
     mainItem->setData(0, Qt::UserRole, showTv.ID);
-    uint countRow = 0;
+
     foreach (const uint seasonNumber, showTv.Episodes.keys()) {
         const QMap<uint, EpisodeInfo>& episodes = showTv.Episodes[seasonNumber];
         foreach (const uint episodeNumber, episodes.keys()) {
@@ -169,7 +168,6 @@ void DialogRenamerFiles::changeNameTv(QString pattern)
             subItem1->setData(1,Qt::UserRole,episodeInfo.seasonsNumber);
             subItem1->setData(2,Qt::UserRole,episodeInfo.episodeNumber);
             subItem1->setData(3,Qt::UserRole,episodeInfo.ID);
-            countRow++;
         }
     }
     mainItem->setExpanded(true);
@@ -190,7 +188,7 @@ QString DialogRenamerFiles::replacePatternMovie(const QString &input)
 {
     QString result = input;
 
-    for (const auto& field : this->replacePlaceholdersMovie->fieldDescriptions) {
+    for (const QString& field : this->replacePlaceholdersMovie->fieldDescriptions) {
         QString keyText = this->replacePlaceholdersMovie->fieldDescriptions.key(field);
         QString value = this->replacePlaceholdersMovie->getValue(keyText);
         result = result.replace(keyText, value);
@@ -201,7 +199,7 @@ QString DialogRenamerFiles::replacePatternMovie(const QString &input)
 QString DialogRenamerFiles::replacePatternTV(const QString &input, int Season, int Episode)
 {
     QString result = input;
-    for (const auto& field : this->replacePlaceholdersTV->fieldDescriptions) {
+    for (const QString& field : this->replacePlaceholdersTV->fieldDescriptions) {
         QString keyText = this->replacePlaceholdersTV->fieldDescriptions.key(field);
         QString value = this->replacePlaceholdersTV->getValue(Season,Episode,keyText);
         result = result.replace(keyText, value);
@@ -260,6 +258,15 @@ QString DialogRenamerFiles::renameAndMoveFile(const QString &oldPath, const QStr
         return oldPath; // Возвращаем полный путь к старому файлу при провале
     }
     return oldPath;
+}
+
+void DialogRenamerFiles::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape) {
+        close();  // Закрыть диалоговое окно при нажатии клавиши Esc
+    } else {
+        QDialog::keyPressEvent(event);  // Передать событие базовому классу
+    }
 }
 
 void DialogRenamerFiles::renameMovie()

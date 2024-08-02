@@ -3,7 +3,6 @@
 
 #include <QMainWindow>
 #include <QVBoxLayout>
-#include "Settings.h"
 #include "dialogrenamerfiles.h"
 #include "dialogshowprogress.h"
 #include "searchmedia.h"

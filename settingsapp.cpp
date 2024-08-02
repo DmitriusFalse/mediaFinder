@@ -169,6 +169,15 @@ void SettingsApp::closeEvent(QCloseEvent *event)
 
 }
 
+void SettingsApp::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape) {
+        close();  // Закрыть окно при нажатии клавиши Esc
+    } else {
+        QMainWindow::keyPressEvent(event);  // Передать событие базовому классу
+    }
+}
+
 void SettingsApp::on_saveButton_clicked()
 {
     // Сохранение настроек программы

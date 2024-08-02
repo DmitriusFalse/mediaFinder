@@ -106,6 +106,8 @@ private slots:
 
     void on_selectFindMediaButton_clicked();
     void on_searchClose_clicked();
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
 };
 
 #endif // SEARCHMEDIA_H

@@ -992,3 +992,12 @@ void SearchMedia::on_searchClose_clicked()
     this->close();
 }
 
+void SearchMedia::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape) {
+        close();  // Закрыть окно при нажатии клавиши Esc
+    } else {
+        QMainWindow::keyPressEvent(event);  // Передать событие базовому классу
+    }
+}
+

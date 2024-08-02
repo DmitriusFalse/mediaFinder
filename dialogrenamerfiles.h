@@ -190,6 +190,8 @@ private:
     bool checkMovieNFO=true;
 signals:
     void signalFinishRename(QString type, int id);
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
 };
 
 #endif // DIALOGRENAMERFILES_H
