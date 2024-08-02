@@ -812,3 +812,29 @@ void MainWindow::on_zoomMovieImage_clicked()
     this->showImageFile->setImage(image,title);
     this->showImageFile->show();
 }
+
+
+void MainWindow::on_filterLine_textChanged(const QString &world)
+{
+    QTreeWidget *currentTree = nullptr;
+    switch (ui->tabMainWindow->currentIndex()) {
+    case 0:{
+        currentTree = ui->listMovieLibrary;
+    }break;
+    case 1:
+        currentTree = ui->listTVLibrary;
+        break;
+    }
+    if(currentTree!=nullptr){
+        for (int i = 0; i < currentTree->topLevelItemCount(); ++i) {
+            QTreeWidgetItem *item = currentTree->topLevelItem(i);
+            QString name = item->text(1);
+            if(!name.contains(world)){
+                currentTree->topLevelItem(i)->setHidden(true);
+            }else{
+                currentTree->topLevelItem(i)->setHidden(false);
+            }
+        }
+    }
+}
+

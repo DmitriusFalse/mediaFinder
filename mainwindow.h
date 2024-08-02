@@ -82,6 +82,8 @@ private slots:
 
     void on_zoomMovieImage_clicked();
 
+    void on_filterLine_textChanged(const QString &world);
+
 public slots:
     // void slotUptateProgressBar(const int &i);
     void slotUptateProgressBar(const QString &str);
