@@ -560,7 +560,7 @@ void DBManager::saveSettings(QString name, QVariant value)
     query.bindValue(":value", data);
 
     if(!query.exec()){
-        qDebug() << "Error update Settings: " << query.lastError().text();
+        qDebug() << tr("Ошибка обновления Settings: ") << query.lastError().text();
     }
 }
 
@@ -572,7 +572,7 @@ void DBManager::putVault(QString name, QString value)
     query.bindValue(":value", value);
 
     if(!query.exec()){
-        qDebug() << "Ошибка обновления Vault: " << query.lastError().text();
+        qDebug() << tr("Ошибка обновления Vault: ") << query.lastError().text();
     }
 }
 
@@ -585,8 +585,6 @@ QHash<QString, QString> DBManager::getVault()
         while(query.next()){
             hash[query.value("name").toString()]=query.value("data").toString();
         }
-    }else{
-        qDebug() << "getVault: " << query.lastError().text();
     }
     return hash;
 }
@@ -684,8 +682,6 @@ QList<int> DBManager::getListNumberSeason(int idDBTVShow)
         while(query.next()){
             list.append(query.value("Season").toInt());
         }
-    }else{
-        qDebug() << query.lastError().text();
     }
     return list;
 }
@@ -718,7 +714,6 @@ bool DBManager::updateMovieColumn(const QString &columnName, const QVariant &new
     if (query.exec()) {
         return true;
     } else {
-        qDebug() << tr("updateMovieColumn - Ошибка выполнения запроса:") << query.lastError().text();
         return false;
     }
 }
@@ -735,7 +730,6 @@ bool DBManager::updateEpisodeColumn(const QString &columnName, const QVariant &n
     if (query.exec()) {
         return true;
     } else {
-        qDebug() << tr("updateEpisodeColumn - Ошибка выполнения запроса:") << query.lastError().text();
         return false;
     }
 }
@@ -815,11 +809,7 @@ void DBManager::writeMovieCollectionToDB(QStringList pathlList)
         query.bindValue(":name", name);
         query.bindValue(":library", libraryPath);
         query.bindValue(":descripton", description);
-        if(!query.exec()){
-            qDebug() << query.lastError ().text ();
-            qDebug() << "name " << name;
-            qDebug() << "libraryPath " << libraryPath;
-        }
+        query.exec();
 
         query.finish();
     }
@@ -955,11 +945,7 @@ void DBManager::writeTVCollectionToDB(QStringList pathlList)
         query.bindValue (":seas", NumSeason);
         query.bindValue (":NameEpisode", NameEpisode);
 
-        if (!query.exec()) {
-            qDebug() << query.lastError ().text ();
-        }
-        query.clear ();
-
+        query.exec();
     }
     emit signalUpdateMainWindow ("TV");
 
@@ -994,7 +980,7 @@ void DBManager::removeOldRecordInBD(QString type)
                     subQuery.prepare("DELETE FROM Movie WHERE id=:id");
                     subQuery.bindValue (":id", id);
                     if(!subQuery.exec()){
-                        qDebug() << "Error: " << subQuery.lastError ().text ();
+                        qDebug() << tr("Ошибка удаление старых записей: ") << subQuery.lastError ().text ();
                     }
                 }
             }
@@ -1145,108 +1131,108 @@ QList<Reviews> DBManager::getReviews(int idShow)
     return reviews;
 }
 
-QStringList DBManager::readMovieCollection(QString detailLevel)
-{
-    // qDebug() << "readMovieCollection";
-    const QString DETAIL_LEVEL_ALL = "all";
-    const QString DETAIL_LEVEL_SHORT = "short";
-    QSqlQuery query(this->m_database);
-    QStringList listMovies={};
-    query.prepare("SELECT * FROM Movie");
-    if(query.exec ()){
-        while (query.next()) {
-            QString id = query.value("id").toString();
-            QString poster = query.value("poster").toString();
-            QString name = query.value("name").toString();
+// QStringList DBManager::readMovieCollection(QString detailLevel)
+// {
+//     // qDebug() << "readMovieCollection";
+//     const QString DETAIL_LEVEL_ALL = "all";
+//     const QString DETAIL_LEVEL_SHORT = "short";
+//     QSqlQuery query(this->m_database);
+//     QStringList listMovies={};
+//     query.prepare("SELECT * FROM Movie");
+//     if(query.exec ()){
+//         while (query.next()) {
+//             QString id = query.value("id").toString();
+//             QString poster = query.value("poster").toString();
+//             QString name = query.value("name").toString();
 
-            if (detailLevel == DETAIL_LEVEL_ALL) {
-                QString genre = query.value("Genre").toString();
-                QString path = query.value("path").toString();
-                QString libraryPath = query.value("Library_path").toString();
-                QString description = query.value("Description").toString();
+//             if (detailLevel == DETAIL_LEVEL_ALL) {
+//                 QString genre = query.value("Genre").toString();
+//                 QString path = query.value("path").toString();
+//                 QString libraryPath = query.value("Library_path").toString();
+//                 QString description = query.value("Description").toString();
 
-                QString formattedEntry = QString("%1//%2//%3//%4//%5//%6//%7")
-                                             .arg(id, genre, path, poster, name, libraryPath, description);
+//                 QString formattedEntry = QString("%1//%2//%3//%4//%5//%6//%7")
+//                                              .arg(id, genre, path, poster, name, libraryPath, description);
 
-                listMovies.append(formattedEntry);
-            } else if (detailLevel == DETAIL_LEVEL_SHORT) {
+//                 listMovies.append(formattedEntry);
+//             } else if (detailLevel == DETAIL_LEVEL_SHORT) {
 
-                QString formattedEntry = QString("%1//%2//%3")
-                                             .arg(id, poster, name);
+//                 QString formattedEntry = QString("%1//%2//%3")
+//                                              .arg(id, poster, name);
 
-                listMovies.append(formattedEntry);
-            }
-        }
-    }
+//                 listMovies.append(formattedEntry);
+//             }
+//         }
+//     }
 
-    return listMovies;
-}
+//     return listMovies;
+// }
 
-QStringList DBManager::readTVCollection(QString detailLevel)
-{
-    const QString DETAIL_LEVEL_ALL = "all";
-    const QString DETAIL_LEVEL_SHORT = "short";
+// QStringList DBManager::readTVCollection(QString detailLevel)
+// {
+//     const QString DETAIL_LEVEL_ALL = "all";
+//     const QString DETAIL_LEVEL_SHORT = "short";
 
-    QStringList listTV={};
-    //Получаем список сериалов в Базе
-    QSqlQuery queryTVShow(this->m_database);
-    queryTVShow.prepare("SELECT id, NameShow, Poster FROM TVShow");
-    if(queryTVShow.exec ()){
-        //Обрабатываем каждый сериал отдельно
-        while (queryTVShow.next()) {
+//     QStringList listTV={};
+//     //Получаем список сериалов в Базе
+//     QSqlQuery queryTVShow(this->m_database);
+//     queryTVShow.prepare("SELECT id, NameShow, Poster FROM TVShow");
+//     if(queryTVShow.exec ()){
+//         //Обрабатываем каждый сериал отдельно
+//         while (queryTVShow.next()) {
 
-            QString Show = ""; // Строка с основной информацией о сериале в целом
+//             QString Show = ""; // Строка с основной информацией о сериале в целом
 
-            QString IDShow = queryTVShow.value ("ID").toString ();
-            QString NameShow = queryTVShow.value ("NameShow").toString ();
-            QString PosterShow = queryTVShow.value ("Poster").toString ();
-            Show = QString("%1//%2//%3")
-                               .arg(IDShow, NameShow, PosterShow);
-            Show = Show + "//@//"; //header info о сериале //@// - разделитель между информации о сериале и информации о сериях
-            // Получаем информацию о сериях сериала!
-            QSqlQuery querySeries(this->m_database);
-            querySeries.prepare ("SELECT * FROM TVEpisodes WHERE NameShow = :nameShow");
-            querySeries.bindValue (":nameShow", NameShow);
+//             QString IDShow = queryTVShow.value ("ID").toString ();
+//             QString NameShow = queryTVShow.value ("NameShow").toString ();
+//             QString PosterShow = queryTVShow.value ("Poster").toString ();
+//             Show = QString("%1//%2//%3")
+//                                .arg(IDShow, NameShow, PosterShow);
+//             Show = Show + "//@//"; //header info о сериале //@// - разделитель между информации о сериале и информации о сериях
+//             // Получаем информацию о сериях сериала!
+//             QSqlQuery querySeries(this->m_database);
+//             querySeries.prepare ("SELECT * FROM TVEpisodes WHERE NameShow = :nameShow");
+//             querySeries.bindValue (":nameShow", NameShow);
 
-            QString body=""; // Строка с основной информацией о сериях сериала
-            if(querySeries.exec ()){
-                while (querySeries.next ()){
+//             QString body=""; // Строка с основной информацией о сериях сериала
+//             if(querySeries.exec ()){
+//                 while (querySeries.next ()){
 
-                    QString IDEpisode = querySeries.value("ID").toString();
+//                     QString IDEpisode = querySeries.value("ID").toString();
 
-                    QString PathToSerial = querySeries.value("PathToSerial").toString();
-                    QString Poster = querySeries.value("Poster").toString();
-                    QString Episode = querySeries.value("Episode").toString();
-                    QString Season = querySeries.value("Season").toString();
-                    QString File = querySeries.value("File").toString();
-                    QString NameEpisode = querySeries.value("NameEpisode").toString();
+//                     QString PathToSerial = querySeries.value("PathToSerial").toString();
+//                     QString Poster = querySeries.value("Poster").toString();
+//                     QString Episode = querySeries.value("Episode").toString();
+//                     QString Season = querySeries.value("Season").toString();
+//                     QString File = querySeries.value("File").toString();
+//                     QString NameEpisode = querySeries.value("NameEpisode").toString();
 
-                    if (detailLevel == DETAIL_LEVEL_ALL) { // Полная информация
+//                     if (detailLevel == DETAIL_LEVEL_ALL) { // Полная информация
 
-                        QString LibraryPath = querySeries.value("LibraryPath").toString();
-                        QString Description = querySeries.value("overview").toString();
+//                         QString LibraryPath = querySeries.value("LibraryPath").toString();
+//                         QString Description = querySeries.value("overview").toString();
 
-                        body = QString("%1//%2//%3//%4//%5//%6//%7//%8//%9")
-                        .arg(IDEpisode,NameEpisode,PathToSerial, LibraryPath, Description, Poster, File, Season, Episode);
-                    } else if (detailLevel == DETAIL_LEVEL_SHORT) { // Короткая информация
+//                         body = QString("%1//%2//%3//%4//%5//%6//%7//%8//%9")
+//                         .arg(IDEpisode,NameEpisode,PathToSerial, LibraryPath, Description, Poster, File, Season, Episode);
+//                     } else if (detailLevel == DETAIL_LEVEL_SHORT) { // Короткая информация
 
-                        body = QString("%1//%2//%3//%4//%5//%6")
-                        .arg(IDEpisode, NameEpisode, File, Poster, Season, Episode);
-                    }
-                    Show = Show + "#/@/#" + body;
-                }
-                listTV.append (Show);
-            }else{
-                qDebug() << querySeries.lastError ().text ();
-            }
+//                         body = QString("%1//%2//%3//%4//%5//%6")
+//                         .arg(IDEpisode, NameEpisode, File, Poster, Season, Episode);
+//                     }
+//                     Show = Show + "#/@/#" + body;
+//                 }
+//                 listTV.append (Show);
+//             }else{
+//                 qDebug() << querySeries.lastError ().text ();
+//             }
 
 
-        }
-    }else{
-        qDebug() << queryTVShow.lastError ().text ();
-    }
-    return listTV;
-}
+//         }
+//     }else{
+//         qDebug() << queryTVShow.lastError ().text ();
+//     }
+//     return listTV;
+// }
 
 TVCollection DBManager::getTVCollection()
 {
@@ -1525,8 +1511,6 @@ MovieInfo DBManager::getMovieByID(int id)
             existCrew.thumb = queryCrew.value("thumb").toString();
             movie.addCrew(existCrew);
         }
-    }else{
-        qDebug() << "getMovieByID: " << query.lastError().text();
     }
 
     return movie;

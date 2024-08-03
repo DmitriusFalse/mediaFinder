@@ -1,98 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="en_EN">
+<TS version="2.1" language="en_US">
 <context>
     <name>DBManager</name>
     <message>
-        <location filename="dbmanager.cpp" line="21"/>
+        <location filename="dbmanager.cpp" line="26"/>
         <source>Ошибка</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="dbmanager.cpp" line="21"/>
+        <location filename="dbmanager.cpp" line="26"/>
         <source>Ошибка открытия базы данных!</source>
         <translation>Database open error!</translation>
     </message>
     <message>
-        <location filename="dbmanager.cpp" line="39"/>
-        <location filename="dbmanager.cpp" line="668"/>
+        <location filename="dbmanager.cpp" line="44"/>
+        <location filename="dbmanager.cpp" line="741"/>
         <source>Ошибка открытия соединения с базой данных:</source>
         <translation>Database connection error:</translation>
     </message>
     <message>
-        <location filename="dbmanager.cpp" line="208"/>
+        <location filename="dbmanager.cpp" line="60"/>
+        <source>Создаем таблицу:</source>
+        <translation>Creating a table:</translation>
+    </message>
+    <message>
+        <location filename="dbmanager.cpp" line="215"/>
         <source>Обновление обзоров - Ошибка выполнения запроса:</source>
         <translation>Reviews update - Query execution error</translation>
     </message>
     <message>
-        <location filename="dbmanager.cpp" line="240"/>
+        <location filename="dbmanager.cpp" line="247"/>
         <source>Обновление серий - шибка выполнения запроса:</source>
         <translation>Series update - Query execution error</translation>
     </message>
     <message>
-        <location filename="dbmanager.cpp" line="260"/>
+        <location filename="dbmanager.cpp" line="267"/>
         <source>Обновление видео из ютуба - шибка выполнения запроса:</source>
         <translation>YouTube video update - Query execution error</translation>
     </message>
     <message>
-        <location filename="dbmanager.cpp" line="286"/>
+        <location filename="dbmanager.cpp" line="293"/>
         <source>Обновление Команды серий - Ошибка выполнения запроса:</source>
         <translation>Series crew update - Query execution error</translation>
     </message>
     <message>
-        <location filename="dbmanager.cpp" line="311"/>
+        <location filename="dbmanager.cpp" line="318"/>
         <source>Обновление Команды шоу - Ошибка выполнения запроса:</source>
         <translation>Show crew update - Query execution error</translation>
     </message>
     <message>
-        <location filename="dbmanager.cpp" line="334"/>
+        <location filename="dbmanager.cpp" line="341"/>
         <source>Обновление Команды Фильма - Ошибка выполнения запроса:</source>
         <translation>Film crew update - Query execution error</translation>
     </message>
     <message>
-        <location filename="dbmanager.cpp" line="407"/>
-        <location filename="dbmanager.cpp" line="623"/>
+        <location filename="dbmanager.cpp" line="414"/>
+        <location filename="dbmanager.cpp" line="698"/>
         <source>Ошибка выполнения запроса:</source>
         <translation>Query execution error</translation>
     </message>
     <message>
-        <location filename="dbmanager.cpp" line="489"/>
+        <location filename="dbmanager.cpp" line="496"/>
         <source>Ошибка при обновлении серии: </source>
         <translation>Error updating series:</translation>
     </message>
     <message>
-        <location filename="dbmanager.cpp" line="493"/>
+        <location filename="dbmanager.cpp" line="500"/>
         <source>Ошибка при обновлении Сериала: </source>
         <translation>Error updating TV show:</translation>
     </message>
     <message>
-        <location filename="dbmanager.cpp" line="496"/>
+        <location filename="dbmanager.cpp" line="503"/>
         <source>Ошибка получении NameShow сериала: </source>
         <translation>Error retrieving NameShow of TV show:</translation>
     </message>
     <message>
-        <location filename="dbmanager.cpp" line="536"/>
+        <location filename="dbmanager.cpp" line="543"/>
         <source>Ошибка обновления фильма: </source>
         <translation>Error updating film: </translation>
     </message>
     <message>
-        <location filename="dbmanager.cpp" line="642"/>
+        <location filename="dbmanager.cpp" line="563"/>
+        <source>Ошибка обновления Settings: </source>
+        <translation>Settings Update error:</translation>
+    </message>
+    <message>
+        <location filename="dbmanager.cpp" line="575"/>
+        <source>Ошибка обновления Vault: </source>
+        <translation>Vault Update Error:</translation>
+    </message>
+    <message>
+        <location filename="dbmanager.cpp" line="983"/>
+        <source>Ошибка удаление старых записей: </source>
+        <oldsource>Ошибка удаление старых записе: </oldsource>
+        <translation>Error deleting old records:</translation>
+    </message>
+    <message>
         <source>updateMovieColumn - Ошибка выполнения запроса:</source>
-        <translation>updateMovieColumn - Query execution error</translation>
+        <translation type="vanished">updateMovieColumn - Query execution error</translation>
     </message>
     <message>
-        <location filename="dbmanager.cpp" line="659"/>
         <source>updateEpisodeColumn - Ошибка выполнения запроса:</source>
-        <translation>updateEpisodeColumn - Query execution error</translation>
+        <translation type="vanished">updateEpisodeColumn - Query execution error</translation>
     </message>
     <message>
-        <location filename="dbmanager.cpp" line="680"/>
-        <location filename="dbmanager.cpp" line="755"/>
+        <location filename="dbmanager.cpp" line="753"/>
+        <location filename="dbmanager.cpp" line="822"/>
         <source>Обновляем Базу Данных</source>
         <translation>Updating database</translation>
     </message>
     <message>
-        <location filename="dbmanager.cpp" line="906"/>
+        <location filename="dbmanager.cpp" line="967"/>
         <source>Чистим базу от старых записей!</source>
         <translation>Cleaning the database of old records!</translation>
     </message>
@@ -110,19 +129,19 @@
     </message>
     <message>
         <location filename="dialogrenamerfiles.ui" line="57"/>
-        <location filename="dialogrenamerfiles.ui" line="250"/>
+        <location filename="dialogrenamerfiles.ui" line="226"/>
         <source>Поля для подстановки:</source>
         <translation>Pattern fields:</translation>
     </message>
     <message>
         <location filename="dialogrenamerfiles.ui" line="102"/>
-        <location filename="dialogrenamerfiles.ui" line="277"/>
+        <location filename="dialogrenamerfiles.ui" line="253"/>
         <source>Шаблон:</source>
         <translation>Pattern:</translation>
     </message>
     <message>
         <location filename="dialogrenamerfiles.ui" line="138"/>
-        <location filename="dialogrenamerfiles.ui" line="317"/>
+        <location filename="dialogrenamerfiles.ui" line="293"/>
         <source>Создать NFO</source>
         <translation>Create NFO</translation>
     </message>
@@ -133,74 +152,79 @@
     </message>
     <message>
         <location filename="dialogrenamerfiles.ui" line="188"/>
-        <location filename="dialogrenamerfiles.ui" line="369"/>
+        <location filename="dialogrenamerfiles.ui" line="345"/>
         <source>Новое название</source>
         <translation>New name</translation>
     </message>
     <message>
-        <location filename="dialogrenamerfiles.ui" line="213"/>
-        <location filename="dialogrenamerfiles.ui" line="394"/>
+        <location filename="dialogrenamerfiles.ui" line="370"/>
+        <location filename="dialogrenamerfiles.ui" line="421"/>
         <source>Переименовать</source>
         <translation>Rename</translation>
+    </message>
+    <message>
+        <location filename="dialogrenamerfiles.ui" line="401"/>
+        <source>Закрыть</source>
+        <translation>Close</translation>
     </message>
     <message>
         <source>TV</source>
         <translation type="vanished">TV</translation>
     </message>
     <message>
-        <location filename="dialogrenamerfiles.ui" line="297"/>
+        <location filename="dialogrenamerfiles.ui" line="273"/>
         <source>Переместить в папки по сезонам</source>
         <translation>Organize into season folders</translation>
     </message>
     <message>
-        <location filename="dialogrenamerfiles.ui" line="344"/>
+        <location filename="dialogrenamerfiles.ui" line="320"/>
         <source>Оригинальные названия</source>
         <translation>Original titles</translation>
     </message>
     <message>
-        <location filename="dialogrenamerfiles.cpp" line="112"/>
+        <location filename="dialogrenamerfiles.cpp" line="111"/>
         <source>Описание</source>
         <translation>Description</translation>
     </message>
     <message>
-        <location filename="dialogrenamerfiles.cpp" line="112"/>
+        <location filename="dialogrenamerfiles.cpp" line="111"/>
         <source>Подстановочное слово</source>
         <translation>Pattern word</translation>
     </message>
     <message>
-        <location filename="dialogrenamerfiles.cpp" line="112"/>
+        <location filename="dialogrenamerfiles.cpp" line="111"/>
         <source>Пример</source>
         <translation>Example</translation>
     </message>
     <message>
-        <location filename="dialogrenamerfiles.cpp" line="121"/>
+        <location filename="dialogrenamerfiles.cpp" line="120"/>
         <source>Описание:</source>
         <translation>Description:</translation>
     </message>
     <message>
-        <location filename="dialogrenamerfiles.cpp" line="122"/>
+        <location filename="dialogrenamerfiles.cpp" line="121"/>
         <source>Подстановочное слово:</source>
         <translation>Pattern word:</translation>
     </message>
     <message>
-        <location filename="dialogrenamerfiles.cpp" line="123"/>
+        <location filename="dialogrenamerfiles.cpp" line="122"/>
         <source>Пример:</source>
         <translation>Example:</translation>
     </message>
     <message>
-        <location filename="dialogrenamerfiles.cpp" line="234"/>
+        <location filename="dialogrenamerfiles.cpp" line="230"/>
         <source>Не удалось переименовать файл:</source>
         <translation>Failed to rename file:</translation>
     </message>
     <message>
-        <location filename="dialogrenamerfiles.cpp" line="261"/>
+        <location filename="dialogrenamerfiles.cpp" line="257"/>
         <source>Не удалось переименовать и переместить файл:</source>
         <translation>Failed to rename and move file:</translation>
     </message>
     <message>
-        <location filename="dialogrenamerfiles.cpp" line="281"/>
-        <location filename="dialogrenamerfiles.cpp" line="408"/>
-        <location filename="dialogrenamerfiles.cpp" line="486"/>
+        <location filename="dialogrenamerfiles.cpp" line="285"/>
+        <location filename="dialogrenamerfiles.cpp" line="413"/>
+        <location filename="dialogrenamerfiles.cpp" line="491"/>
         <source>Не удалось открыть файл для записи:</source>
         <translation>Failed to open file for writing:</translation>
     </message>
@@ -252,16 +276,16 @@
     <message>
         <location filename="mainwindow.ui" line="260"/>
         <location filename="mainwindow.ui" line="621"/>
-        <location filename="mainwindow.cpp" line="46"/>
-        <location filename="mainwindow.cpp" line="49"/>
+        <location filename="mainwindow.cpp" line="52"/>
+        <location filename="mainwindow.cpp" line="55"/>
         <source>Афиша</source>
         <translation>Poster</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="265"/>
         <location filename="mainwindow.ui" line="626"/>
-        <location filename="mainwindow.cpp" line="46"/>
-        <location filename="mainwindow.cpp" line="49"/>
+        <location filename="mainwindow.cpp" line="52"/>
+        <location filename="mainwindow.cpp" line="55"/>
         <source>Название</source>
         <translation>Name</translation>
     </message>
@@ -382,32 +406,42 @@
         <translation>Episode:</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="126"/>
+        <location filename="mainwindow.ui" line="1497"/>
+        <source>Фильтр:</source>
+        <translation>Filter:</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="134"/>
         <source>Обновляем список Фильмов</source>
         <translation>Updating the movie list</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="128"/>
+        <location filename="mainwindow.cpp" line="136"/>
         <source>Обновление коллекции фильмов!</source>
         <translation>Updating the movie collection!</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="133"/>
+        <location filename="mainwindow.cpp" line="141"/>
         <source>Обновляем список Сериалов</source>
         <translation>Updating the TV show list</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="595"/>
+        <location filename="mainwindow.cpp" line="550"/>
+        <source>Ошибка загрузки перевода: </source>
+        <translation>Translation upload error:</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="605"/>
         <source>Выделение снято</source>
         <translation>Unselected item</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="620"/>
+        <location filename="mainwindow.cpp" line="630"/>
         <source>Настройки - MediaFinder</source>
         <translation>Settings - MediaFinder</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="634"/>
+        <location filename="mainwindow.cpp" line="644"/>
         <source>Обновление метаданных - MediaFinder</source>
         <translation>Metadata update - MediaFinder</translation>
     </message>
@@ -559,6 +593,11 @@
         <translation>Source:</translation>
     </message>
     <message>
+        <location filename="searchmedia.ui" line="230"/>
+        <source>Закрыть</source>
+        <translation>Close</translation>
+    </message>
+    <message>
         <source>TMDB</source>
         <translation type="obsolete">TMDB</translation>
     </message>
@@ -588,150 +627,150 @@
         <translation>Search</translation>
     </message>
     <message>
-        <location filename="searchmedia.ui" line="208"/>
+        <location filename="searchmedia.ui" line="210"/>
         <source>Выбрать</source>
         <translation>Choose</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="188"/>
+        <location filename="searchmedia.cpp" line="189"/>
         <source>Ищем фильмы... сериалы...</source>
         <translation>Searching for movies... TV shows...</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="213"/>
+        <location filename="searchmedia.cpp" line="215"/>
         <source>Получаем картинки в окне поиска</source>
         <translation>Fetching images in the search window</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="243"/>
+        <location filename="searchmedia.cpp" line="245"/>
         <source>Получаем информацию о выбранном Фильме/Сериале</source>
         <translation>Fetching information about the selected film/show</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="273"/>
+        <location filename="searchmedia.cpp" line="276"/>
         <source>Получаем информацию о епизодах Сериале</source>
         <translation>Fetching information about the episodes of the show</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="275"/>
+        <location filename="searchmedia.cpp" line="278"/>
         <source>Получаем подробную информацию о эпизодах Шоу</source>
         <translation>Fetching detailed information about the show&apos;s episodes</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="280"/>
+        <location filename="searchmedia.cpp" line="283"/>
         <source>Запрос на Сезон </source>
         <translation>Request for Season</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="322"/>
-        <location filename="searchmedia.cpp" line="375"/>
+        <location filename="searchmedia.cpp" line="326"/>
+        <location filename="searchmedia.cpp" line="379"/>
         <source>Получаем изображения</source>
         <translation>Fetching images</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="614"/>
+        <location filename="searchmedia.cpp" line="625"/>
         <source>Ошибка запроса Поиск медиа:</source>
         <translation>Search media request error:</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="635"/>
+        <location filename="searchmedia.cpp" line="646"/>
         <source>Ошибка обновление картинок в списке:</source>
         <translation>Error updating images in the list:</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="661"/>
+        <location filename="searchmedia.cpp" line="672"/>
         <source>Получаем ответ после поиска</source>
         <translation>Fetching response after search</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="676"/>
+        <location filename="searchmedia.cpp" line="687"/>
         <source>Ошибка выбора медиа:</source>
         <translation>Media selection error:</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="684"/>
+        <location filename="searchmedia.cpp" line="695"/>
         <source>Получаем ответ о сериях</source>
         <translation>Fetching response about episodes</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="716"/>
+        <location filename="searchmedia.cpp" line="727"/>
         <source>Ответ на Сезон </source>
         <translation>Season response</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="716"/>
+        <location filename="searchmedia.cpp" line="727"/>
         <source> Эпизод </source>
         <translation>Episode</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="720"/>
+        <location filename="searchmedia.cpp" line="731"/>
         <source>Ошибка выбора медиа - Серии:</source>
         <translation>Media selection error - Episodes:</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="743"/>
+        <location filename="searchmedia.cpp" line="754"/>
         <source>Не удалось открыть файл для записи:</source>
         <translation>Failed to open file for writing:</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="748"/>
+        <location filename="searchmedia.cpp" line="759"/>
         <source>Ошибка записи Постера в файл:</source>
         <translation>Error writing poster to file:</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="752"/>
+        <location filename="searchmedia.cpp" line="763"/>
         <source>Записываем собранную информацию в базу!</source>
         <translation>Saving the collected information to the database!</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="772"/>
+        <location filename="searchmedia.cpp" line="783"/>
         <source>Получаем информацию о выбраном шоу</source>
         <translation>Fetching information about the selected show</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="773"/>
-        <location filename="searchmedia.cpp" line="873"/>
+        <location filename="searchmedia.cpp" line="784"/>
+        <location filename="searchmedia.cpp" line="884"/>
         <source>Основная информация</source>
         <translation>Main information</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="792"/>
-        <location filename="searchmedia.cpp" line="804"/>
-        <location filename="searchmedia.cpp" line="893"/>
+        <location filename="searchmedia.cpp" line="803"/>
+        <location filename="searchmedia.cpp" line="815"/>
         <location filename="searchmedia.cpp" line="904"/>
+        <location filename="searchmedia.cpp" line="915"/>
         <source>Команда</source>
         <translation>Crew</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="816"/>
+        <location filename="searchmedia.cpp" line="827"/>
         <source>YouTube видео</source>
         <translation>YouTube video</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="827"/>
-        <location filename="searchmedia.cpp" line="940"/>
+        <location filename="searchmedia.cpp" line="838"/>
+        <location filename="searchmedia.cpp" line="951"/>
         <source>Обзоры от пользователей</source>
         <translation>User reviews</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="844"/>
-        <location filename="searchmedia.cpp" line="918"/>
+        <location filename="searchmedia.cpp" line="855"/>
+        <location filename="searchmedia.cpp" line="929"/>
         <source>Жанры</source>
         <translation>Genres</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="852"/>
-        <location filename="searchmedia.cpp" line="927"/>
+        <location filename="searchmedia.cpp" line="863"/>
+        <location filename="searchmedia.cpp" line="938"/>
         <source>Компания производитель</source>
         <translation>Production company</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="872"/>
+        <location filename="searchmedia.cpp" line="883"/>
         <source>Получаем информацию о выбраном фильме</source>
         <translation>Fetching information about the selected film</translation>
     </message>
     <message>
-        <location filename="searchmedia.cpp" line="965"/>
+        <location filename="searchmedia.cpp" line="976"/>
         <source>Закрыть окно, начать поиск по выбранному медиа</source>
         <translation>Close window, start search for selected media</translation>
     </message>
@@ -739,62 +778,113 @@
 <context>
     <name>SettingsApp</name>
     <message>
-        <location filename="settingsapp.ui" line="38"/>
+        <location filename="settingsapp.ui" line="25"/>
+        <source>Основные</source>
+        <translation>Main</translation>
+    </message>
+    <message>
+        <location filename="settingsapp.ui" line="48"/>
         <source>Язык по умолчанию:</source>
         <translation>Default language:</translation>
     </message>
     <message>
-        <location filename="settingsapp.ui" line="52"/>
+        <location filename="settingsapp.ui" line="62"/>
+        <location filename="settingsapp.ui" line="249"/>
         <source>Английский</source>
         <translation>English</translation>
     </message>
     <message>
-        <location filename="settingsapp.ui" line="61"/>
+        <location filename="settingsapp.ui" line="71"/>
+        <location filename="settingsapp.ui" line="244"/>
         <source>Русский</source>
         <translation>Russian</translation>
     </message>
     <message>
-        <location filename="settingsapp.ui" line="95"/>
+        <location filename="settingsapp.ui" line="188"/>
+        <location filename="settingsapp.ui" line="198"/>
+        <source>Жанры</source>
+        <translation>Genres</translation>
+    </message>
+    <message>
+        <location filename="settingsapp.ui" line="221"/>
+        <source>Обновить</source>
+        <translation>Refresh</translation>
+    </message>
+    <message>
+        <location filename="settingsapp.ui" line="239"/>
+        <source>id</source>
+        <translation>id</translation>
+    </message>
+    <message>
+        <location filename="settingsapp.ui" line="262"/>
+        <source>Ключи</source>
+        <translation>Keys</translation>
+    </message>
+    <message>
+        <location filename="settingsapp.ui" line="270"/>
+        <source>API Read Access Token - https://www.themoviedb.org/settings/api</source>
+        <translation>API Read Access Token - https://www.themoviedb.org/settings/api</translation>
+    </message>
+    <message>
+        <location filename="settingsapp.ui" line="320"/>
+        <source>Сохранить и закрыть</source>
+        <translation>Save and close</translation>
+    </message>
+    <message>
+        <location filename="settingsapp.ui" line="327"/>
+        <source>Закрыть</source>
+        <translation>Close</translation>
+    </message>
+    <message>
         <source>Применить</source>
-        <translation>Apply</translation>
+        <translation type="vanished">Apply</translation>
+    </message>
+    <message>
+        <source>Сохранить и выйти</source>
+        <translation type="vanished">Save and exit</translation>
     </message>
     <message>
         <location filename="settingsapp.ui" line="102"/>
-        <source>Сохранить и выйти</source>
-        <translation>Save and exit</translation>
-    </message>
-    <message>
-        <location filename="settingsapp.ui" line="139"/>
         <source>Путь</source>
         <translation>Path</translation>
     </message>
     <message>
-        <location filename="settingsapp.ui" line="144"/>
+        <location filename="settingsapp.ui" line="107"/>
         <source>Тип медиа</source>
         <translation>Media type</translation>
     </message>
     <message>
-        <location filename="settingsapp.cpp" line="85"/>
+        <location filename="settingsapp.cpp" line="107"/>
+        <source>Ошибка загрузки перевода:</source>
+        <translation>Translation upload error:</translation>
+    </message>
+    <message>
+        <location filename="settingsapp.cpp" line="126"/>
+        <source>Выводим жанры</source>
+        <translation>We output genres</translation>
+    </message>
+    <message>
+        <location filename="settingsapp.cpp" line="156"/>
         <source>Подтверждение</source>
         <translation>Confirmation</translation>
     </message>
     <message>
-        <location filename="settingsapp.cpp" line="86"/>
+        <location filename="settingsapp.cpp" line="157"/>
         <source>Сохранить изменения перед выходом?</source>
         <translation>Save changes before exiting?</translation>
     </message>
     <message>
-        <location filename="settingsapp.cpp" line="121"/>
+        <location filename="settingsapp.cpp" line="201"/>
         <source>Выберите папку</source>
         <translation>Select folder</translation>
     </message>
     <message>
-        <location filename="settingsapp.cpp" line="139"/>
+        <location filename="settingsapp.cpp" line="219"/>
         <source>Информация</source>
         <translation>Information</translation>
     </message>
     <message>
-        <location filename="settingsapp.cpp" line="140"/>
+        <location filename="settingsapp.cpp" line="220"/>
         <source>Путь к библиотеке не добавлен.
 Путь &apos;/home/user/media&apos; является родительским
 для уже добавленного пути.
@@ -808,14 +898,34 @@ The path &apos;/home/user/media&apos; is a parent of an already added path.
 Please choose a different folder.</translation>
     </message>
     <message>
-        <location filename="settingsapp.cpp" line="157"/>
+        <location filename="settingsapp.cpp" line="237"/>
         <source>Библиотека</source>
         <translation>Library</translation>
     </message>
     <message>
-        <location filename="settingsapp.cpp" line="157"/>
+        <location filename="settingsapp.cpp" line="237"/>
         <source>Тип</source>
         <translation>Type</translation>
+    </message>
+    <message>
+        <location filename="settingsapp.cpp" line="276"/>
+        <source>Загружаем Жанры</source>
+        <translation>Uploading Genres</translation>
+    </message>
+    <message>
+        <location filename="settingsapp.cpp" line="399"/>
+        <source>Получаем ответ о Жанрах</source>
+        <translation>We get an answer about Genres</translation>
+    </message>
+    <message>
+        <location filename="settingsapp.cpp" line="401"/>
+        <source>Жанры получены</source>
+        <translation>Genres received</translation>
+    </message>
+    <message>
+        <location filename="settingsapp.cpp" line="416"/>
+        <source>Ошибка выбора медиа - Серии:</source>
+        <translation>Media selection error - Episodes:</translation>
     </message>
 </context>
 <context>

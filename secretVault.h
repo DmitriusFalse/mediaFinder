@@ -1,13 +1,11 @@
 #ifndef SECRETVAULT_H
 #define SECRETVAULT_H
-#include <QObject>
 #include <QString>
 #include <QHash>
 
-class Vault : public QObject {
-    Q_OBJECT
+class Vault{
 public:
-    Vault(QObject *parent = nullptr);
+    Vault();
     void putVault(const QString& key, const QString& value);
     void putVault(QHash<QString, QString> data);
     QString getValue(const QString& key);

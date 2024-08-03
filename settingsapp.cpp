@@ -20,7 +20,6 @@
 #include <QUrl>
 #include "qurlquery.h"
 #include <QJsonArray>
-#include "secretVault.h"
 
 //////////////////////////////////////////////////////////////////////////
 /// \brief SettingsApp::SettingsApp
@@ -105,7 +104,7 @@ void SettingsApp::loadTranslation()
 {
     QString lang = m_settings->getLangApp();
     if(!this->translator.load(":/translation/"+lang)){
-        qDebug() << "Error load translation";
+        qDebug() << tr("Ошибка загрузки перевода:");
     };
     qApp->installTranslator(&translator);
     ui->retranslateUi(this);
@@ -124,7 +123,7 @@ void SettingsApp::refreshGenresList()
         ui->tableGenreList->setRowCount(genre_en.size());
     }
     uint index = 0;
-    showProgres->setMainLineMessage("Выводим жанры");
+    showProgres->setMainLineMessage(tr("Выводим жанры"));
     showProgres->updateProgres();
     while(genre_ru.next()){
         showProgres->updateProgres();
@@ -196,7 +195,7 @@ void SettingsApp::on_saveButton_clicked()
 void SettingsApp::on_addPath_clicked()
 {
     changeSettings = true;
-    qRegisterMetaType<libraryItem>("libraryItem");
+    // qRegisterMetaType<libraryItem>("libraryItem");
     QList<libraryItem> libFolders = m_settings->readLibraryFromSettings();
     QString directory = QFileDialog::getExistingDirectory(this,
                                                           tr("Выберите папку"),
@@ -399,7 +398,7 @@ void SettingsApp::slotFinishRequestGetGenre(QNetworkReply *reply, QString lang, 
 {
     qDebug() << tr("Получаем ответ о Жанрах");
     showProgres->updateProgres();
-    showProgres->setTextProgres("Жанры получены");
+    showProgres->setTextProgres(tr("Жанры получены"));
     GenreList genresList;
     if (reply->error() == QNetworkReply::NoError) {
         QByteArray data = reply->readAll(); // Читаем полученные данные

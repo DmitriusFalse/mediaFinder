@@ -30,8 +30,8 @@ public:
     void saveGenres(GenreList genres);
     QList<Videos> getVideos(int idShow);
     QList<Reviews> getReviews(int idShow);
-    QStringList readMovieCollection(QString detailLevel);
-    QStringList readTVCollection(QString detailLevel);
+    // QStringList readMovieCollection(QString detailLevel);
+    // QStringList readTVCollection(QString detailLevel);
     TVCollection getTVCollection();
     MovieCollections getMovieCollection();
     QString readTVShowByID(QString detailLevel, int id);

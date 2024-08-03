@@ -10,7 +10,6 @@
 Q_DECLARE_METATYPE(libraryItem);
 
 SettingsData::SettingsData(DBManager *dbmanager) : m_dbmanager(dbmanager) {
-    qRegisterMetaType<libraryItem>("libraryItem");
     this->vault = new Vault;
     this->reloadVault();
     this->reloadSettings();

@@ -18,13 +18,13 @@
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow)
 {
 
-    qRegisterMetaType<libraryItem>("libraryItem");
-    qRegisterMetaType<MovieCollections>("movieCollections");
-    qRegisterMetaType<MovieInfo>("movieItem");
-    qRegisterMetaType<TVCollection>("TVCollection");
-    qRegisterMetaType<ShowInfo>("SerialInfo");
-    // qRegisterMetaType<SeasonInfo>("SeasonInfo");
-    qRegisterMetaType<EpisodeInfo>("EpisodeInfo");
+    // qRegisterMetaType<libraryItem>("libraryItem");
+    // qRegisterMetaType<MovieCollections>("movieCollections");
+    // qRegisterMetaType<MovieInfo>("movieItem");
+    // qRegisterMetaType<TVCollection>("TVCollection");
+    // qRegisterMetaType<ShowInfo>("SerialInfo");
+    // // qRegisterMetaType<SeasonInfo>("SeasonInfo");
+    // qRegisterMetaType<EpisodeInfo>("EpisodeInfo");
     ui->setupUi(this);
     this->dbmanager = new DBManager(this);
     // Получаем АПИ ключи доступа и назначаем его
@@ -56,10 +56,10 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     ui->listTVLibrary->setColumnWidth(0,128);
 
     QScrollBar *scrollMovieList = ui->listMovieLibrary->verticalScrollBar ();
-    scrollMovieList->setStyleSheet("width: 30px;");
+    scrollMovieList->setStyleSheet("width: 20px;");
 
     QScrollBar *scrolShowTVList = ui->listTVLibrary->verticalScrollBar ();
-    scrolShowTVList->setStyleSheet("width: 30px;");
+    scrolShowTVList->setStyleSheet("width: 20px;");
 
     //Соединяем клик в QTreeWidget listMovieLibrary с функцией onTreeWidgetItemSelected
     connect(ui->listMovieLibrary, &QTreeWidget::itemSelectionChanged, this, &MainWindow::clickTreeWidgetMovie);
@@ -151,7 +151,6 @@ void MainWindow::on_refreshLibrary_clicked()
 void MainWindow::clickTreeWidgetMovie()
 {
 
-    qDebug() << "Click Movie";
     this->setLayoutVisibility(ui->mainDetailsLayout, true);
     ui->loadMediaButton->setDisabled(false);
     ui->renameButton->setDisabled(false);
@@ -200,7 +199,7 @@ void MainWindow::clickTreeWidgetMovie()
         ui->statusText->setText("-");
     }
     ui->genreText->setText(movie.genre);
-    // ui->reviewsLayout;
+
     QVBoxLayout *reviewDynamicLayout = new QVBoxLayout();
     QWidget *containerWidget = new QWidget();
     containerWidget->setLayout(reviewDynamicLayout);
@@ -215,21 +214,16 @@ void MainWindow::clickTreeWidgetMovie()
         contentReviewLabel->setWordWrap(true);
         contentReviewLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-        // contentReviewLabel->setFixedHeight(textHeight);
-        // QLabel *contentReviewLabel = new QLabel(review.content);
         reviewDynamicLayout->addWidget(titleReviewLabel);
         reviewDynamicLayout->addWidget(contentReviewLabel);
         reviewDynamicLayout->addWidget(separated);
         reviewDynamicLayout->addWidget(separated);
     }
     ui->scrollArea->setWidget(containerWidget);
-    // ui->reviewsContentLayout->addLayout(reviewDynamicLayout);
 }
 
 void MainWindow::clickTreeWidgetTV()
 {
-    qDebug() << "Click TV";
-
     ui->saveSeasonEpisodeNum->hide();
 
     QTreeWidgetItem *selectedItem = ui->listTVLibrary->currentItem();
@@ -346,7 +340,6 @@ void MainWindow::updateCollectionsByID(QString type, int id)
         case 0:{ // movie
 
             QTreeWidgetItem *selectedItem = ui->listMovieLibrary->currentItem();
-            int srcID = selectedItem->data(0, Qt::UserRole).toInt();
             MovieInfo movie = dbmanager->getMovieByID(id);
             QPixmap pixmap;
             if(QFile::exists (movie.poster)){
@@ -554,7 +547,7 @@ void MainWindow::reloadSettings()
 void MainWindow::loadTranslation()
 {
     if(!this->translator.load(":/translation/"+this->settingsData->getLangApp())){
-        qDebug() << "Error load translation: "<< this->settingsData->getLangApp();
+        qDebug() << tr("Ошибка загрузки перевода: ") << this->settingsData->getLangApp();
     };
 
     qApp->installTranslator(&translator);
@@ -633,7 +626,7 @@ void MainWindow::on_openSettings_clicked()
             &SettingsApp::signalUpdateListCollection,
             this,
             &MainWindow::slotUpdateListLibraries);
-    // dialogSettingsApp->setAttribute(Qt::WA_DeleteOnClose);
+
     dialogSettingsApp->setWindowTitle(tr("Настройки - MediaFinder"));
     // Показываем диалоговое окно при нажатии на кнопку
     dialogSettingsApp->show();

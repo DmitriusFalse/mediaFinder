@@ -1,7 +1,6 @@
 #include "secretVault.h"
-#include <QObject>
 
-Vault::Vault(QObject *parent)
+Vault::Vault()
 {
 
 }
