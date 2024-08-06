@@ -185,6 +185,7 @@ private:
     QString replacePatternTV(const QString& input, int Season, int Episode);
     QString renameFile(const QString& filePath, const QString& newName);
     QString renameAndMoveFile(const QString& oldPath, const QString& newPath);
+    bool moveAndRemoveFile(const QString &sourceDirPath, const QString &destinationDirPath);
     bool checkNewFoldersEpisodes;
     bool checkTVShowNFO=true;
     bool checkMovieNFO=true;

@@ -30,8 +30,6 @@ public:
     void saveGenres(GenreList genres);
     QList<Videos> getVideos(int idShow);
     QList<Reviews> getReviews(int idShow);
-    // QStringList readMovieCollection(QString detailLevel);
-    // QStringList readTVCollection(QString detailLevel);
     TVCollection getTVCollection();
     MovieCollections getMovieCollection();
     QString readTVShowByID(QString detailLevel, int id);
@@ -52,7 +50,9 @@ public:
     QList<int> getListNumberSeason(int idDBTVShow);
     bool checkSeasonEpisodeExist(const QString NameShow, const int& season, const int& episode);
     bool updateMovieColumn(const QString &columnName, const QVariant &newValue, int rowId);
+    void updateShowTVColumn(const QString &columnName, const QVariant &newValue, int rowId);
     bool updateEpisodeColumn(const QString &columnName, const QVariant &newValue, int rowId);
+    void updateActorByShowTV(const QString &oldRootPath,const QString &newRootPath, const uint &idShowTV);
 private:
     bool openConnection();
     void closeConnection();

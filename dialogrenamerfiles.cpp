@@ -143,9 +143,9 @@ void DialogRenamerFiles::on_patternMovieEdit_textChanged(const QString &arg1)
 void DialogRenamerFiles::on_patternTVEdit_textChanged(const QString &arg1)
 {
     if(arg1==""){
-        ui->renameTVButton->setDisabled(true);
+        ui->renameButton->setDisabled(true);
     }else{
-        ui->renameTVButton->setDisabled(false);
+        ui->renameButton->setDisabled(false);
     }
     this->changeNameTv(arg1);
 }
@@ -260,6 +260,59 @@ QString DialogRenamerFiles::renameAndMoveFile(const QString &oldPath, const QStr
     return oldPath;
 }
 
+bool DialogRenamerFiles::moveAndRemoveFile(const QString &sourceDirPath, const QString &destinationDirPath)
+{
+    if (sourceDirPath == destinationDirPath) {
+        return true;
+    }
+
+    QDir sourceDir(sourceDirPath);
+    if (!sourceDir.exists()) {
+        qWarning() << "Source directory does not exist:" << sourceDirPath;
+        return false;
+    }
+
+    QDir destinationDir(destinationDirPath);
+    if (!destinationDir.exists()) {
+        if (!destinationDir.mkpath(destinationDirPath)) {
+            qWarning() << "Failed to create destination directory:" << destinationDirPath;
+            return false;
+        }
+    }
+
+    // Перемещение всех файлов
+    foreach (const QString &fileName, sourceDir.entryList(QDir::Files)) {
+        QString srcFilePath = sourceDir.filePath(fileName);
+        QString dstFilePath = destinationDir.filePath(fileName);
+        if (fileName.endsWith(".nfo", Qt::CaseInsensitive)) {
+            continue;
+        }
+        if (!QFile::exists(dstFilePath)) {
+            if (!QFile::rename(srcFilePath, dstFilePath)) {
+                continue;
+            }
+        }
+    }
+
+    // Перемещение всех подкаталогов
+    foreach (const QString &subDirName, sourceDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+        QString srcSubDirPath = sourceDir.filePath(subDirName);
+        QString dstSubDirPath = destinationDir.filePath(subDirName);
+        if (!this->moveAndRemoveFile(srcSubDirPath, dstSubDirPath)) {
+            return false;
+        }
+    }
+
+    // Удаление исходного каталога после успешного перемещения
+    if (!sourceDir.removeRecursively()) {
+        qWarning() << "Failed to remove source directory:" << sourceDirPath;
+        return false;
+    }
+
+    qDebug() << "Contents moved successfully from" << sourceDirPath << "to" << destinationDirPath;
+    return true;
+}
+
 void DialogRenamerFiles::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Escape) {
@@ -370,13 +423,20 @@ void DialogRenamerFiles::renameMovie()
 
 void DialogRenamerFiles::renameTV()
 {
+    QFileInfo oldPathToPoster(this->showTv.poster);
+    QFileInfo oldPathShowTV(oldPathToPoster.absolutePath());
+
     QTreeWidgetItem *topLevelItem = ui->newListTV->topLevelItem(0);
 
     for (int i = 0; i < topLevelItem->childCount(); ++i) {
         QTreeWidgetItem *childItem = topLevelItem->child(i);
+
         QString newName = childItem->text(0);
+        //Номер сезона
         uint season = childItem->data(1,Qt::UserRole).toUInt();
+        //Номер эпизола
         uint episode = childItem->data(2,Qt::UserRole).toUInt();
+        //id записи в БД
         int  id = childItem->data(3,Qt::UserRole).toInt();
 
         EpisodeInfo infoEpisode = this->showTv.getEpisode(season, episode);
@@ -386,6 +446,7 @@ void DialogRenamerFiles::renameTV()
 
         QFileInfo oldPathInfo(oldPath);
         QFileInfo oldPosterInfo(oldPoster);
+
         QString newFileName;
         QString newFilePoster;
         QString rootPathShowTV = infoEpisode.libraryPath;
@@ -399,6 +460,7 @@ void DialogRenamerFiles::renameTV()
                 QString newPathToPosterEpisodeShowTV = rootPathShowTV + "/Season "+seasonWithNull+"/S"+seasonWithNull+"E"+episodeWithNull+" - "+ infoEpisode.episodeTitle +"-thumb."+oldPosterInfo.suffix();
                 newFilePoster = this->renameAndMoveFile(oldPoster, newPathToPosterEpisodeShowTV);
             }
+
         }else{
             newFileName = this->renameFile(oldPath, newName);
             if(oldPoster!=""){
@@ -483,6 +545,7 @@ void DialogRenamerFiles::renameTV()
         dbmanager->updateEpisodeColumn("file", newFileName, id);
         dbmanager->updateEpisodeColumn("Poster", newFilePoster, id);
     }
+
     QString pathtoTVShow = this->showTv.poster;
     if(this->checkTVShowNFO){
         QFileInfo filepath(pathtoTVShow);

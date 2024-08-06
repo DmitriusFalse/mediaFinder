@@ -150,7 +150,7 @@ void MainWindow::on_refreshLibrary_clicked()
 
 void MainWindow::clickTreeWidgetMovie()
 {
-
+    // click movie
     this->setLayoutVisibility(ui->mainDetailsLayout, true);
     ui->loadMediaButton->setDisabled(false);
     ui->renameButton->setDisabled(false);
@@ -200,30 +200,13 @@ void MainWindow::clickTreeWidgetMovie()
     }
     ui->genreText->setText(movie.genre);
 
-    QVBoxLayout *reviewDynamicLayout = new QVBoxLayout();
-    QWidget *containerWidget = new QWidget();
-    containerWidget->setLayout(reviewDynamicLayout);
-    for (const Reviews& review : movie.reviews) {
-
-        QLabel *titleReviewLabel = new QLabel(review.author);
-        QLabel *contentReviewLabel = new QLabel(review.content);
-
-        QFrame *separated = new QFrame();
-        separated->setFrameShape(QFrame::HLine);
-
-        contentReviewLabel->setWordWrap(true);
-        contentReviewLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-
-        reviewDynamicLayout->addWidget(titleReviewLabel);
-        reviewDynamicLayout->addWidget(contentReviewLabel);
-        reviewDynamicLayout->addWidget(separated);
-        reviewDynamicLayout->addWidget(separated);
-    }
-    ui->scrollArea->setWidget(containerWidget);
+    QWidget *containerWidget = getWrapReviews(movie.reviews);
+    ui->scrollAreaMovie->setWidget(containerWidget);
 }
 
 void MainWindow::clickTreeWidgetTV()
 {
+    // click show tv
     ui->saveSeasonEpisodeNum->hide();
 
     QTreeWidgetItem *selectedItem = ui->listTVLibrary->currentItem();
@@ -464,7 +447,7 @@ void MainWindow::fillTvShowForm(int id)
         ui->overviewTVShowText->setText("-");
     }
     // ui->overviewTVShowText->setWordWrapMode(true);
-    ui->overviewTVShowText->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    // ui->overviewTVShowText->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     if(show.idShow>0){
         ui->TMDBTVshowIDText->setText(QString::number(show.idShow));
     }else{
@@ -475,6 +458,11 @@ void MainWindow::fillTvShowForm(int id)
     }else{
         ui->statusTVShowText->setText("-");
     }
+
+    QWidget *containerWidget = getWrapReviews(show.reviews);
+    ui->scrollAreaShowTV->setWidget(containerWidget);
+
+    ui->genreTVListLabel->setText(show.genres);
     ui->infoCountSText->setText(QString::number(show.numberOfSeasons));
     ui->infoCountEText->setText(QString::number(show.numberOfEpisodes));
 }
@@ -552,6 +540,30 @@ void MainWindow::loadTranslation()
 
     qApp->installTranslator(&translator);
     ui->retranslateUi(this);
+}
+
+QWidget *MainWindow::getWrapReviews(QList<Reviews> reviews)
+{
+    QVBoxLayout *reviewDynamicLayout = new QVBoxLayout();
+    QWidget *containerWidget = new QWidget();
+    containerWidget->setLayout(reviewDynamicLayout);
+    for (const Reviews& review : reviews) {
+
+        QLabel *titleReviewLabel = new QLabel(review.author);
+        QLabel *contentReviewLabel = new QLabel(review.content);
+
+        QFrame *separated = new QFrame();
+        separated->setFrameShape(QFrame::HLine);
+
+        contentReviewLabel->setWordWrap(true);
+        contentReviewLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+        reviewDynamicLayout->addWidget(titleReviewLabel);
+        reviewDynamicLayout->addWidget(contentReviewLabel);
+        reviewDynamicLayout->addWidget(separated);
+        reviewDynamicLayout->addWidget(separated);
+    }
+    return containerWidget;
 }
 
 

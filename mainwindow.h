@@ -43,7 +43,7 @@ private:
   void fillTvShowEpisodeForm(int id, int seasonsNumber, int episodeNumber);
   void reloadSettings();
   void loadTranslation();
-
+  QWidget* getWrapReviews(QList<Reviews> reviews);
   Ui::MainWindow *ui;
   QTranslator translator;
   DBManager *dbmanager = nullptr;

@@ -718,6 +718,20 @@ bool DBManager::updateMovieColumn(const QString &columnName, const QVariant &new
     }
 }
 
+void DBManager::updateShowTVColumn(const QString &columnName, const QVariant &newValue, int rowId)
+{
+    QSqlQuery query(this->m_database);
+
+    QString queryString = QString("UPDATE TVShow SET %1 = :newValue WHERE ID = :rowId").arg(columnName);
+    query.prepare(queryString);
+    query.bindValue(":newValue", newValue);
+    query.bindValue(":rowId", rowId);
+
+    if (!query.exec()) {
+        qDebug() << tr("Ошибка обновления updateShowTVColumn:") << query.lastError().text();
+    }
+}
+
 bool DBManager::updateEpisodeColumn(const QString &columnName, const QVariant &newValue, int rowId)
 {
 
@@ -732,6 +746,24 @@ bool DBManager::updateEpisodeColumn(const QString &columnName, const QVariant &n
     } else {
         return false;
     }
+}
+
+void DBManager::updateActorByShowTV(const QString &oldRootPath, const QString &newRootPath, const uint &idShowTV)
+{
+    QSqlQuery query(this->m_database);
+    query.prepare("UPDATE crewEpisode SET "
+                  "thumb = REPLACE(thumb, :oldPath, "
+                  ":newPath) WHERE idShow = :idShow");
+    query.bindValue(":oldPath",oldRootPath);
+    query.bindValue(":newPath",newRootPath);
+    query.bindValue(":idShow",idShowTV);
+    if (!query.exec()) {
+        qDebug() << tr("Ошибка обновления crewActor Episode Show:") << query.lastError().text();
+    }
+/*
+ *
+;
+*/
 }
 
 
@@ -1430,7 +1462,7 @@ ShowInfo DBManager::getShowTVShowByID(int id)
             showTv.logoPath = queryTVShow.value ("production_companies_logo_path").toString();
             showTv.first_air_date = queryTVShow.value ("first_air_date").toString();
             showTv.last_air_date = queryTVShow.value ("last_air_date").toString();
-
+            showTv.reviews = this->getReviews(showTv.idShow);
             QSqlQuery querySeries(this->m_database);
             querySeries.prepare ("SELECT * FROM TVEpisodes WHERE NameShow = :nameShow");
             querySeries.bindValue (":nameShow", showTv.nameShow);
