@@ -14,7 +14,6 @@
 #include <QStyleFactory>
 #include <QTranslator>
 
-
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow)
 {
 
@@ -459,10 +458,14 @@ void MainWindow::fillTvShowForm(int id)
         ui->statusTVShowText->setText("-");
     }
 
-    QWidget *containerWidget = getWrapReviews(show.reviews);
-    ui->scrollAreaShowTV->setWidget(containerWidget);
+    QWidget *containerReviews = this->getWrapReviews(show.reviews);
+    ui->scrollAreaShowTV->setWidget(containerReviews);
+    QWidget *containerVideo = this->getWrapVideo(show.videos);
+    ui->scrollAreaVideoShowTV->setWidget(containerVideo);
 
     ui->genreTVListLabel->setText(show.genres);
+
+
     ui->infoCountSText->setText(QString::number(show.numberOfSeasons));
     ui->infoCountEText->setText(QString::number(show.numberOfEpisodes));
 }
@@ -562,6 +565,20 @@ QWidget *MainWindow::getWrapReviews(QList<Reviews> reviews)
         reviewDynamicLayout->addWidget(contentReviewLabel);
         reviewDynamicLayout->addWidget(separated);
         reviewDynamicLayout->addWidget(separated);
+    }
+    return containerWidget;
+}
+
+QWidget *MainWindow::getWrapVideo(QList<Videos> videos)
+{
+    QVBoxLayout *videoDynamicLayout = new QVBoxLayout();
+    QWidget *containerWidget = new QWidget();
+    containerWidget->setLayout(videoDynamicLayout);
+    for (const Videos& video : videos) {
+        QWebEngineView *view = new QWebEngineView;
+        view->load(QUrl("https://www.youtube.com/embed/"+video.key)); // Замените на ключ видео
+        view->setMinimumHeight(480);
+        videoDynamicLayout->addWidget(view);
     }
     return containerWidget;
 }

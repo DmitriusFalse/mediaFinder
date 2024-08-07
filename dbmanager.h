@@ -28,7 +28,7 @@ public:
     void removeOldRecordInBD(QString type);
     GenreList loadGenre(QString lang);
     void saveGenres(GenreList genres);
-    QList<Videos> getVideos(int idShow);
+    QList<Videos> getVideos(int id);
     QList<Reviews> getReviews(int idShow);
     TVCollection getTVCollection();
     MovieCollections getMovieCollection();
@@ -60,7 +60,7 @@ private:
     void createStructureDB(int index);
     void updateReviewsTV(QList<Reviews> reviews, int id);
     void updateTvShowEpisode(ShowInfo show);
-    void updateVideosTV(QList<Videos> videos, QString nameShow, int id);
+    void updateVideos(QList<Videos> videos, int id);
     // void createUpdateCrewEpisode(int idShow,int id,QString role, QString name,QString thumb);
     void createUpdateCrewEpisode(ShowInfo tvshow);
     void createUpdateCrewTVShow(ShowInfo tvshow);

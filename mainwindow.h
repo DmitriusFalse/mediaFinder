@@ -11,6 +11,7 @@
 #include "dbmanager.h"
 #include "showimagefile.h"
 #include <QTranslator>
+#include <QWebEngineView>
 
 struct Connection {
     bool isConnected;
@@ -44,6 +45,8 @@ private:
   void reloadSettings();
   void loadTranslation();
   QWidget* getWrapReviews(QList<Reviews> reviews);
+  QWidget* getWrapVideo(QList<Videos> videos);
+
   Ui::MainWindow *ui;
   QTranslator translator;
   DBManager *dbmanager = nullptr;
@@ -52,15 +55,11 @@ private:
   SettingsApp *dialogSettingsApp = nullptr;
   SearchMedia *searchMedia = nullptr;
   DialogShowProgress *progressBar = nullptr;
-
   DialogRenamerFiles *renameFiles = nullptr;
   ShowImageFile *showImageFile = nullptr;
-
-
   QString NameShowLoaded="";
-
   Connection renameConnection;
-    int numSeason, numEpisode, idShow, episodeID;
+  int numSeason, numEpisode, idShow, episodeID;
 
 private slots:
     void onDialogClosed();

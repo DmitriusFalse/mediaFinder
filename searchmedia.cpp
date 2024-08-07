@@ -249,8 +249,6 @@ void SearchMedia::sendRequestTMDBGetInformation(QString lang)
                             .arg(QString::number(getIdSelectMedia()));
     QUrl url(urlString);
     QUrlQuery query;
-    // // query.addQueryItem("query", Name);
-    // query.addQueryItem("language", "ru-RU");
 
     query.addQueryItem("append_to_response", "reviews,credits,images,videos,translations,external_ids");
     query.addQueryItem("language", lang);
@@ -822,7 +820,7 @@ void SearchMedia::processResponseTV(QJsonObject jsonObject)
         this->showTv->addCrew(rawCrew);
     }
 
-    QJsonObject videos = jsonObject.value ("videos").toObject().value("results").toObject();
+    QJsonArray videos = jsonObject.value ("videos").toObject().value("results").toArray();
     for (const QJsonValue& video : videos) {
         showProgres->setTextProgres(tr("YouTube видео"));
         QJsonObject itemVideo = video.toObject();

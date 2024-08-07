@@ -1,4 +1,5 @@
 QT       += core gui network sql
+QT += webenginewidgets
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 QT_MIN_VERSION = 6.0.0
 QT_MAJOR_VERSION = 6

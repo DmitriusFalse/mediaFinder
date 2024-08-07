@@ -6,6 +6,10 @@
 
 int main(int argc, char *argv[])
 {
+    QGuiApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
+    QCoreApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
+    QApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
+
     QApplication a(argc, argv);
     qDebug() << "Qt Version:" << QT_VERSION_STR;
 
