@@ -1,10 +1,9 @@
-QT       += core gui network sql
-QT += webenginewidgets
+QT += core gui network sql webenginewidgets
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 QT_MIN_VERSION = 6.0.0
 QT_MAJOR_VERSION = 6
 CONFIG += c++17
-CONFIG += release
+
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -22,6 +21,7 @@ SOURCES += \
     settingsapp.cpp \
     settingsdata.cpp \
     showimagefile.cpp \
+    videoplayer.cpp \
     workrefreshmovie.cpp
 
 HEADERS += \
@@ -38,6 +38,7 @@ HEADERS += \
     settingsapp.h \
     settingsdata.h \
     showimagefile.h \
+    videoplayer.h \
     workrefreshmovie.h
 
 FORMS += \
@@ -46,14 +47,16 @@ FORMS += \
     mainwindow.ui \
     searchmedia.ui \
     settingsapp.ui \
-    showimagefile.ui
+    showimagefile.ui \
+    videoplayer.ui
 
 TRANSLATIONS += \
     MediaFinder_ru_RU.ts \  
     MediaFinder_en_EN.ts \
     MediaFinder_en_EN.qm \
     MediaFinder_ru_RU.qm \
-CONFIG += lrelease
+#CONFIG += lrelease
+#CONFIG += release
 CONFIG += embed_translations
 
 # Default rules for deployment.

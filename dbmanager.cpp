@@ -53,11 +53,11 @@ void DBManager::checkDB() {
     QStringList tbDB = {
         "Movie", "Library", "TVEpisodes", "Genres",
         "ReviewsTV", "TVShow", "Videos", "settings",
-        "crewEpisode", "crewShowTV", "crewMovie", "Vault"
+        "crewEpisode", "crewShowTV", "crewMovie", "vault"
     };
     for (const QString& table : tbDB) {
         if (!tables.contains(table)) {
-            qDebug() << tr("Создаем таблицу:") << tables;
+            qDebug() << tr("Создаем таблицу:") << table;
             this->createStructureDB(tbDB.indexOf(table));
         }
     }
@@ -145,7 +145,8 @@ void DBManager::createStructureDB(int index) {
     case 6:
         query.exec("CREATE TABLE IF NOT EXISTS Videos ("
                    "key TEXT NOT NULL ON CONFLICT REPLACE, "
-                   "idMedia INTEGER"
+                   "idMedia INTEGER, "
+                   "name TEXT"
                    ")");
         break;
     case 7:
@@ -258,9 +259,10 @@ void DBManager::updateVideos(QList<Videos> videos, int id)
     query.exec();
 
     for (const Videos& video : videos) {
-        query.prepare("INSERT INTO Videos (key, idMedia) VALUES (:key, :id)");
+        query.prepare("INSERT INTO Videos (key, idMedia, name) VALUES (:key, :id, :name)");
         query.bindValue(":key",video.key);
         query.bindValue(":id",video.idMedia);
+        query.bindValue(":name",video.name);
         if(!query.exec()){
             qDebug() << tr("Обновление видео из ютуба - шибка выполнения запроса:") << query.lastError().text();
         }
@@ -1136,6 +1138,7 @@ QList<Videos> DBManager::getVideos(int id)
             Videos video;
             video.key = query.value("key").toString();
             video.idMedia = query.value("idMedia").toInt();
+            video.name = query.value("name").toString();
             videos.append(video);
         }
     }
@@ -1274,7 +1277,7 @@ MovieCollections DBManager::getMovieCollection()
         }
     return movCol;
 }
-
+//Remove old function
 QString DBManager::readTVShowByID(QString detailLevel, int id)
 {
     const QString DETAIL_LEVEL_ALL = "all";

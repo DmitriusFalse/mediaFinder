@@ -16,6 +16,7 @@
         <file alias="en">icons/en.png</file>
         <file alias="ru">icons/ru.png</file>
         <file alias="subtitles">icons/subtitles.png</file>
+        <file alias="youtube">icons/youtube.png</file>
     </qresource>
     <qresource prefix="/translation">
         <file alias="ru-RU">MediaFinder_ru_RU.qm</file>

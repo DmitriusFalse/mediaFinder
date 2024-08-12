@@ -11,7 +11,8 @@
 #include "dbmanager.h"
 #include "showimagefile.h"
 #include <QTranslator>
-#include <QWebEngineView>
+#include "videoplayer.h"
+
 
 struct Connection {
     bool isConnected;
@@ -44,6 +45,8 @@ private:
   void fillTvShowEpisodeForm(int id, int seasonsNumber, int episodeNumber);
   void reloadSettings();
   void loadTranslation();
+
+
   QWidget* getWrapReviews(QList<Reviews> reviews);
   QWidget* getWrapVideo(QList<Videos> videos);
 
@@ -59,6 +62,7 @@ private:
   ShowImageFile *showImageFile = nullptr;
   QString NameShowLoaded="";
   Connection renameConnection;
+  videoPlayer *player;
   int numSeason, numEpisode, idShow, episodeID;
 
 private slots:
@@ -82,6 +86,10 @@ private slots:
     void on_zoomMovieImage_clicked();
 
     void on_filterLine_textChanged(const QString &world);
+
+    void on_showVideoTV_clicked();
+
+    void on_showVideoMovie_clicked();
 
 public slots:
     // void slotUptateProgressBar(const int &i);

@@ -827,7 +827,8 @@ void SearchMedia::processResponseTV(QJsonObject jsonObject)
         QString site = itemVideo.value("site").toString();
         if(site == "YouTube") {
             QString key = itemVideo.value("key").toString();
-            this->showTv->addVideos(key, this->showTv->idShow);
+            QString name = itemVideo.value("name").toString();
+            this->showTv->addVideos(key, name, this->showTv->idShow);
         }
     }
     QJsonObject jsonReviews = jsonObject.value ("reviews").toObject();
@@ -893,6 +894,19 @@ void SearchMedia::processResponseMovie(QJsonObject jsonObject)
     movie->poster = this->updateField(movie->poster,jsonObject.value("poster_path").toString());
     movie->release_date = this->updateField(movie->release_date,jsonObject.value("release_date").toString());
     movie->Status = this->updateField(movie->Status,jsonObject.value("status").toString());
+
+    QJsonArray videos = jsonObject.value ("videos").toObject().value("results").toArray();
+    for (const QJsonValue& video : videos) {
+        showProgres->setTextProgres(tr("YouTube видео"));
+        QJsonObject itemVideo = video.toObject();
+        QString site = itemVideo.value("site").toString();
+        if(site == "YouTube") {
+            QString key = itemVideo.value("key").toString();
+            QString name = itemVideo.value("name").toString();
+            Videos video = Videos{this->movie->IDMovie, key, name};
+            movie->addVideos(video);
+        }
+    }
 
     if(this->movie->getSizeCredits()==0){
         QJsonObject credits = jsonObject.value("credits").toObject();

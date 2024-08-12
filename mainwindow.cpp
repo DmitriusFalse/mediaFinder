@@ -13,23 +13,14 @@
 #include <QGraphicsPixmapItem>
 #include <QStyleFactory>
 #include <QTranslator>
+#include <QWebEngineView>
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow)
 {
 
-    // qRegisterMetaType<libraryItem>("libraryItem");
-    // qRegisterMetaType<MovieCollections>("movieCollections");
-    // qRegisterMetaType<MovieInfo>("movieItem");
-    // qRegisterMetaType<TVCollection>("TVCollection");
-    // qRegisterMetaType<ShowInfo>("SerialInfo");
-    // // qRegisterMetaType<SeasonInfo>("SeasonInfo");
-    // qRegisterMetaType<EpisodeInfo>("EpisodeInfo");
     ui->setupUi(this);
     this->dbmanager = new DBManager(this);
     // Получаем АПИ ключи доступа и назначаем его
-
-    // QString tmdbApiToken = this->dbmanager->getSetting("tmdbApiToken");
-    // Vault::putVault("tmdbApiToken", tmdbApiToken);
 
     this->settingsData = new SettingsData(this->dbmanager);
     this->mediaLibrary = new MediaLibrary(this, this->dbmanager, settingsData);
@@ -37,16 +28,14 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     this->dialogSettingsApp = new SettingsApp(this,dbmanager, this->settingsData, this->progressBar);
     this->showImageFile = new ShowImageFile;
 
+    this->player = new videoPlayer;
+
     this->reloadSettings();
     this->loadTranslation();
 
-    // translator.load("MediaFinder_ru_RU.qm");
     qApp->installTranslator(&translator);
     ui->retranslateUi(this);
     ui->PBRefreshLibrary->hide();
-
-    // ui->listMovieLibrary->setStyleSheet("QTreeWidget::item { height: 128px; }");
-    // ui->listTVLibrary->setStyleSheet("QTreeWidget::item { height: 128px; }");
 
     ui->listMovieLibrary->setHeaderLabels({tr("Афиша"),tr("Название")});
     ui->listMovieLibrary->setColumnWidth(0,128);
@@ -201,6 +190,14 @@ void MainWindow::clickTreeWidgetMovie()
 
     QWidget *containerWidget = getWrapReviews(movie.reviews);
     ui->scrollAreaMovie->setWidget(containerWidget);
+
+
+    if(movie.videos.size()>0){
+        ui->showVideoMovie->show();
+        player->setVideoPlayList(movie.videos);
+    }else{
+        ui->showVideoMovie->hide();
+    }
 }
 
 void MainWindow::clickTreeWidgetTV()
@@ -417,7 +414,8 @@ void MainWindow::fillTvShowForm(int id)
     ShowInfo show = dbmanager->getShowTVShowByID(id);
     this->NameShowLoaded = show.nameShow;
     QPixmap posterPixmap(show.poster);
-    if(QFile::exists (show.poster)){
+    qDebug() << show.poster;
+    if(QFile::exists (show.poster) && show.poster!=":/images/poster"){
         posterPixmap.load (show.poster);
         ui->zoomShowTVImage->show();
         ui->zoomShowTVImage->setProperty("image", QVariant::fromValue(show.poster));
@@ -460,8 +458,13 @@ void MainWindow::fillTvShowForm(int id)
 
     QWidget *containerReviews = this->getWrapReviews(show.reviews);
     ui->scrollAreaShowTV->setWidget(containerReviews);
-    QWidget *containerVideo = this->getWrapVideo(show.videos);
-    ui->scrollAreaVideoShowTV->setWidget(containerVideo);
+    if(show.videos.size()>0){
+        ui->showVideoTV->show();
+        player->setVideoPlayList(show.videos);
+    }else{
+        ui->showVideoTV->hide();
+    }
+
 
     ui->genreTVListLabel->setText(show.genres);
 
@@ -575,10 +578,10 @@ QWidget *MainWindow::getWrapVideo(QList<Videos> videos)
     QWidget *containerWidget = new QWidget();
     containerWidget->setLayout(videoDynamicLayout);
     for (const Videos& video : videos) {
-        QWebEngineView *view = new QWebEngineView;
-        view->load(QUrl("https://www.youtube.com/embed/"+video.key)); // Замените на ключ видео
-        view->setMinimumHeight(480);
-        videoDynamicLayout->addWidget(view);
+        // QtWebView *view = new QtWebView(this);
+        // view->setUrl(QUrl("https://www.youtube.com/embed/"+video.key));
+        // view->setMinimumHeight(480);
+        // videoDynamicLayout->addWidget(view);
     }
     return containerWidget;
 }
@@ -858,5 +861,18 @@ void MainWindow::on_filterLine_textChanged(const QString &world)
             }
         }
     }
+}
+
+
+void MainWindow::on_showVideoTV_clicked()
+{
+// player->setVideoPlayList(idShow);
+    player->open();
+}
+
+
+void MainWindow::on_showVideoMovie_clicked()
+{
+    player->open();
 }
 

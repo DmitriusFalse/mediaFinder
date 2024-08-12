@@ -12,6 +12,7 @@ struct Reviews {
 struct Videos {
     int idMedia;
     QString key;
+    QString name; //name
     QString getYouTubeEmbed(){
         return "https://www.youtube.com/embed/" + this->key;
     }
@@ -244,10 +245,11 @@ struct ShowInfo {
     void addVideos(Videos video){
         this->videos.append(video);
     }
-    void addVideos(QString key, uint id){
+    void addVideos(QString key, QString name, uint id){
         Videos video;
         video.idMedia = id;
         video.key= key;
+        video.name = name;
         this->addVideos(video);
     }
     void addCrew(int id, const QString& name, const QString& role, const QString& thumb) {
