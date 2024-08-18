@@ -872,7 +872,7 @@ void DBManager::writeTVCollectionToDB(QStringList pathlList)
         QFileInfo fileInfo(fullPath);
         //Полный путь к конечному файлу
         QString File = fileInfo.filePath ();
-        QString NameEpisode = fileInfo.baseName ();
+        QString NameEpisode = fileInfo.completeBaseName ();
         //Ищем в базе такой же файл.
 
         query.prepare("SELECT id FROM TVEpisodes WHERE File = :path");

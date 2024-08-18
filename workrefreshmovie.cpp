@@ -20,7 +20,8 @@ QStringList WorkRefreshMovie::scanFoldersLibrary(QString path)
     if (!directory.exists()) {
         return list;
     }
-    QStringList scanList = directory.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+    QStringList scanList = directory.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden);
+
     foreach(const QString &fileName, scanList) {
         QFileInfo fileInfo(path+"/"+fileName);
         if(fileInfo.isFile()) {
