@@ -76,19 +76,12 @@ private slots:
     void on_seasonEdit_textEdited(const QString &arg1);
     void on_saveSeasonEpisodeNum_clicked();
     void on_episodeEdit_textEdited(const QString &arg1);
-
     void on_zoomEpisodeImage_clicked();
-
     void on_tabMainWindow_currentChanged(int index);
-
     void on_zoomShowTVImage_clicked();
-
     void on_zoomMovieImage_clicked();
-
     void on_filterLine_textChanged(const QString &world);
-
     void on_showVideoTV_clicked();
-
     void on_showVideoMovie_clicked();
 
 public slots:

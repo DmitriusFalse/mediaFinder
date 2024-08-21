@@ -140,7 +140,12 @@ void MainWindow::clickTreeWidgetMovie()
 {
     // click movie
     this->setLayoutVisibility(ui->mainDetailsLayout, true);
-    ui->loadMediaButton->setDisabled(false);
+    QString apitoken = this->settingsData->getApiAccessToken("tmdbApiToken");
+    if(apitoken.size()>0){
+        ui->loadMediaButton->setDisabled(false);
+    }else{
+        ui->loadMediaButton->setDisabled(true);
+    }
     ui->renameButton->setDisabled(false);
     QTreeWidgetItem *selectedItem = ui->listMovieLibrary->currentItem();
 
@@ -239,7 +244,12 @@ void MainWindow::clickTreeWidgetTV()
     }
 
 
-    ui->loadMediaButton->setDisabled(false);
+    QString apitoken = this->settingsData->getApiAccessToken("tmdbApiToken");
+    if(apitoken.size()>0){
+        ui->loadMediaButton->setDisabled(false);
+    }else{
+        ui->loadMediaButton->setDisabled(true);
+    }
     ui->renameButton->setDisabled(false);
 
 }
@@ -536,6 +546,8 @@ void MainWindow::reloadSettings()
 {
     // Освобождаем память от старых настроек
     // Получаем новые настройки из базы данных
+    this->settingsData->reloadVault();
+    this->settingsData->reloadSettings();
 }
 
 void MainWindow::loadTranslation()
@@ -614,6 +626,7 @@ void MainWindow::slotUpdateListLibraries()
     this->on_refreshLibrary_clicked();
     this->updateCollections("Movie");
     this->updateCollections("TV");
+    this->reloadSettings();
 }
 
 void MainWindow::slotEndSearch()

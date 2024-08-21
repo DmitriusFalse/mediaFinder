@@ -535,6 +535,7 @@ void SearchMedia::slotViewOverviewMedia()
 void SearchMedia::slotFinishRequestFindMedia(QNetworkReply *reply, QString media_type)
 {
     if (reply->error() == QNetworkReply::NoError) {
+        qDebug() << "ljhbsdjfbskdjbsjdfbjkbvjbvzcvzxbcvzbxcvbzxcjvzxcvzxcv";
         this->progresSearchAdd();
         QString lang = this->settings->getLangApp();
         GenreList genre = dbManager->loadGenre (lang);
@@ -548,8 +549,9 @@ void SearchMedia::slotFinishRequestFindMedia(QNetworkReply *reply, QString media
         int lenghtName = 0;
         QFontMetrics fontMetrics(uiSearch->viewSearchTree->font());
         uiSearch->viewSearchTree->clear ();
-
+        bool continueSearch = false;
         for (const QJsonValue& resultsValue : resultsArray) {
+            continueSearch = true;
             this->progresSearchAdd();
             QStringList listGenre;
             QJsonObject itemObject = resultsValue.toObject();
@@ -608,15 +610,25 @@ void SearchMedia::slotFinishRequestFindMedia(QNetworkReply *reply, QString media
             item->setText(1, name+" \n("+original_name+")"); // Название
             item->setText(2, date); // Год
             item->setText(3, listGenre.join(", ") ); // Жанр
-            item->setText(4, type ); // Тип
+            if(type=="tv"){
+                item->setText(4, tr("Сериал")); // Тип
+            }else{
+                item->setText(4, tr("Фильм")); // Тип
+            }
+
 
             int textWidth = fontMetrics.horizontalAdvance(name+"   ");
             lenghtName = std::max(lenghtName, textWidth);
         }
-        uiSearch->viewSearchTree->setColumnWidth(1,lenghtName);
-        disconnect (uiSearch->viewSearchTree, &QTreeWidget::itemSelectionChanged, this, &SearchMedia::slotViewOverviewMedia);
-        connect(uiSearch->viewSearchTree, &QTreeWidget::itemSelectionChanged, this, &SearchMedia::slotViewOverviewMedia);
-        this->sendRequestTMDBSearchGetImage();
+        if(continueSearch){
+            uiSearch->viewSearchTree->setColumnWidth(1,lenghtName);
+            disconnect (uiSearch->viewSearchTree, &QTreeWidget::itemSelectionChanged, this, &SearchMedia::slotViewOverviewMedia);
+            connect(uiSearch->viewSearchTree, &QTreeWidget::itemSelectionChanged, this, &SearchMedia::slotViewOverviewMedia);
+            this->sendRequestTMDBSearchGetImage();
+        }else{
+            uiSearch->overviewMedia->setPlainText(tr("Ничего не найдено"));
+            uiSearch->progressSearch->hide();
+        }
 
     } else {
         // Произошла ошибка при выполнении запроса:
@@ -643,7 +655,7 @@ void SearchMedia::slotUpdateImagesInTree(QNetworkReply *reply, int index)
     } else {
         qDebug() << tr("Ошибка обновление картинок в списке:") << reply->errorString();
     }
-    this->progresSearchShow();
+    uiSearch->progressSearch->hide();
     reply->deleteLater();
 }
 
