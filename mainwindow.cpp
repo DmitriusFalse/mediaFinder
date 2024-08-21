@@ -194,7 +194,7 @@ void MainWindow::clickTreeWidgetMovie()
     ui->genreText->setText(movie.genre);
 
     QWidget *containerWidget = getWrapReviews(movie.reviews);
-    ui->scrollAreaMovie->setWidget(containerWidget);
+    ui->scrollAreaMovieReviews->setWidget(containerWidget);
 
 
     if(movie.videos.size()>0){
@@ -424,7 +424,7 @@ void MainWindow::fillTvShowForm(int id)
     ShowInfo show = dbmanager->getShowTVShowByID(id);
     this->NameShowLoaded = show.nameShow;
     QPixmap posterPixmap(show.poster);
-    qDebug() << show.poster;
+
     if(QFile::exists (show.poster) && show.poster!=":/images/poster"){
         posterPixmap.load (show.poster);
         ui->zoomShowTVImage->show();
@@ -467,7 +467,7 @@ void MainWindow::fillTvShowForm(int id)
     }
 
     QWidget *containerReviews = this->getWrapReviews(show.reviews);
-    ui->scrollAreaShowTV->setWidget(containerReviews);
+    ui->scrollAreaShowTVReviews->setWidget(containerReviews);
     if(show.videos.size()>0){
         ui->showVideoTV->show();
         player->setVideoPlayList(show.videos);
@@ -478,9 +478,13 @@ void MainWindow::fillTvShowForm(int id)
 
     ui->genreTVListLabel->setText(show.genres);
 
+    if(show.numberOfSeasons>0){
+        ui->infoCountSText->setText(QString::number(show.numberOfSeasons));
+    }
 
-    ui->infoCountSText->setText(QString::number(show.numberOfSeasons));
-    ui->infoCountEText->setText(QString::number(show.numberOfEpisodes));
+    if(show.numberOfEpisodes>0){
+        ui->infoCountEText->setText(QString::number(show.numberOfEpisodes));
+    }
 }
 
 void MainWindow::fillTvShowEpisodeForm(int id, int seasonsNumber, int episodeNumber)

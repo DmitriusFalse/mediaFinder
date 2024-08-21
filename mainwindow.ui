@@ -622,7 +622,7 @@
                 <item>
                  <layout class="QVBoxLayout" name="reviewsContentLayout">
                   <item>
-                   <widget class="QScrollArea" name="scrollAreaMovie">
+                   <widget class="QScrollArea" name="scrollAreaMovieReviews">
                     <property name="widgetResizable">
                      <bool>true</bool>
                     </property>
@@ -632,7 +632,7 @@
                        <x>0</x>
                        <y>0</y>
                        <width>548</width>
-                       <height>277</height>
+                       <height>266</height>
                       </rect>
                      </property>
                     </widget>
@@ -1029,6 +1029,9 @@
                             <property name="text">
                              <string notr="true"/>
                             </property>
+                            <property name="readOnly">
+                             <bool>true</bool>
+                            </property>
                            </widget>
                           </item>
                          </layout>
@@ -1113,6 +1116,9 @@
                               <height>197</height>
                              </size>
                             </property>
+                            <property name="readOnly">
+                             <bool>true</bool>
+                            </property>
                            </widget>
                           </item>
                          </layout>
@@ -1184,76 +1190,26 @@
                      </layout>
                     </item>
                     <item>
-                     <widget class="QToolBox" name="toolBox">
-                      <property name="frameShadow">
-                       <enum>QFrame::Shadow::Sunken</enum>
+                     <widget class="QLabel" name="label_4">
+                      <property name="text">
+                       <string>Отзывы</string>
                       </property>
-                      <property name="currentIndex">
-                       <number>1</number>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QScrollArea" name="scrollAreaShowTVReviews">
+                      <property name="widgetResizable">
+                       <bool>true</bool>
                       </property>
-                      <widget class="QWidget" name="reviewsPage">
+                      <widget class="QWidget" name="scrollAreaWidgetContents">
                        <property name="geometry">
                         <rect>
                          <x>0</x>
                          <y>0</y>
-                         <width>98</width>
-                         <height>88</height>
+                         <width>572</width>
+                         <height>193</height>
                         </rect>
                        </property>
-                       <attribute name="label">
-                        <string>Отзывы</string>
-                       </attribute>
-                       <layout class="QHBoxLayout" name="horizontalLayout_12">
-                        <item>
-                         <widget class="QScrollArea" name="scrollAreaShowTV">
-                          <property name="widgetResizable">
-                           <bool>true</bool>
-                          </property>
-                          <widget class="QWidget" name="scrollAreaWidgetContents">
-                           <property name="geometry">
-                            <rect>
-                             <x>0</x>
-                             <y>0</y>
-                             <width>98</width>
-                             <height>28</height>
-                            </rect>
-                           </property>
-                          </widget>
-                         </widget>
-                        </item>
-                       </layout>
-                      </widget>
-                      <widget class="QWidget" name="videoPage">
-                       <property name="geometry">
-                        <rect>
-                         <x>0</x>
-                         <y>0</y>
-                         <width>586</width>
-                         <height>165</height>
-                        </rect>
-                       </property>
-                       <attribute name="label">
-                        <string>Видео</string>
-                       </attribute>
-                       <layout class="QVBoxLayout" name="verticalLayout_4">
-                        <item>
-                         <widget class="QScrollArea" name="scrollAreaVideoShowTV">
-                          <property name="widgetResizable">
-                           <bool>true</bool>
-                          </property>
-                          <widget class="QWidget" name="scrollAreaWidgetContents_2">
-                           <property name="geometry">
-                            <rect>
-                             <x>0</x>
-                             <y>0</y>
-                             <width>566</width>
-                             <height>145</height>
-                            </rect>
-                           </property>
-                          </widget>
-                         </widget>
-                        </item>
-                       </layout>
                       </widget>
                      </widget>
                     </item>
@@ -1784,7 +1740,7 @@
      <x>0</x>
      <y>0</y>
      <width>1206</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
