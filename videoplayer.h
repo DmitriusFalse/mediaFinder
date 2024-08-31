@@ -26,6 +26,11 @@ private:
     QList<Videos> videos;
     void clickItemTreeVideo();
     void clearVideo();
+signals:
+    void closePlayer();
+protected:
+    void closeEvent(QCloseEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 };
 
 #endif // VIDEOPLAYER_H

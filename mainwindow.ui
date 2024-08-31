@@ -369,7 +369,7 @@
                     </property>
                     <property name="sizeHint" stdset="0">
                      <size>
-                      <width>160</width>
+                      <width>140</width>
                       <height>20</height>
                      </size>
                     </property>
@@ -1206,8 +1206,8 @@
                         <rect>
                          <x>0</x>
                          <y>0</y>
-                         <width>572</width>
-                         <height>193</height>
+                         <width>98</width>
+                         <height>28</height>
                         </rect>
                        </property>
                       </widget>

@@ -62,7 +62,8 @@ private:
   ShowImageFile *showImageFile = nullptr;
   QString NameShowLoaded="";
   Connection renameConnection;
-  videoPlayer *player;
+  Connection playerConnection;
+  videoPlayer *player = nullptr;
   int numSeason, numEpisode, idShow, episodeID;
 
 private slots:
@@ -92,5 +93,6 @@ public slots:
     void slotUpdateListLibraryByID(QString type, int id);
     void slotUpdateListLibraries();
     void slotEndSearch();
+    void closePlayer();
 };
 #endif // MAINWINDOW_H

@@ -649,6 +649,20 @@ void MainWindow::slotEndSearch()
 
 }
 
+void MainWindow::closePlayer()
+{
+    if(this->player!=nullptr){ // Проверяем существование инициализированного DialogRenamerFiles
+        // отключаем соединения
+        if(playerConnection.isConnected){
+            disconnect(playerConnection.connection);
+        }
+        // и удаляем
+        delete this->player;
+    }
+
+    this->player = new videoPlayer;
+}
+
 void MainWindow::slotChangetSelection()
 {
     qDebug() << tr("Выделение снято");
@@ -890,6 +904,8 @@ void MainWindow::on_showVideoTV_clicked()
 
 void MainWindow::on_showVideoMovie_clicked()
 {
+    playerConnection.connection = connect(this->player, &videoPlayer::closePlayer, this, &MainWindow::clickTreeWidgetMovie);
+    playerConnection.isConnected = true;
     player->open();
 }
 

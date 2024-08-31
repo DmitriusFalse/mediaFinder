@@ -1,6 +1,7 @@
 #include "videoplayer.h"
 #include "ui_videoplayer.h"
 #include <QWebEngineView>
+#include <QCloseEvent>
 videoPlayer::videoPlayer(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::videoPlayer)
@@ -39,12 +40,12 @@ void videoPlayer::setVideoPlayList(QList<Videos> videoList)
 
 void videoPlayer::on_closeVideoPlayer_clicked()
 {
+    emit closePlayer();
     this->close();
 }
 
 void videoPlayer::clickItemTreeVideo()
 {
-    qDebug() << "Click video";
 
     QTreeWidgetItem *selectedItem = ui->playlistVideo->currentItem();
     QString keyVideo = selectedItem->data(0, Qt::UserRole).toString();
@@ -64,6 +65,21 @@ void videoPlayer::clearVideo()
     // Удаляем все дочерние виджеты
     for (QWidget *child : children) {
         delete child;
+    }
+}
+
+void videoPlayer::closeEvent(QCloseEvent *event)
+{
+    emit closePlayer();
+    event->accept();
+}
+
+void videoPlayer::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape) {
+        this->close();  // Закрыть диалоговое окно при нажатии клавиши Esc
+    } else {
+        QDialog::keyPressEvent(event);  // Передать событие базовому классу
     }
 }
 
