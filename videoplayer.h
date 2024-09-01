@@ -17,6 +17,7 @@ public:
     ~videoPlayer();
     void open();
     void setVideoPlayList(QList<Videos> videoList);
+    QList<Videos> getVideoPlayList();
 
 private slots:
     void on_closeVideoPlayer_clicked();

@@ -30,6 +30,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
 
     this->player = new videoPlayer;
 
+
+
     this->reloadSettings();
     this->loadTranslation();
 
@@ -79,6 +81,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     connect(this->progressBar, &DialogShowProgress::emitCloseProgres, this, &MainWindow::onDialogClosed);
     //
     connect(this->dialogSettingsApp, &SettingsApp::signalWindowClosed, this, &MainWindow::onDialogClosed);
+
+    playerConnection.connection = connect(this->player, &videoPlayer::closePlayer, this, &MainWindow::closePlayer);
 
     ui->listMovieLibrary->setAlternatingRowColors(true);
     ui->listTVLibrary->setAlternatingRowColors(true);
@@ -651,16 +655,15 @@ void MainWindow::slotEndSearch()
 
 void MainWindow::closePlayer()
 {
+    QList<Videos> videoList = player->getVideoPlayList();
     if(this->player!=nullptr){ // Проверяем существование инициализированного DialogRenamerFiles
-        // отключаем соединения
-        if(playerConnection.isConnected){
-            disconnect(playerConnection.connection);
-        }
-        // и удаляем
+        disconnect(playerConnection.connection);
         delete this->player;
     }
 
     this->player = new videoPlayer;
+    this->player->setVideoPlayList(videoList);
+    playerConnection.connection = connect(this->player, &videoPlayer::closePlayer, this, &MainWindow::closePlayer);
 }
 
 void MainWindow::slotChangetSelection()
@@ -897,15 +900,16 @@ void MainWindow::on_filterLine_textChanged(const QString &world)
 
 void MainWindow::on_showVideoTV_clicked()
 {
-// player->setVideoPlayList(idShow);
+
+
     player->open();
 }
 
 
 void MainWindow::on_showVideoMovie_clicked()
 {
-    playerConnection.connection = connect(this->player, &videoPlayer::closePlayer, this, &MainWindow::clickTreeWidgetMovie);
-    playerConnection.isConnected = true;
+
+
     player->open();
 }
 

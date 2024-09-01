@@ -219,7 +219,7 @@
          <enum>QTabWidget::TabShape::Rounded</enum>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <property name="iconSize">
          <size>
@@ -694,7 +694,7 @@
               <item>
                <widget class="QTabWidget" name="TVShowInfoTab">
                 <property name="currentIndex">
-                 <number>1</number>
+                 <number>0</number>
                 </property>
                 <property name="tabsClosable">
                  <bool>false</bool>
@@ -1206,8 +1206,8 @@
                         <rect>
                          <x>0</x>
                          <y>0</y>
-                         <width>98</width>
-                         <height>28</height>
+                         <width>572</width>
+                         <height>193</height>
                         </rect>
                        </property>
                       </widget>

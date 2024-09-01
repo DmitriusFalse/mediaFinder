@@ -38,10 +38,15 @@ void videoPlayer::setVideoPlayList(QList<Videos> videoList)
 
 }
 
+QList<Videos> videoPlayer::getVideoPlayList()
+{
+    return this->videos;
+}
+
 void videoPlayer::on_closeVideoPlayer_clicked()
 {
     emit closePlayer();
-    this->close();
+    // this->close();
 }
 
 void videoPlayer::clickItemTreeVideo()
